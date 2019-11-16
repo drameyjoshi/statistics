@@ -111,7 +111,10 @@ $\sigma^2$ is the population variance. This quantity has as $\chi^2$-distributio
 with $n - 1$ degrees of freedom. 
 ```{r, echo = TRUE}
 sample.var <- sample.stats[2, ]^2
-population.var <- var(LakeHuron)
+
+# The var function of R always computes the sample variance.
+population.var <- var(LakeHuron) * (sample.size - 1)/sample.size
+
 sample.chisq <- (sample.size - 1) * sample.var/population.var
 X.left <- seq(from = 0, to = 10, length.out = 100)
 X.right <- seq(from = 10, to = 30, length.out = n.samples - length(X.left))
@@ -120,7 +123,7 @@ Y <- dchisq(X, df = sample.size - 1)
 # We compute the density separately so that we can estimate the extent of the
 # y-axis.
 D <- density(sample.chisq)
-plot(X, Y, type = "l", lty = 1, col = 1, ylim = c(0, round(range(D$y)[2], 1) + 0.01))
+plot(X, Y, type = "l", lty = 1, col = 1, ylim = c(0, round(range(D$y)[2], 1)))
 lines(D, lty = 2, col = 2)
 legend.text <- c("Theoretical", "Actual")
 legend("topright", col = c(1, 2), lty = c(1, 2), legend = legend.text, cex = 0.8)
