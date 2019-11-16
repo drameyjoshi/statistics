@@ -1,0 +1,115 @@
+---
+title: "ANOVA"
+author: "Amey Joshi"
+date: "16/11/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(MASS)
+set.seed(18081932)
+```
+
+## The data
+
+We will use the 'housefly' data from Sokal and Rohfl's 'Biostatistics'. You can
+find the details of the reference in the file 'datasources.txt'. We create a 
+grouped sample where there are five samples in each of the seven groups.
+
+```{r}
+full.data <- read.csv("housefly.txt", header = FALSE)
+sample.size <- 5
+n.groups <- 7
+
+sample.data <- data.frame(
+  s1 = full.data$V1[sample(nrow(full.data), sample.size)],
+  s2 = full.data$V1[sample(nrow(full.data), sample.size)],
+  s3 = full.data$V1[sample(nrow(full.data), sample.size)],
+  s4 = full.data$V1[sample(nrow(full.data), sample.size)],
+  s5 = full.data$V1[sample(nrow(full.data), sample.size)],
+  s6 = full.data$V1[sample(nrow(full.data), sample.size)],
+  s7 = full.data$V1[sample(nrow(full.data), sample.size)]
+)
+```
+
+We now find the group mean and the group variances.
+```{r}
+group.means <- colMeans(sample.data)
+group.vars  <- apply(sample.data, 2, var)
+var.within <- mean(group.vars)
+cat(paste("Variance within: ", var.within, "\n"))
+var.among <- var(group.means) * sample.size
+cat(paste("Variance among: ", var.among, "\n"))
+```
+
+In order to find out if these variances are the same, we conduct a $F$-test.
+```{r}
+F_s <- var.within/var.among
+nu_1 <- n.groups - 1
+nu_2 <- n.groups * (sample.size - 1)
+p_1 <- ifelse(F_s < 1, pf(F_s, nu_1, nu_2), 1 - pf(F_s, nu_1, nu_2))
+p_2 <- ifelse(F_s < 1, 1 - pf(1/F_s, nu_2, nu_1), pf(1/F_s, nu_2, nu_1))
+p <- p_1 + p_2
+cat(paste("The p-value of the F-test is ", p, ".\n"))
+```
+
+A high $p$-value indicates that we cannot reject the null hypothesis that the 
+two variances are not statistically different from the true parametric (population)
+variance.
+
+# Model I ANOVA
+Sometimes we consider one of the groups in the sample as a control group and
+the rest are assumed to be subjected to some 'treatment'. The treatment is assumed
+to be fixed. As an example, we will consider the seventh group to be a control
+group and the rest to be under a treatment. The treatment is in the form of a 
+fixed change in the wing-length. We can express it as a fixed vector like
+```{r}
+alpha <- c(-5, -2, 0, 1, 1, 5, 0)
+```
+and add it to every row of the sample data to get the sample of a fixed treatment.
+```{r}
+fixed.treatment.sample <- sweep(sample.data, 2, alpha, "+")
+```
+We now repeat the above calculations for testing if the variances are equal.
+```{r}
+group.means <- colMeans(fixed.treatment.sample)
+group.vars  <- apply(fixed.treatment.sample, 2, var)
+var.within <- mean(group.vars)
+cat(paste("Variance within: ", var.within, "\n"))
+var.among <- var(group.means) * sample.size
+cat(paste("Variance among: ", var.among, "\n"))
+F_s <- var.within/var.among
+nu_1 <- n.groups - 1
+nu_2 <- n.groups * (sample.size - 1)
+p_1 <- ifelse(F_s < 1, pf(F_s, nu_1, nu_2), 1 - pf(F_s, nu_1, nu_2))
+p_2 <- ifelse(F_s < 1, 1 - pf(1/F_s, nu_2, nu_1), pf(1/F_s, nu_2, nu_1))
+p <- p_1 + p_2
+cat(paste("The p-value of the F-test is ", p, ".\n"))
+```
+
+## Model II ANOVA
+If the different groups are subjected to random effects instead of fixed 
+treatments the resulting analysis is called model II ANOVA. We can simulate the
+random effects by adding a standard normal deviate to each data point of all the
+groups.
+```{r}
+noise <- matrix(rnorm(n.groups * sample.size), nrow = sample.size, ncol = n.groups)
+random.treatment.sample <- sample.data + noise
+```
+We again carry out the above calculations for testing if the variances are equal.
+```{r}
+group.means <- colMeans(random.treatment.sample)
+group.vars  <- apply(random.treatment.sample, 2, var)
+var.within <- mean(group.vars)
+cat(paste("Variance within: ", var.within, "\n"))
+var.among <- var(group.means) * sample.size
+cat(paste("Variance among: ", var.among, "\n"))
+F_s <- var.within/var.among
+nu_1 <- n.groups - 1
+nu_2 <- n.groups * (sample.size - 1)
+p_1 <- ifelse(F_s < 1, pf(F_s, nu_1, nu_2), 1 - pf(F_s, nu_1, nu_2))
+p_2 <- ifelse(F_s < 1, 1 - pf(1/F_s, nu_2, nu_1), pf(1/F_s, nu_2, nu_1))
+p <- p_1 + p_2
+cat(paste("The p-value of the F-test is ", p, ".\n"))
+```
