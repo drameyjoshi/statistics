@@ -1,0 +1,126 @@
+---
+title: "Sampling Distributions"
+author: "Amey Joshi"
+date: "16/11/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(MASS)
+```
+
+## The idea
+
+If we draw $n$ samples from a population and compute the mean for each one of 
+them we find that the means are not identical. The distribution of sample means
+is called the sampling distribution of means. We can extend this idea to any
+statistic. We demonstrate how to study sampling distribution of means and 
+variances of water level of Lake Huron, one of the five great lakes in the 
+north America.
+
+The data set of water level of Lake Huron is available on every R installation.
+
+## Visual examination of the data
+A summary of the data is
+```{r}
+data.summary <- summary(LakeHuron)
+```
+
+The water level has a relatively narrow range about the mean.
+```{r}
+upper.fluctuation <- (data.summary[6] - data.summary[4])/data.summary[4]
+lower.fluctuation <- (data.summary[4] - data.summary[1])/data.summary[4]
+
+up <- round(upper.fluctuation * 100, 2)
+dn <- round(lower.fluctuation * 100, 2)
+cat(paste(sep = "", "The highest level is ", up, "% above the mean.\n"))
+cat(paste(sep = "", "The lowest level is ", dn, "% below the mean.\n"))
+```
+
+The highest and the lowest levels of the lake are not symmetrically placed about
+the mean. We expect the distribution of water level to by asymmetric about its
+mean. We check it by plotting the histogram with its empirical density.
+```{r}
+truehist(LakeHuron, nbins = 14, main = "Water level of Lake Huron")
+lines(density(LakeHuron))
+rug(LakeHuron)
+```
+
+## Is the data normal?
+In order to study the sampling distribution we first examine of the data is normal.
+We use the Shapiro-Wilk test whose null hypothesis is that the data is indeed
+normal.
+```{r}
+sig.p <- 0.05 # Significant p-value.
+normality.result <- shapiro.test(LakeHuron)
+p.val <- round(normality.result[["p.value"]], 3)
+if (p.val > sig.p) {
+  cat(paste(sep = "", "Data is normal.\n"))
+  cat(paste(sep = "", "Shapiro-Wilk test has p-value ", p.val, " and significance level ", sig.p, ".\n"))
+} else {
+  cat(paste(sep = "", "Data is NOT normal.\n"))
+  cat(paste(sep = "", "Shapiro-Wilk test has p-value ", p.val, " and significance level ", sig.p, ".\n"))
+}
+```
+
+## Sampling distribution of means
+If the population data is normally distributed then the standardized sample means
+are $t$-distributed with $\nu = n - 1$ degrees of freedom, $n$ being the sample
+size.
+```{r}
+population.size <- length(LakeHuron)
+sample.size <- population.size / 7
+n.samples <- 500
+
+sample_stats <- function(i) {
+  # This function has a dummy argument. We have it so that it can be invoked
+  # through an apply family of functions.
+  s <-
+    LakeHuron[sample(population.size, sample.size, replace = TRUE)]
+  c(mean(s), sd(s))
+}
+
+sample.stats <- sapply(1:n.samples, sample_stats)
+population.mean <- mean(LakeHuron)
+sample.t <-
+  (sample.stats[1,] - population.mean) / (sample.stats[2,] / sqrt(sample.size))
+
+# Get the domain of the t-distribution that best fits our standardized sample 
+# means.
+L <- round(max(abs(range(sample.t))))
+X <- seq(from = -L, to = L, length.out = n.samples)
+Y <- dt(X, df = sample.size - 1)
+plot(X, Y, type = "l", lty = 1, col = 1)
+lines(density(sample.t), lty = 2, col = 2)
+legend.text <- c("Theoretical", "Actual")
+legend("topright", col = c(1, 2), lty = c(1, 2), legend = legend.text, cex = 0.8)
+title(main = "Sampling distribution of means")
+```
+
+We observe the distribution of sample means is close to the theoretically 
+expected $t$ distribution with $6$ degrees of freedom.
+
+## Sampling distribution of variances
+If the population data is normally distributed and the sample size if $n$ then
+we compute $(n - 1)s^2/\sigma^2$, where $s^2$ is the sample variance and 
+$\sigma^2$ is the population variance. This quantity has as $\chi^2$-distribution
+with $n - 1$ degrees of freedom. 
+```{r}
+sample.var <- sample.stats[2, ]^2
+population.var <- var(LakeHuron)
+sample.chisq <- (sample.size - 1) * sample.var/population.var
+X.left <- seq(from = 0, to = 10, length.out = 100)
+X.right <- seq(from = 10, to = 30, length.out = n.samples - length(X.left))
+X <- c(X.left, X.right)
+Y <- dchisq(X, df = sample.size - 1)
+# We compute the density separately so that we can estimate the extent of the
+# y-axis.
+D <- density(sample.chisq)
+plot(X, Y, type = "l", lty = 1, col = 1, ylim = c(0, round(range(D$y)[2], 1)))
+lines(D, lty = 2, col = 2)
+legend.text <- c("Theoretical", "Actual")
+legend("topright", col = c(1, 2), lty = c(1, 2), legend = legend.text, cex = 0.8)
+title(main = "Sampling distribution of variances")
+```
+
