@@ -1,0 +1,54 @@
+---
+title: "F distribution"
+author: "Amey Joshi"
+date: "16/11/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(MASS)
+set.seed(18081932)
+```
+
+## Comparison of variances
+
+Consider a standard normally distributed population of size $1000$. Suppose we
+draw two samples from it, one of size $n_1$ and another of size $n_2$. We compute
+the sample variances and their ratio $r = s_1^2/s_2^2$. The quantity $r$ is $F$-
+distributed with parameters $\nu_1 = n_1 - 1$ and $\nu_2 = n_2 - 2$.
+```{r}
+N <- 1000
+population <- rnorm(N)
+
+n1 <- 15
+n2 <- 20
+
+n.samples <- 500
+
+sample_vars <- function(i) {
+  s1 <- population[sample(n1, replace = TRUE)]
+  s2 <- population[sample(n2, replace = TRUE)]
+  var(s1)/var(s2)
+}
+
+sample.f <- sapply(1:n.samples, sample_vars)
+approx.mean <- round(summary(sample.f)[4], 1)
+X1 <- seq(from = 0, to = approx.mean, length.out = 100)
+X2 <- seq(from = approx.mean, to = 10, length.out = n.samples - length(X1))
+X <- c(X1, X2)
+Y <- df(X, n1 - 1, n2 - 1)
+plot(X, Y, type = "l", col = 1, lty = 1)
+lines(density(sample.f), col = 2, lty = 2)
+legend.text <- c("Theoretical", "Actual")
+legend("topright", legend = legend.text, lty = c(1, 2), col = c(1, 2), cex = 0.6)
+title.txt <- paste(sep = "", "F(", n1 - 1, ", ", n2 - 1, ") distribution")
+title(title.txt)
+```
+
+An alternative interpreation of the $F$-statistic is that it is the ratio of
+two appropriately scaled $\chi^2$ random variables. Recall that $\chi^2$ random
+variable is the sum of squares of normal random variables so that its ratio with
+its degrees of freedom is the variance of the random variables. Thus, if $U_1$ and
+$U_2$ are two $\chi^2$ distributed random variables with $d_1$ and $d_2$ degrees
+of freedom then $U_1/d_1$ and $U_2/d_2$ are the respective variances.
