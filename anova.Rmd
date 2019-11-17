@@ -9,6 +9,15 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(MASS)
 set.seed(18081932)
+
+p_val_of_F_test <- function(F_s, df.num, df.den) {
+  p_1 <-
+    ifelse(F_s < 1, pf(F_s, df.num, df.den), 1 - pf(F_s, df.num, df.den))
+  p_2 <-
+    ifelse(F_s < 1, 1 - pf(1 / F_s, df.den, df.num), pf(1 / F_s, df.den, df.num))
+  p <- p_1 + p_2
+}
+
 ```
 
 ## The data
@@ -45,20 +54,23 @@ cat(paste("Variance among: ", var.among, "\n"))
 
 In order to find out if these variances are the same, we conduct a $F$-test.
 ```{r}
-F_s <- var.within/var.among
+F_s <- var.within / var.among
 nu_1 <- n.groups - 1
 nu_2 <- n.groups * (sample.size - 1)
-p_1 <- ifelse(F_s < 1, pf(F_s, nu_1, nu_2), 1 - pf(F_s, nu_1, nu_2))
-p_2 <- ifelse(F_s < 1, 1 - pf(1/F_s, nu_2, nu_1), pf(1/F_s, nu_2, nu_1))
-p <- p_1 + p_2
-cat(paste("The p-value of the F-test is ", p, ".\n"))
+
+cat(paste(
+  sep = "",
+  "The p-value of the F-test is ",
+  p_val_of_F_test(F_s, nu_1, nu_2),
+  ".\n"
+))
 ```
 
 A high $p$-value indicates that we cannot reject the null hypothesis that the 
 two variances are not statistically different from the true parametric (population)
 variance.
 
-# Model I ANOVA
+## Example 1
 Sometimes we consider one of the groups in the sample as a control group and
 the rest are assumed to be subjected to some 'treatment'. The treatment is assumed
 to be fixed. As an example, we will consider the seventh group to be a control
@@ -79,39 +91,16 @@ var.within <- mean(group.vars)
 cat(paste("Variance within: ", var.within, "\n"))
 var.among <- var(group.means) * sample.size
 cat(paste("Variance among: ", var.among, "\n"))
-F_s <- var.within/var.among
+F_s <- var.within / var.among
 nu_1 <- n.groups - 1
 nu_2 <- n.groups * (sample.size - 1)
-p_1 <- ifelse(F_s < 1, pf(F_s, nu_1, nu_2), 1 - pf(F_s, nu_1, nu_2))
-p_2 <- ifelse(F_s < 1, 1 - pf(1/F_s, nu_2, nu_1), pf(1/F_s, nu_2, nu_1))
-p <- p_1 + p_2
-cat(paste("The p-value of the F-test is ", p, ".\n"))
-```
 
-## Model II ANOVA
-If the different groups are subjected to random effects instead of fixed 
-treatments the resulting analysis is called model II ANOVA. We can simulate the
-random effects by adding a standard normal deviate to each data point of all the
-groups.
-```{r}
-noise <- matrix(rnorm(n.groups * sample.size), nrow = sample.size, ncol = n.groups)
-random.treatment.sample <- sample.data + noise
-```
-We again carry out the above calculations for testing if the variances are equal.
-```{r}
-group.means <- colMeans(random.treatment.sample)
-group.vars  <- apply(random.treatment.sample, 2, var)
-var.within <- mean(group.vars)
-cat(paste("Variance within: ", var.within, "\n"))
-var.among <- var(group.means) * sample.size
-cat(paste("Variance among: ", var.among, "\n"))
-F_s <- var.within/var.among
-nu_1 <- n.groups - 1
-nu_2 <- n.groups * (sample.size - 1)
-p_1 <- ifelse(F_s < 1, pf(F_s, nu_1, nu_2), 1 - pf(F_s, nu_1, nu_2))
-p_2 <- ifelse(F_s < 1, 1 - pf(1/F_s, nu_2, nu_1), pf(1/F_s, nu_2, nu_1))
-p <- p_1 + p_2
-cat(paste("The p-value of the F-test is ", p, ".\n"))
+cat(paste(
+  sep = "",
+  "The p-value of the F-test is ",
+  p_val_of_F_test(F_s, nu_1, nu_2),
+  ".\n"
+))
 ```
 
 ## The idea behind ANOVA
@@ -125,14 +114,112 @@ It is more illuminating to call 'variance within' as 'mean-of-variances' and
 'variance among' as 'variance-of-means'.
 
 The 'mean-of-variances' (or 'variance within') is always an estimator of the 
-parametric variance.
+parametric variance. One can have another estimate using the variance of means
+using the relation between parametric variance and variance of the sampling
+distribution of means.
 
 If there was no difference between the groups then the group means will be 
 representatives of the population and hence their variance, 'variance-of-means'
 (or 'variance among') will also be an estimator of the parametric variance.
 
 Therefore, to conclude whether the groups are similar or not, we check if the
-two variances are statistically similar. We do it using the $F$-test.
+two variance estimates are statistically similar. We do it using the $F$-test.
 
 Despite its name, ANOVA is a technique to compare means of grouped data.
 
+## Effectiveness of insect sprays
+The data set InsectSpray is available on every R installation. It has data of
+count of insects found after treatment with five varieties of sprays. Let us first
+check how the data looks. We find out how many records we have for every variety
+of spray.
+```{r}
+aggregate(count ~ spray, InsectSprays, length)
+```
+
+Every spray has $12$ records. Let us visualize the data using box-plots.
+```{r}
+with(InsectSprays, boxplot(count ~ spray, main = "Insect sprays"))
+```
+
+We now proceed with the usual analysis.
+```{r}
+group.means <- with(InsectSprays, tapply(count, spray, mean))
+group.vars  <- with(InsectSprays, tapply(count, spray, var))
+
+mean.of.vars <- mean(group.vars)
+var.of.means <- var(group.means)
+
+# We confirmed that there are an equal number of samples in each group.
+sample.size <- nrow(InsectSprays[InsectSprays$spray == "A", ])
+n.groups <- length(unique(InsectSprays$spray))
+
+est.var.2 <- sample.size * var.of.means
+F_s <- mean.of.vars / est.var.2
+
+# The number of degrees of freedom for the numerator. It was computed as a mean
+# of n.groups variances. Each variance had (sample.size - 1) degrees of freedom.
+# Therefore the total number of degrees of freedom is:
+nu_1 <- n.groups * (sample.size - 1)
+# The number of degrees of freedom for the denominator. It was computed as a
+# variance of n.groups means. Therefore, it is:
+nu_2 <- n.groups - 1
+
+cat(paste(
+  sep = "",
+  "The p-value of the F-test is ",
+  p_val_of_F_test(F_s, nu_1, nu_2),
+  ".\n"
+))
+```
+
+Not surprisingly, R has a test to carry out this procedure.
+```{r}
+oneway.test(count ~ spray, data = InsectSprays, var.equal = TRUE)
+```
+
+## Potency of Orchard Sprays
+This dataset also comes with the standard R installation. 
+```{r}
+help("OrchardSprays")
+```
+We first visualize the data.
+```{r}
+with(OrchardSprays,
+     boxplot(decrease ~ treatment, main = "Potency of Orchard Sprays"))
+```
+
+It is quite clear from the box plot that the treatments produce different response.
+
+We next check if there are an equal number of samples in each treatment.
+```{r}
+with(OrchardSprays, tapply(decrease, treatment, length))
+```
+
+Let us see if our analysis yields the same conclusion.
+```{r}
+group.means <- with(OrchardSprays, tapply(decrease, treatment, mean))
+group.vars  <- with(OrchardSprays, tapply(decrease, treatment, var))
+
+n.groups <- length(unique(OrchardSprays$treatment))
+sample.size <- nrow(OrchardSprays[OrchardSprays$treatment == "A", ])
+var.est.1 <-
+  mean(group.vars) # df = num_of_groups x (sample_size - 1)
+var.est.2 <- sample.size * var(group.means) # df = num_of_groups - 1
+
+F_s <- var.est.1 / var.est.2
+
+df.num <- n.groups * (sample.size - 1)
+df.den <- n.groups - 1
+
+cat(paste(
+  sep = "",
+  "The p-value of F-test is ",
+  p_val_of_F_test(F_s, df.num, df.den),
+  ".\n"
+))
+```
+
+Our conclusions are no different from those of R's one-way test.
+```{r}
+oneway.test(decrease ~ treatment, data = OrchardSprays, var.equal = FALSE)
+```
