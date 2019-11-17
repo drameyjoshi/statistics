@@ -113,3 +113,26 @@ p_2 <- ifelse(F_s < 1, 1 - pf(1/F_s, nu_2, nu_1), pf(1/F_s, nu_2, nu_1))
 p <- p_1 + p_2
 cat(paste("The p-value of the F-test is ", p, ".\n"))
 ```
+
+## The idea behind ANOVA
+The purpose of ANOVA is to find out if the groups of samples differ from each 
+other. We first compute the mean and the variance of each group. The mean of
+group variances, called 'variance within', is really an estimator for the 
+parametric variance. The variance of means, called 'variance among', tell how
+dispersed are the group means.
+
+It is more illuminating to call 'variance within' as 'mean-of-variances' and
+'variance among' as 'variance-of-means'.
+
+The 'mean-of-variances' (or 'variance within') is always an estimator of the 
+parametric variance.
+
+If there was no difference between the groups then the group means will be 
+representatives of the population and hence their variance, 'variance-of-means'
+(or 'variance among') will also be an estimator of the parametric variance.
+
+Therefore, to conclude whether the groups are similar or not, we check if the
+two variances are statistically similar. We do it using the $F$-test.
+
+Despite its name, ANOVA is a technique to compare means of grouped data.
+
