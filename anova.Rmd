@@ -9,15 +9,6 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(MASS)
 set.seed(18081932)
-
-p_val_of_F_test <- function(F_s, df.num, df.den) {
-  p_1 <-
-    ifelse(F_s < 1, pf(F_s, df.num, df.den), 1 - pf(F_s, df.num, df.den))
-  p_2 <-
-    ifelse(F_s < 1, 1 - pf(1 / F_s, df.den, df.num), pf(1 / F_s, df.den, df.num))
-  p <- p_1 + p_2
-}
-
 ```
 
 ## The data
@@ -31,44 +22,51 @@ full.data <- read.csv("housefly.txt", header = FALSE)
 sample.size <- 5
 n.groups <- 7
 
-sample.data <- data.frame(
-  s1 = full.data$V1[sample(nrow(full.data), sample.size)],
-  s2 = full.data$V1[sample(nrow(full.data), sample.size)],
-  s3 = full.data$V1[sample(nrow(full.data), sample.size)],
-  s4 = full.data$V1[sample(nrow(full.data), sample.size)],
-  s5 = full.data$V1[sample(nrow(full.data), sample.size)],
-  s6 = full.data$V1[sample(nrow(full.data), sample.size)],
-  s7 = full.data$V1[sample(nrow(full.data), sample.size)]
-)
+X <-
+  full.data[sample(nrow(full.data), n.groups * sample.size, replace = FALSE),]
+Y <- rep(LETTERS[1:n.groups], each = sample.size)
+
+sample.data = data.frame(Wing = X, Group = Y)
+rm(X, Y)
 ```
 
 We now find the group mean and the group variances.
 ```{r}
-group.means <- colMeans(sample.data)
-group.vars  <- apply(sample.data, 2, var)
-var.within <- mean(group.vars)
-cat(paste("Variance within: ", var.within, "\n"))
-var.among <- var(group.means) * sample.size
-cat(paste("Variance among: ", var.among, "\n"))
+group.means <- with(sample.data, tapply(Wing, Group, mean))
+group.vars  <- with(sample.data, tapply(Wing, Group, var))
+
+mov.estimate <- mean(group.vars)
+vom.estimate <- sample.size * var(group.means)
+
+cat(paste("Variance within: ", mov.estimate, "\n"))
+cat(paste("Variance among: ", vom.estimate, "\n"))
 ```
 
 In order to find out if these variances are the same, we conduct a $F$-test.
 ```{r}
-F_s <- var.within / var.among
-nu_1 <- n.groups - 1
-nu_2 <- n.groups * (sample.size - 1)
+F_s <- vom.estimate / mov.estimate
+# The number of degrees of freedom for the numerator. It was computed as a
+# variance of n.groups means. Therefore, it is:
+df.num <- n.groups - 1
+# The number of degrees of freedom for the denominator. It was computed as a mean
+# of n.groups variances. Each variance had (sample.size - 1) degrees of freedom.
+# Therefore the total number of degrees of freedom is:
+df.den <- n.groups * (sample.size - 1)
 
 cat(paste(
   sep = "",
   "The p-value of the F-test is ",
-  p_val_of_F_test(F_s, nu_1, nu_2),
+  1 - pf(F_s, df.num, df.den),
   ".\n"
 ))
 ```
 
 A high $p$-value indicates that we cannot reject the null hypothesis that the 
-two variances are not statistically different from the true parametric (population)
-variance.
+two means of the groups are not statistically different from each other. We can
+confirm our conclusion by looking at the box plot of the Wing data.
+```{r}
+with(sample.data, boxplot(Wing ~ Group, main = "Housefly wings"))
+```
 
 ## Example 1
 Sometimes we consider one of the groups in the sample as a control group and
@@ -81,26 +79,45 @@ alpha <- c(-5, -2, 0, 1, 1, 5, 0)
 ```
 and add it to every row of the sample data to get the sample of a fixed treatment.
 ```{r}
-fixed.treatment.sample <- sweep(sample.data, 2, alpha, "+")
+alpha.1 <- rep(alpha, each = sample.size)
+fixed.treatment.sample <-
+  data.frame(Wing = sample.data$Wing + alpha.1,
+             Group = sample.data$Group)
 ```
 We now repeat the above calculations for testing if the variances are equal.
 ```{r}
-group.means <- colMeans(fixed.treatment.sample)
-group.vars  <- apply(fixed.treatment.sample, 2, var)
-var.within <- mean(group.vars)
-cat(paste("Variance within: ", var.within, "\n"))
-var.among <- var(group.means) * sample.size
-cat(paste("Variance among: ", var.among, "\n"))
-F_s <- var.within / var.among
-nu_1 <- n.groups - 1
-nu_2 <- n.groups * (sample.size - 1)
+group.means <-
+  with(fixed.treatment.sample, tapply(Wing, Group, mean))
+group.vars  <-
+  with(fixed.treatment.sample, tapply(Wing, Group, var))
+mov.estimate <- mean(group.vars)
+vom.estimate <- sample.size * var(group.means)
+cat(paste("Variance within: ", mov.estimate, "\n"))
+cat(paste("Variance among: ", vom.estimate, "\n"))
+
+F_s <- vom.estimate / mov.estimate
+# The number of degrees of freedom for the numerator. It was computed as a
+# variance of n.groups means. Therefore, it is:
+df.num <- n.groups - 1
+# The number of degrees of freedom for the denominator. It was computed as a mean
+# of n.groups variances. Each variance had (sample.size - 1) degrees of freedom.
+# Therefore the total number of degrees of freedom is:
+df.den <- n.groups * (sample.size - 1)
 
 cat(paste(
   sep = "",
   "The p-value of the F-test is ",
-  p_val_of_F_test(F_s, nu_1, nu_2),
+  1 - pf(F_s, df.num, df.den),
   ".\n"
 ))
+```
+
+A high $p$-value indicates that we cannot reject the null hypothesis that the 
+two means of the groups are not statistically different from each other. We can
+confirm our conclusion by looking at the box plot of the Wing data.
+```{r}
+with(fixed.treatment.sample,
+     boxplot(Wing ~ Group, main = "Housefly wings with treatment"))
 ```
 
 ## The idea behind ANOVA
@@ -127,6 +144,20 @@ two variance estimates are statistically similar. We do it using the $F$-test.
 
 Despite its name, ANOVA is a technique to compare means of grouped data.
 
+## R's built-in function
+ANOVA is a basic and important statistical test. Not surprisingly, R has a function
+to carry it out. We repeat the two previous analyses now using the R's function.
+The test on the original data gives
+```{r}
+oneway.test(Wing ~ Group, data = sample.data, var.equal = TRUE)
+```
+The one on the data with treatment gives
+```{r}
+oneway.test(Wing ~ Group, fixed.treatment.sample, var.equal = TRUE)
+```
+The $p$-values reported by these tests match with the ones previously obtained.
+We illustrate ANOVA for two more data sets.
+
 ## Effectiveness of insect sprays
 The data set InsectSpray is available on every R installation. It has data of
 count of insects found after treatment with five varieties of sprays. Let us first
@@ -136,6 +167,11 @@ of spray.
 aggregate(count ~ spray, InsectSprays, length)
 ```
 
+An alternative to using the aggretate function is
+```{r}
+with(InsectSprays, tapply(count, spray, length))
+```
+
 Every spray has $12$ records. Let us visualize the data using box-plots.
 ```{r}
 with(InsectSprays, boxplot(count ~ spray, main = "Insect sprays"))
@@ -143,31 +179,29 @@ with(InsectSprays, boxplot(count ~ spray, main = "Insect sprays"))
 
 We now proceed with the usual analysis.
 ```{r}
-group.means <- with(InsectSprays, tapply(count, spray, mean))
-group.vars  <- with(InsectSprays, tapply(count, spray, var))
-
-mean.of.vars <- mean(group.vars)
-var.of.means <- var(group.means)
-
 # We confirmed that there are an equal number of samples in each group.
 sample.size <- nrow(InsectSprays[InsectSprays$spray == "A", ])
 n.groups <- length(unique(InsectSprays$spray))
 
-est.var.2 <- sample.size * var.of.means
-F_s <- mean.of.vars / est.var.2
+group.means <- with(InsectSprays, tapply(count, spray, mean))
+group.vars  <- with(InsectSprays, tapply(count, spray, var))
 
-# The number of degrees of freedom for the numerator. It was computed as a mean
+mov.estimate <- mean(group.vars)
+vom.estimate <- sample.size * var(group.means)
+
+F_s <- vom.estimate / mov.estimate
+# The number of degrees of freedom for the numerator. It was computed as a
+# variance of n.groups means. Therefore, it is:
+df.num <- n.groups - 1
+# The number of degrees of freedom for the denominator. It was computed as a mean
 # of n.groups variances. Each variance had (sample.size - 1) degrees of freedom.
 # Therefore the total number of degrees of freedom is:
-nu_1 <- n.groups * (sample.size - 1)
-# The number of degrees of freedom for the denominator. It was computed as a
-# variance of n.groups means. Therefore, it is:
-nu_2 <- n.groups - 1
+df.den <- n.groups * (sample.size - 1)
 
 cat(paste(
   sep = "",
   "The p-value of the F-test is ",
-  p_val_of_F_test(F_s, nu_1, nu_2),
+  1 - pf(F_s, df.num, df.den),
   ".\n"
 ))
 ```
@@ -197,29 +231,33 @@ with(OrchardSprays, tapply(decrease, treatment, length))
 
 Let us see if our analysis yields the same conclusion.
 ```{r}
+n.groups <- length(unique(OrchardSprays$treatment))
+sample.size <- nrow(OrchardSprays[OrchardSprays$treatment == "A", ])
+
 group.means <- with(OrchardSprays, tapply(decrease, treatment, mean))
 group.vars  <- with(OrchardSprays, tapply(decrease, treatment, var))
 
-n.groups <- length(unique(OrchardSprays$treatment))
-sample.size <- nrow(OrchardSprays[OrchardSprays$treatment == "A", ])
-var.est.1 <-
-  mean(group.vars) # df = num_of_groups x (sample_size - 1)
-var.est.2 <- sample.size * var(group.means) # df = num_of_groups - 1
+mov.estimate <- mean(group.vars)
+vom.estimate <- sample.size * var(group.means)
 
-F_s <- var.est.1 / var.est.2
-
-df.num <- n.groups * (sample.size - 1)
-df.den <- n.groups - 1
+F_s <- vom.estimate / mov.estimate
+# The number of degrees of freedom for the numerator. It was computed as a
+# variance of n.groups means. Therefore, it is:
+df.num <- n.groups - 1
+# The number of degrees of freedom for the denominator. It was computed as a mean
+# of n.groups variances. Each variance had (sample.size - 1) degrees of freedom.
+# Therefore the total number of degrees of freedom is:
+df.den <- n.groups * (sample.size - 1)
 
 cat(paste(
   sep = "",
-  "The p-value of F-test is ",
-  p_val_of_F_test(F_s, df.num, df.den),
+  "The p-value of the F-test is ",
+  1 - pf(F_s, df.num, df.den),
   ".\n"
 ))
 ```
 
 Our conclusions are no different from those of R's one-way test.
 ```{r}
-oneway.test(decrease ~ treatment, data = OrchardSprays, var.equal = FALSE)
+oneway.test(decrease ~ treatment, data = OrchardSprays, var.equal = TRUE)
 ```
