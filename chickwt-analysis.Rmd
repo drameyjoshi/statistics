@@ -1,0 +1,83 @@
+---
+title: "Analysis of chicken weight"
+author: "Amey Joshi"
+date: "20/11/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+The data describing the effect of certain choices of diet on weight of chicken
+is part of every R installation. We first find out how many diet plans were
+examined.
+```{r}
+unique(ChickWeight$Diet)
+```
+
+For each diet plan, we will see the variation in the chicken's weight from its
+birth to the twentieth day. This is for diet 1.
+```{r}
+chicks <-
+  as.numeric(unique(ChickWeight[ChickWeight$Diet == 1,]$Chick))
+coplot(
+  weight ~ Time |
+    Chick,
+  data = ChickWeight,
+  given.values = chicks,
+  type = "l",
+  show.given = FALSE,
+  xlab = c("Time", "Chicken on diet 1"),
+  ylab = c("Weight")
+)
+```
+
+For diet 2 it is
+```{r}
+chicks <-
+  as.numeric(unique(ChickWeight[ChickWeight$Diet == 2,]$Chick))
+coplot(
+  weight ~ Time |
+    Chick,
+  data = ChickWeight,
+  given.values = chicks,
+  type = "l",
+  show.given = FALSE,
+  xlab = c("Time", "Chicken on diet 2"),
+  ylab = c("Weight")
+)
+```
+
+For diet 3 it is
+```{r}
+chicks <-
+  as.numeric(unique(ChickWeight[ChickWeight$Diet == 3,]$Chick))
+coplot(
+  weight ~ Time |
+    Chick,
+  data = ChickWeight,
+  given.values = chicks,
+  type = "l",
+  show.given = FALSE,
+  xlab = c("Time", "Chicken on diet 3"),
+  ylab = c("Weight")
+)
+```
+
+Finally, for diet 4 the data is
+```{r}
+chicks <-
+  as.numeric(unique(ChickWeight[ChickWeight$Diet == 4,]$Chick))
+coplot(
+  weight ~ Time |
+    Chick,
+  data = ChickWeight,
+  given.values = chicks,
+  type = "l",
+  show.given = FALSE,
+  xlab = c("Time", "Chicken on diet 4"),
+  ylab = c("Weight")
+)
+```
