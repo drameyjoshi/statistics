@@ -34,6 +34,9 @@ coplot(
 )
 ```
 
+Some chickens showed a modest rise in weight but many did not. A few of them 
+do not have data for all twenty days, perhaps they did not survive.
+
 For diet 2 it is
 ```{r}
 chicks <-
@@ -49,6 +52,9 @@ coplot(
   ylab = c("Weight")
 )
 ```
+
+Barring one, all chickens gained weight in twenty days - some substantially, 
+others more modestly.
 
 For diet 3 it is
 ```{r}
@@ -66,6 +72,8 @@ coplot(
 )
 ```
 
+Every chicken gained weight, though not to the same extent.
+
 Finally, for diet 4 the data is
 ```{r}
 chicks <-
@@ -81,3 +89,35 @@ coplot(
   ylab = c("Weight")
 )
 ```
+
+The weight gain through diet 4 is monotonous in all but one case. One of the 
+chickens does not have data beyong 18 days suggesting a case of mortality.
+
+We will now analyze the efficacy of the four diets using ANOVA. In order to 
+do that, we first find the weight gain for each bird.
+```{r}
+gain <- function(x) {
+  x[length(x)] - x[1]
+}
+
+X <- with(ChickWeight, tapply(weight, Chick, gain))
+weight.gain <- data.frame(Chick = names(X), gain = X)
+rm(X)
+```
+
+We then merge this data with the main data set to get the weight gain by a 
+bird for a diet.
+```{r}
+X <- merge(weight.gain, ChickWeight, by.x = "Chick", by.y = "Chick")
+anova.data <- unique(X[, c("gain", "Chick", "Diet")])
+rm(X)
+```
+
+An ANOVA will tell if if the null hypothesis that all diets led to an equal
+weight gain is true.
+```{r}
+oneway.test(gain ~ Diet, data = anova.data, var.equal = TRUE)
+```
+
+The very small value of making a type I error indicates that we can reject the
+null hypothesis.
