@@ -1,0 +1,81 @@
+---
+title: "Ordinary Least Square Regression"
+author: "Amey Joshi"
+date: "22/11/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## The data set
+We will illustrate linear regression using the 'cars' data set. It has the 
+distance taken to stop a car moving at a certain speed. In this experiment, 
+speed is a deterministic variable and the distance it travelled before stopping 
+is a random variable. Before trying to fit a regression model we will first 
+check if a model can at all be built. The easiest first step is to visualize the 
+data.
+```{r}
+with(cars, plot(dist, speed, main = "Stopping distance of cars"))
+```
+
+The scatter plot shows that there is a positive correlation between the two
+variables. The correlation coefficient is
+```{r}
+with(cars, cor(speed, dist))
+```
+
+There is a high enough correlation between the two variables. Yet one sees a 
+significant scatter along with a positive trend. It might be fruitful to check
+if there are any outliers in the data.
+```{r}
+par(mfrow = c(1, 2))
+with(cars, boxplot(speed, main = "Speed"))
+with(cars, boxplot(dist, main = "Distance"))
+```
+
+The distance data seems to have an outlier. We can find it using the box-plot 
+statistics.
+```{r}
+boxplot.stats(cars$dist)$out
+```
+
+The outlier rows are
+```{r}
+cars[which(cars$dist %in% boxplot.stats(cars$dist)$out), ]
+```
+
+For the moment we wil not worry about the sole outlier in our data set.
+
+Let us also examine the distribution of the two variables.
+```{r}
+library(MASS)
+truehist(cars$speed, nbins = 10, xlab = "Speed")
+lines(density(cars$speed))
+rug(cars$speed)
+```
+
+The distribution is symmetric but we do not know if it is gaussian. We check it
+using the Shapiro-Wilk test whose null hypothesis is that the data is normal.
+```{r}
+shapiro.test(cars$speed)
+```
+
+The high p-value suggests that the data is indeed normal. 
+
+```{r}
+truehist(cars$dist, nbins = 10, xlab = "Distance")
+lines(density(cars$dist))
+rug(cars$dist)
+```
+
+The outlier detected in the boxplot is visible in the histogram as well. The
+distribution appears to be skewed to the right. Perhaps the distribution is 
+not normal. If we run the Shapiro-Wilk test, 
+```{r}
+shapiro.test(cars$dist)
+```
+
+the low $p$-value allows us to reject the null hypothesis that the data is normal.
+
