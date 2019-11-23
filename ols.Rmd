@@ -79,3 +79,90 @@ shapiro.test(cars$dist)
 
 the low $p$-value allows us to reject the null hypothesis that the data is normal.
 
+## The regression model
+We will now build and diagnose a linear regression model on the cars data.
+```{r}
+m.1 <- lm(dist ~ speed, cars)
+summary(m.1)
+with(cars, plot(speed, dist))
+abline(m.1)
+```
+
+We show the data and the fitted linear model in the previous plot. We next look
+at the residuals.
+```{r}
+plot(m.1$residuals, ylab = "residual", main = "Model residuals")
+```
+
+The mean and standard error of residuals is
+```{r}
+residual.mean <- mean(m.1$residuals)
+
+# Subtracting 2 because we fitted 2 parameters, slope and the intercept
+residual.df <- length(m.1$residuals) - 2 
+residual.se <- sqrt(sum(m.1$residuals^2)/residual.df)
+```
+
+The residuals seems to be distributed evenly on either side of zero. There does
+not appear to be a trend in them. To find out if they are normally distributed 
+we examine their Q-Q plot.
+```{r}
+qqnorm(m.1$residuals)
+qqline(m.1$residuals)
+```
+
+The data may not be far from normal. Let us also see the histogram and the 
+density of the residuals before subjecting them to Shapiro-Wilk test.
+```{r}
+library(MASS)
+truehist(m.1$residuals, xlab = "residual", main = "Histogram and density of residuals", nbins = 10)
+lines(density(m.1$residuals))
+```
+
+The residuals are skewed to the right. 
+```{r}
+shapiro.test(m.1$residuals)
+```
+
+The small $p$-value suggests that we reject the null hypothesis that the residuals
+are normally distributed must be rejected. This shatters one of the assumptions
+of a linear model. Nevertheless, we look at other aspects.
+
+The sum of squares is
+```{r}
+SS <- sum((cars$dist - mean(cars$dist))^2)
+```
+
+The sum of squares of residuals is
+```{r}
+RSS <- sum((m.1$residuals - mean(m.1$residuals))^2)
+```
+
+The sum of squares of deviations, also called errors, of the estimated distance 
+from its mean is
+```{r}
+ESS <- sum((fitted(m.1) - mean(fitted(m.1)))^2)
+```
+
+We confirm that
+```{r}
+SS - (ESS + RSS)
+```
+is a very small number.
+
+The $R^2$ of the model is
+```{r}
+R.sq <- ESS/SS
+```
+
+The $F$-statistic for the model is
+```{r}
+F.stat <- ESS/residual.se^2
+df.num <- 1
+df.den <- length(m.1$residuals) - 2
+```
+
+Therefore, the $p$-value of the ANOVA is
+```{r}
+p.val <- df(F.stat, df.num, df.den)
+```
