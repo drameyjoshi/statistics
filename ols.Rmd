@@ -2,7 +2,7 @@
 title: "Ordinary Least Square Regression"
 author: "Amey Joshi"
 date: "22/11/2019"
-output: html_document
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
@@ -79,17 +79,68 @@ shapiro.test(cars$dist)
 
 the low $p$-value allows us to reject the null hypothesis that the data is normal.
 
+## The theory of regression
+In its simplest case, when a single deterministic variable $x$ is used to predict
+$y$ using a linear relationship between the two, regression consists in fitting
+the 'best' line passing through the given data points $(x_i, y_i)$. If $\hat{y}_i$
+is the value of $y$ predicted by a linear relationship, we want to minimize the
+'error',
+\begin{equation}\label{e1}
+E = \sum_{i=1}^N (y_i - \hat{y}_i)^2,
+\end{equation}
+where $N$ is the number of data points. If $y$ is modelled as a linear function
+of $x$ then we want to fit a line
+\begin{equation}\label{e2}
+\hat{y}_i = \beta_1 x_i + \beta_0
+\end{equation}
+such that $E$ is minized. The values of $\beta_1$ and $\beta_0$ are found using
+the relations
+\begin{eqnarray}
+\frac{\partial E}{\partial\beta_0} &=& 0 \label{e3} \\
+\frac{\partial E}{\partial\beta_1} &=& 0 \label{e4}
+\end{eqnarray}
+They are
+\begin{equation}\label{e5}
+\beta_0 = \frac{\sum_{i=1}^N x_i^2\sum_{i=1}^Ny_i - \sum_{i=1}^N x_i\sum_{i=1}^N x_iy_i}{N\sum_{i=1}^N x_i^2 - \left(\sum_{i=1}^N x_i\right)^2}
+\end{equation}
+and
+\begin{equation}\label{e6}
+\beta_1 = \frac{N\sum_{i=1}^N x_iy_i- \sum_{i=1}^N x_i\sum_{i=1}^N y_i}{N\sum_{i=1}^N x_i^2 - \left(\sum_{i=1}^N x_i\right)^2}
+\end{equation}
+
 ## The regression model
 We will now build and diagnose a linear regression model on the cars data.
 ```{r}
 m.1 <- lm(dist ~ speed, cars)
 summary(m.1)
+```
+
+We confirm that the values of the slope and the intercept are indeed those
+predicted by the two equations derived in the previous section.
+```{r}
+sum.x <- sum(cars$speed)
+sum.y <- sum(cars$dist)
+sum.x.sq <- sum(cars$speed^2)
+sum.xy <- cars$speed %*% cars$dist
+N <- nrow(cars)
+
+den <- N * sum.x.sq - (sum.x)^2
+num.1 <- N * sum.xy - sum.x * sum.y
+num.0 <- sum.x.sq * sum.y - sum.x * sum.xy
+
+beta.1 <- num.1/den
+beta.0 <- num.0/den
+cat(paste("Slope", round(beta.1, 4), "\n"))
+cat(paste("Intercept", round(beta.0, 4), "\n"))
+```
+
+We show the data and the fitted linear model in the previous plot. 
+```{r}
 with(cars, plot(speed, dist))
 abline(m.1)
 ```
 
-We show the data and the fitted linear model in the previous plot. We next look
-at the residuals.
+We next look at the residuals.
 ```{r}
 plot(m.1$residuals, ylab = "residual", main = "Model residuals")
 ```
@@ -127,6 +178,110 @@ shapiro.test(m.1$residuals)
 The small $p$-value suggests that we reject the null hypothesis that the residuals
 are normally distributed must be rejected. This shatters one of the assumptions
 of a linear model. Nevertheless, we look at other aspects.
+
+## Further diagnostics
+We will now understand the other numbers printed while summarizing the linear
+model. Before we get there, we recall the formulae for $\beta_0$ and $\beta_1$.
+They depends on the $N$ data points $(x_i, y_i)$. A different sample of the $N$
+data points will give (hopefully slightly) different values of the intercept
+$\beta_0$ and the slope $\beta_1$. Thus, the estimates of slope and intercept
+are themselves 'statistics' and therefore they too have their sampling 
+distributions. It is easy to get an expression for the mean and variance of these
+estimates if we recast the expressions for $\beta_0$ and $\beta_1$ in a slightly
+different form. We start with $\beta_1$. Its numerator $n_1$ can be written as
+\begin{equation}\label{e7}
+n_1 = N^2\overline{xy} - N^2\bar{x}\bar{y}.
+\end{equation} 
+Now, 
+\begin{equation}\label{e8}
+\overline{(x - \bar{x})(y - \bar{y})} = \overline{xy} - \bar{x}\bar{y} - \bar{x}\bar{y} + \bar{x}\bar{y} = \overline{xy} - \bar{x}\bar{y}.
+\end{equation}
+By the same principles, the denominator $d$ of the expression for $\beta_1$ can
+be written as 
+\begin{equation}\label{e9}
+d = \overline{(x - \bar{x})^2}.
+\end{equation}
+Thus,
+\begin{equation}\label{e10}
+\beta_1 = \frac{N^2\overline{(x - \bar{x})(y - \bar{y})}}{N^2\overline{(x - \bar{x})^2}}  
+= \frac{\sum_{i=1}^N(x_i - \bar{x})(y_i - \bar{y})}{\sum_{i=1}^N{(x_i - \bar{x})^2}}
+\end{equation}
+
+The denominators of $\beta_0$ and $\beta_1$ are identical. Let us denote the common
+denominator by $d$ and let us write $\beta_0 = n_0/d$ and $\beta_1 = n_1/d$. Now
+\begin{equation}\label{e11}
+n_1\sum_{i=1}^Nx_i = N\sum_{i=1}^Nx_i\sum_{i=1}^Nx_iy_i - \left(\sum_{i=1}^Nx_i\right)^2\sum_{i=1}^Ny_i
+\end{equation}
+so that 
+\begin{equation}\label{e12}
+\sum_{i=1}^Nx_i\sum_{i=1}^Nx_iy_i = n_1\bar{x} + \left(\sum_{i=1}^Nx_i\right)^2\bar{y}.
+\end{equation}
+We can
+now write 
+\begin{equation}\label{e13}
+n_0 = \sum_{i=1}^N x_i^2\sum_{i=1}^N y_i - n_1\bar{x} + \left(\sum_{i=1}^Nx_i\right)^2\bar{y}
+= N\sum_{i=1}^N x_i^2\bar{y} - n_1\bar{x} + \left(\sum_{i=1}^Nx_i\right)^2\bar{y} = d\bar{y} - n_1\bar{x}.
+\end{equation}
+The intercept $\beta_0$ is thus
+\begin{equation}\label{e14}
+\beta_0 = \frac{n_0}{d} = \bar{y} - \beta_1\bar{x}.
+\end{equation}
+
+Now comes an important point. In a regression experiment, $\{x_i\}$ are deterministic
+variables and $\{y_i\}$ are random variables. Therefore, mean of $\beta_1$ is
+zero and therefore its variance is just the mean of $\beta_1^2$. Now,
+\begin{equation}\label{e15}
+\beta_1^2 = \frac{\sum_{i,j=1}^N(x_i - \bar{x})(x_j - \bar{x})(y_i - \bar{y})(y_j - \bar{y})}{\left(\sum_{i=1}^N(x_i - \bar{x})^2\right)^2}
+\end{equation}
+The variables $\{y_i\}$ are independent of each other so that the mean of
+$\sum_{i,j=1}^N(y_i - \bar{y})(y_j - \bar{y})$ is $\sum_{i,j=1}^N(y_i - \bar{y})^2\delta_{ij}$,
+and hence
+\begin{equation}\label{e16}
+\text{var}(\beta_1) = \overline{\beta_1^2} = 
+\frac{\sum_{i=1}^N(x_i - \bar{x})^2\overline{(y_i - \bar{y})^2}}{\left(\sum_{i=1}^N(x_i - \bar{x})^2\right)^2}
+= \frac{\sigma^2}{\sum_{i=1}^N(x_i - \bar{x})^2},
+\end{equation}
+where $\sigma^2$ is the variance of $y$.
+
+Similarly, 
+\begin{equation}\label{e18}
+\text{var}(\beta_0) = \text{var}(\bar{y} - \beta_1\bar{x}) = 
+\text{var}(\bar{y}) + \text{var}(\beta_1)\bar{x}^2 - 2\text{cov}(\bar{y}, \beta_1)
+\end{equation}
+Now, $\text{cov}(\bar{y}, \beta_1) = \text{E}(\bar{y}\beta_1) - \text{E}(\bar{y})\text{E}(\beta_1)$.
+As $\text{E}(\bar{y}) = \bar{y}$ and $\text{E}(\bar{y}\beta_1) = \bar{y}\text{E}(\beta_1)$, we
+readily get that $\text{cov}(\bar{y}, \beta_1) = 0$. Therefore,
+\begin{equation}\label{e19}
+\text{var}(\beta_0) = \text{var}(\bar{y}) + \text{var}(\beta_1)\bar{x}^2.
+\end{equation}
+$\text{var}(\bar{y})$ is the variance of the sampling distribution of $\bar{y}$
+and it is $\sigma^2/N$. Therefore,
+\begin{equation}\label{e20}
+\text{var}(\beta_0) = \frac{\sigma^2}{N} + \frac{\sigma^2}{\sum_{i=1}^N(x_i - \bar{x})^2}\bar{x}^2,
+\end{equation}
+where we used equation \eqref{e16}. Simplifying the right hand side, we get
+\begin{equation}\label{e21}
+\text{var}(\beta_0) = \sigma^2\left(\frac{1}{N} + \frac{\bar{x}^2}{\sum_{i=1}^N(x_i - \bar{x})^2}\right).
+\end{equation}
+Equations \eqref{e16} and \eqref{e21} give the standard error of the estimate
+of the slope $\beta_1$ and that of the intercept $\beta_0$.
+
+Before proceeding we confirm the formulae of equations \eqref{e16} and \eqref{e20}.
+```{r}
+x.bar <- mean(cars$speed)
+ss.x <- sum((cars$speed - x.bar)^2)
+N <- nrow(cars)
+
+sigma.sq <- var(cars$dist)
+
+se.beta.0 <- sqrt(sigma.sq * (1/N + x.bar^2/ss.x))
+se.beta.1 <- sqrt(sigma.sq/ss.x)
+
+cat(paste("Standard error of intercept:", se.beta.0, "\n"))
+cat(paste("Standard error of slope:", se.beta.1, "\n"))
+```
+
+
 
 The sum of squares is
 ```{r}
