@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 \newcommand{\ev}{\operatorname{E}}
 \newcommand{\var}{\operatorname{var}}
+\newcommand{\cov}{\operatorname{cov}}
 
 ## The data set
 We will illustrate linear regression using the 'cars' data set. It has the 
@@ -192,8 +193,8 @@ $\beta_0$ and the slope $\beta_1$. Thus, the estimates of slope and intercept
 are themselves 'statistics' and therefore they too have their sampling 
 distributions. The ones computed using equations \eqref{e5} and \eqref{e6} are
 thus the estimates of the true intercept and slope. In order to differentiate
-an estimate from the true value, we fill follow the standard convention of putting
-a hat on the estimates.
+an estimate from the true value, we fill follow the standard convention of 
+putting a hat on the estimates.
 
 It is easy to get an expression for the mean and variance of these
 estimates if we recast the expressions for $\beta_0$ and $\beta_1$ in a slightly
@@ -238,62 +239,51 @@ The estimate of intercept is thus
 \hat{\beta}_0 = \frac{n_0}{d} = \ev y - \beta_1\ev x.
 \end{equation}
 
-Now comes an important point. In a regression experiment, $\{x_i\}$ are deterministic
-variables and $\{y_i\}$ are random variables. Therefore, mean of $\beta_1$ is
-zero and therefore its variance is just the mean of $\beta_1^2$. Now,
+We will now compute the variance of the estimated regression coefficients, the
+intercept $\hat{\beta}_0$ and the slope $\hat{\beta}_1$. Let us start with the
+estimated slope.
 \begin{equation}\label{e15}
-\hat{\beta}_1^2 = \frac{\sum_{i,j=1}^N(x_i - \ev x)(x_j - \ev x)(y_i - \ev y)(y_j - \ev y)}{\left(\sum_{i=1}^N(x_i - \ev x)^2\right)^2}
+\var(\hat{\beta}_1) = \var\left(\frac{\sum_{i=1}^N(x_i - \ev x)(y_i - \ev y)}{\sum_{i=1}^N{(x_i - \ev x)^2}}\right)
+= \frac{1}{\left(\sum_{i=1}^N{(x_i - \ev x)^2}\right)^2}\var\left(\sum_{i=1}^N(x_i - \ev x)(y_i - \ev y)\right)
 \end{equation}
-The variables $\{y_i\}$ are independent of each other so that the mean of
-$\sum_{i,j=1}^N(y_i - \ev y)(y_j - \ev y)$ is $\sum_{i,j=1}^N(y_i - \ev y)^2\delta_{ij}$,
-and hence
+Simplifying the right hand side,
 \begin{equation}\label{e16}
-\var(\beta_1) = \ev\beta_1^2 = 
-\frac{\sum_{i=1}^N(x_i - \ev x)^2\ev (y_i - \ev y)^2}{\left(\sum_{i=1}^N(x_i - \ev x)^2\right)^2}.
+\var(\hat{\beta}_1) = \frac{1}{\left(\sum_{i=1}^N{(x_i - \ev x)^2}\right)^2}\sum_{i=1}^n \var\left((x_i - \ev x)(y_i - \ev y)\right)
 \end{equation}
-Let us now compute $\ev(y_i - \ev y)^2$. We know that $y_i = \beta_0 
-+ \beta_1 x_i + \epsilon_i$ where $\epsilon_i$ is the random error in the estimate.
-Therefore, $\var(y_i) = 0 + 0 + \var(\epsilon_i)$. If the error terms
-are normally distributed then $\var(\epsilon_i)$ is estimated by the sample
-variance of the residuals. We call it $\hat{\sigma}^2$. Equation \eqref{e16} now
-becomes
+or
+\begin{equation}\nonumber
+\var(\hat{\beta}_1) = \frac{1}{\left(\sum_{i=1}^N{(x_i - \ev x)^2}\right)^2}\sum_{i=1}^n \var\left((x_i - \ev x)y_i - (x_i - \ev x)\ev y)\right)
+\end{equation}
+The variance of $(x_i - \ev x)\ev y$ is zero because it is not a random variable.
+Thus,
 \begin{equation}\label{e17}
-\var(\beta_1) = \frac{\hat{\sigma}^2}{\left(\sum_{i=1}^N(x_i - \ev x)^2\right)^2}.
+\var(\hat{\beta}_1) = \frac{1}{\left(\sum_{i=1}^N{(x_i - \ev x)^2}\right)^2}\sum_{i=1}^n \var\left((x_i - \ev x)y_i\right)
 \end{equation}
-
-Similarly, 
+Now $y_i = \beta_0 + \beta_1 x_i + \epsilon_i$. Of these, only $\epsilon_i$ is
+a random variable. Therefore $\var\left((x_i - \ev x)y_i\right) = 
+\var\left((x_i - \ev x)\epsilon_i\right) = (x_i - \ev x)^2\var(\epsilon_i)$. 
+Since all $\epsilon_i$ are identically distributes, equation \eqref{e17} becomes
 \begin{equation}\label{e18}
-\var(\beta_0) = \var(\ev y - \beta_1\ev x) = 
-\var(\ev y) + \var(\beta_1)(\ev x)^2 - 2\text{cov}(\ev y, \beta_1)
+\var(\hat{\beta}_1) = \frac{\var(\epsilon)}{\left(\sum_{i=1}^N{(x_i - \ev x)^2}\right)^2}\sum_{i=1}^n (x_i - \ev x)^2
 \end{equation}
-Now, $\text{cov}(\ev y, \beta_1) = \text{E}(\ev y\beta_1) - \text{E}(\ev y)\text{E}(\beta_1)$.
-As $\text{E}(\ev y) = \ev y$ and $\text{E}(\ev y\beta_1) = \ev y\text{E}(\beta_1)$, we
-readily get that $\text{cov}(\ev y, \beta_1) = 0$. Therefore,
+or,
 \begin{equation}\label{e19}
-\var(\beta_0) = \var(\ev y) + \var(\beta_1)(\ev x)^2.
+\var(\hat{\beta}_1) = \frac{\var(\epsilon)}{\sum_{i=1}^N(x_i - \ev x)^2}
 \end{equation}
-$\var(\ev y)$ is the variance of the sampling distribution of $\ev y$
-and it is $\var(y)/N = \hat{\sigma}^2/N$. Therefore,
+
+Moving on to the estimate of the intercept, 
+\begin{equation}\nonumber
+\var\hat{\beta}_0 = \var\ev y + \var(\hat{\beta}_1\ev x) + 2\cov(\ev y, \hat{\beta}_1\ev x) = \var\ev y + (\ev x)^2\var(\hat{\beta}) + 0.
+\end{equation}
+
+Now, $\ev y = \sum_{i=1}^N y_i/N$ so that $\var\ev y = \sum_{i=1}^N \var(y_i)/N^2
+= \sum_{i=1}^N\var(\epsilon_i)/N^2 = N\var(\epsilon)/N^2 = \var(\epsilon)/N$.
+Therefore,
 \begin{equation}\label{e20}
-\var(\beta_0) = \frac{\hat{\sigma}^2}{N} + \frac{\hat{sigma}^2}{\sum_{i=1}^N(x_i - \ev x)^2}(\ev x)^2,
+\var\hat{\beta}_0 = \frac{\var(\epsilon)}{N} + (\ev x)^2\var(\hat{\beta})
 \end{equation}
-where we used equation \eqref{e16}. Simplifying the right hand side, we get
-\begin{equation}\label{e21}
-\var(\beta_0) = \hat{\sigma}^2\left(\frac{1}{N} + \frac{(\ev x)^2}{\sum_{i=1}^N(x_i - \ev x)^2}\right).
-\end{equation}
-Equations \eqref{e16} and \eqref{e21} give the standard error of the estimate
-of the slope $\beta_1$ and that of the intercept $\beta_0$.
 
-Before leaving this topic we note that $\hat{\sigma}^2$, the variance of the
-residuals is given by the formula
-\begin{equation}
-\hat{\sigma}^2 = \frac{1}{N - 2}\sum_{i=1}^N(\epsilon_i - \ev\epsilon)^2.
-\end{equation}
-The denominator is $N-2$ instead of the usual $N-1$ because we have lost two
-degrees of freedom while estimating $\hat{\beta}_0$ and $\hat{\beta}_1$.
-
-
-We will now confirm the formulae of equations \eqref{e16} and \eqref{e20}.
+We will now confirm the formulae of equations \eqref{e19} and \eqref{e20}.
 ```{r}
 x.bar <- mean(cars$speed)
 ss.x <- sum((cars$speed - x.bar)^2)
