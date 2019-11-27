@@ -239,51 +239,17 @@ The estimate of intercept is thus
 \hat{\beta}_0 = \frac{n_0}{d} = \ev y - \beta_1\ev x.
 \end{equation}
 
-We will now compute the variance of the estimated regression coefficients, the
-intercept $\hat{\beta}_0$ and the slope $\hat{\beta}_1$. Let us start with the
-estimated slope.
-\begin{equation}\label{e15}
-\var(\hat{\beta}_1) = \var\left(\frac{\sum_{i=1}^N(x_i - \ev x)(y_i - \ev y)}{\sum_{i=1}^N{(x_i - \ev x)^2}}\right)
-= \frac{1}{\left(\sum_{i=1}^N{(x_i - \ev x)^2}\right)^2}\var\left(\sum_{i=1}^N(x_i - \ev x)(y_i - \ev y)\right)
-\end{equation}
-Simplifying the right hand side,
-\begin{equation}\label{e16}
-\var(\hat{\beta}_1) = \frac{1}{\left(\sum_{i=1}^N{(x_i - \ev x)^2}\right)^2}\sum_{i=1}^n \var\left((x_i - \ev x)(y_i - \ev y)\right)
-\end{equation}
-or
-\begin{equation}\nonumber
-\var(\hat{\beta}_1) = \frac{1}{\left(\sum_{i=1}^N{(x_i - \ev x)^2}\right)^2}\sum_{i=1}^n \var\left((x_i - \ev x)y_i - (x_i - \ev x)\ev y)\right)
-\end{equation}
-The variance of $(x_i - \ev x)\ev y$ is zero because it is not a random variable.
-Thus,
-\begin{equation}\label{e17}
-\var(\hat{\beta}_1) = \frac{1}{\left(\sum_{i=1}^N{(x_i - \ev x)^2}\right)^2}\sum_{i=1}^n \var\left((x_i - \ev x)y_i\right)
-\end{equation}
-Now $y_i = \beta_0 + \beta_1 x_i + \epsilon_i$. Of these, only $\epsilon_i$ is
-a random variable. Therefore $\var\left((x_i - \ev x)y_i\right) = 
-\var\left((x_i - \ev x)\epsilon_i\right) = (x_i - \ev x)^2\var(\epsilon_i)$. 
-Since all $\epsilon_i$ are identically distributes, equation \eqref{e17} becomes
-\begin{equation}\label{e18}
-\var(\hat{\beta}_1) = \frac{\var(\epsilon)}{\left(\sum_{i=1}^N{(x_i - \ev x)^2}\right)^2}\sum_{i=1}^n (x_i - \ev x)^2
-\end{equation}
-or,
-\begin{equation}\label{e19}
-\var(\hat{\beta}_1) = \frac{\var(\epsilon)}{\sum_{i=1}^N(x_i - \ev x)^2}
-\end{equation}
+We will now state the expression for the variance of the estimated regression 
+coefficients.
+\begin{eqnarray}
+\var(\hat{\beta}_0) &=& \sigma^2\left(\frac{1}{N} + \frac{\ev x}{\sum_{i=1}^N(x_i - \ev x)^2}\right) \label{e15} \\
+\var(\hat{\beta}_1) &=& \frac{\sigma^2}{\sum_{i=1}^N(x_i - \ev x)^2} \label{e16}
+\end{eqnarray}
+$\sigma^2$ in these equations is the variance of the residuals computed using
+$N - 2$ degrees of freedom. The reason for choosing $N - 2$ and not $N - 1$ is
+explained a little later.
 
-Moving on to the estimate of the intercept, 
-\begin{equation}\nonumber
-\var\hat{\beta}_0 = \var\ev y + \var(\hat{\beta}_1\ev x) + 2\cov(\ev y, \hat{\beta}_1\ev x) = \var\ev y + (\ev x)^2\var(\hat{\beta}) + 0.
-\end{equation}
-
-Now, $\ev y = \sum_{i=1}^N y_i/N$ so that $\var\ev y = \sum_{i=1}^N \var(y_i)/N^2
-= \sum_{i=1}^N\var(\epsilon_i)/N^2 = N\var(\epsilon)/N^2 = \var(\epsilon)/N$.
-Therefore,
-\begin{equation}\label{e20}
-\var\hat{\beta}_0 = \frac{\var(\epsilon)}{N} + (\ev x)^2\var(\hat{\beta})
-\end{equation}
-
-We will now confirm the formulae of equations \eqref{e19} and \eqref{e20}.
+We will now confirm the formulae of equations \eqref{e15} and \eqref{e16}.
 ```{r}
 x.bar <- mean(cars$speed)
 ss.x <- sum((cars$speed - x.bar)^2)
@@ -298,8 +264,10 @@ cat(paste("Standard error of intercept:", round(se.beta.0, 4), "\n"))
 cat(paste("Standard error of slope:", round(se.beta.1, 4), "\n"))
 ```
 
-Now that we have the standard errors for the estimates, we can get their $t$-values
-as well.
+Now that we have the standard errors for the estimates, we can get their 
+$t$-values as well. The $t$-values are computed to test the null hypothesis
+that the coefficients are zero. As a result, we assume that the true mean is 
+zero and we estimate the probability of finding a value that we estimated.
 ```{r}
 t.beta.0 <- (beta.0 - 0)/se.beta.0
 t.beta.1 <- (beta.1 - 0)/se.beta.1
@@ -308,41 +276,65 @@ cat(paste("t-value of intercept:", round(t.beta.0, 4), "\n"))
 cat(paste("t-value of slope:", round(t.beta.1, 4), "\n"))
 ```
 
-The sum of squares is
+How good the model is can be judged by comparing its estimates with those of 
+a 'null-model', that is the one whose coefficients are zero. The predictions
+of the 'null-model' are the random noise introduced by the standard normally
+distributed $\epsilon_i$. We will now introduce the concept of variance due to
+the model and that due to random noise. Let
+\begin{equation}\label{e17}
+SS = \sum_{i=1}^N (y_i - \bar{y})^2,
+\end{equation}
+be the sum of squares of the predicted variables. The model predicts $\hat{y}_i$
+for $y_i$. Therefore, the 'explained sum of squares' is
+\begin{equation}\label{e18}
+ESS = \sum_{i=1}^N (\hat{y}_i - \bar{y})^2.
+\end{equation}
+The difference between $SS$ and $ESS$ is called the residual sum of squares, 
+$RSS$. Let us get them for our model.
 ```{r}
 SS <- sum((cars$dist - mean(cars$dist))^2)
+ESS <- sum((fitted(m.1) - mean(cars$dist))^2)
+RSS <- SS - ESS
+
+cat(paste("SS =", SS, "\n"))
+cat(paste("ESS =", ESS, "\n"))
+cat(paste("RSS =", RSS, "\n"))
 ```
 
-The sum of squares of residuals is
+The residuals also available as a part of model summary. We can readily compute
+$RSS$ from them.
 ```{r}
-RSS <- sum((m.1$residuals - mean(m.1$residuals))^2)
+RSS.model <- sum(m.1$residuals^2)
 ```
 
-The sum of squares of deviations, also called errors, of the estimated distance 
-from its mean is
+The variance $ESS$ arises from choosing the two parameters that we did. The
+number of degrees of freedom giving rise to it is $2$. Therefore, the mean
+variance due to the model is $ESS/1 = ESS$. Let us call it 'explained variance'.
+Thus,
 ```{r}
-ESS <- sum((fitted(m.1) - mean(fitted(m.1)))^2)
+explained.variance <- ESS/(2 - 1)
 ```
 
-We confirm that
+The total number of degrees of freedom is $N - 1$, of which $2 - 1$ are taken
+up by $ESS$. Therefore, the number of degrees of freedom taken by $RSS$ is $N - 2$.
+The 'unexplained variances' is thus,
 ```{r}
-SS - (ESS + RSS)
-```
-is a very small number.
-
-The $R^2$ of the model is
-```{r}
-R.sq <- ESS/SS
+unexplained.variance <- RSS/(N - 2)
 ```
 
-The $F$-statistic for the model is
+The ratio os variances gives us the $F$-statistic for the model. The number of
+degrees of freedom are $1$ for the numerator and $48$ for the denominator.
 ```{r}
-F.stat <- ESS/residual.se^2
-df.num <- 1
-df.den <- length(m.1$residuals) - 2
+F.stat <- explained.variance/unexplained.variance
+cat(paste("F statistic =", F.stat, "\n"))
 ```
 
-Therefore, the $p$-value of the ANOVA is
+The $p$-value for the model is
 ```{r}
-p.val <- df(F.stat, df.num, df.den)
+p.val <- 1 - pf(F.stat, 1, 48)
+cat(paste("p-value for the model =", p.val, "\n"))
 ```
+
+Both these numbers match the one given by the model's summary.
+
+
