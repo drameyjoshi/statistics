@@ -1,0 +1,207 @@
+---
+title: "Preliminary examination"
+author: "Amey Joshi"
+date: "29/11/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+training.data <- read.csv("train.csv")
+```
+
+## Observations
+The observations listed in this section are substantiated in the rest of the 
+analysis.
+
+1.  Sale price for different sales condition is different. The categories 
+    'Abnorml' and 'Family' are statistically similar.
+2.  It might be useful to collapse sale type into 'Normal', 'New' and 'Others'.
+    Sale type and sale condition seem to be closely related to each other. We can
+    think of retaining only one of them.
+    
+## Condition of sale
+We first find the distribution of 'condition of sale'
+```{r}
+with(training.data,
+     tapply(SalePrice, SaleCondition, function(x) {
+       round(length(x)/nrow(training.data), 4)
+     }))
+```
+
+A significant percentage of sales were normal. Is there a statistically
+significant difference in their sale price? We first view the data
+```{r}
+with(training.data, boxplot(SalePrice ~ SaleCondition))
+```
+
+The data shows a large number of outliers even in the 'normal' case. Further,
+all outliers are at the higher end of the sale price. Visually, it is hard to
+tell if the sale price depends on the sale condition. We run an ANOVA to test it.
+
+```{r}
+oneway.test(SalePrice ~ SaleCondition, training.data)
+```
+
+The null hypothesis of the one way test is that all the means are equal. The 
+test concludes that they are not all equal. Are some of them equal? We first get
+the means.
+```{r}
+with(training.data,
+     tapply(SalePrice, SaleCondition, mean))
+```
+
+Of these, the 'Abnorml' [sic] and 'Family' means are close by. Let us check if
+they are statistically similar.
+```{r}
+oneway.test(SalePrice ~ SaleCondition, 
+            data = training.data[training.data$SaleCondition %in% c("Abnorml", "Family"), ])
+```
+
+A $p$-value of $82\%$ suggests that we cannot reject the null hypothesis. The
+data suggests that the means are similar. It is possible that 'Family' trades
+happen during an abnormal situation and vice versa.
+
+## Sale type
+The distribution of sale type is
+```{r}
+with(training.data,
+     tapply(SalePrice, SaleType, function(x) {
+       round(length(x)/nrow(training.data), 4)
+     }))
+```
+
+Is the sale type correlated with the sale condition?
+```{r}
+with(training.data, 
+     table(SaleType, SaleCondition))
+```
+
+A large number of WD (Warranty Deed - Conventional) sale type are indeed normal.
+The words normal and conventional are synonymous.
+
+
+The mean sale price across the types is
+```{r}
+with(training.data,
+     tapply(SalePrice, SaleType, mean))
+```
+
+It is tempting to conclude that the means are different until one also realizes
+that there are only two transactions with sale type 'Cond'.
+
+Does sale type determine sale price? 
+```{r}
+with(training.data,
+     boxplot(SalePrice ~ SaleType))
+```
+
+The 'WD' class shows a large number of outliers. But this class also tend to 
+have a 'normal' sale condition.
+
+Let us check if the mean sale price is statistically distinct across sale types.
+```{r}
+oneway.test(SalePrice ~ SaleType, training.data)
+```
+
+What was suspected from the box-plot is substantiated by ANOVA. Instead of
+looking at all the sale types, what if we club all non-WD together. We create
+a new dataset with this change.
+```{r}
+temp.ds <- training.data[, c("SaleType", "SalePrice")]
+temp.ds$SaleType.1 <- ifelse(training.data$SaleType == "WD", "WD", "Non-WD")
+oneway.test(SalePrice ~ SaleType.1, data = temp.ds)
+```
+
+The 'WD' and 'non-WD' classes are indeed different. Their class means are
+```{r}
+with(temp.ds,
+     tapply(SalePrice, SaleType.1, mean))
+```
+
+The distribution of data is
+```{r}
+with(temp.ds,
+     boxplot(SalePrice ~ SaleType.1))
+```
+
+Among the 'Non-WD' is 'New' sufficiently different?
+```{r}
+temp.ds$SaleType.2 <- ifelse(training.data$SaleType == "WD", 
+                             "WD",
+                             ifelse(training.data$SaleType == "New", 
+                                    "New", 
+                                    "Others"))
+oneway.test(SalePrice ~ SaleType.2, data = temp.ds)
+```
+
+It makes sense the separate "New" from the "Non-WD". The new class means are
+```{r}
+with(temp.ds,
+     tapply(SalePrice, SaleType.2, mean))
+```
+
+The distribution of data is
+```{r}
+with(temp.ds,
+     boxplot(SalePrice ~ SaleType.2))
+```
+
+How different are "Others" from "WD"?
+```{r}
+oneway.test(SalePrice ~ SaleType.2, data = temp.ds[temp.ds$SaleType.2 %in% c("Others", "WD"), ])
+```
+
+They differ but not as significantly as from "New".
+```{r}
+rm(temp.ds)
+```
+
+## Type of dwelling
+A distribution of sale price across dwelling types is
+```{r}
+with(training.data,
+     boxplot(SalePrice ~ MSSubClass))
+```
+
+Sale price seems to be strongly dependent on the type of the dwelling. The 
+differences are visually conspicuous enough to not require a confirmation 
+through ANOVA.
+
+We will also look at the number of sales in each category.
+```{r}
+with(training.data,
+     tapply(SalePrice, MSSubClass, function(x) {
+       round(length(x)/nrow(training.data), 4)
+     }))
+```
+
+Unlike the case of sale condition and sale type, dwelling type is not dominated
+by one class alone.
+
+## Zoning classification
+```{r}
+with(training.data,
+     boxplot(SalePrice ~ MSZoning))
+```
+
+
+We will also look at the number of sales in each category.
+```{r}
+with(training.data,
+     tapply(SalePrice, MSZoning, function(x) {
+       round(length(x)/nrow(training.data), 4)
+     }))
+```
+
+Most of the sales have happened in RL (Residential Low density) and RM (Residential
+Medium density) zones.
+
+How are the dwelling types distributed across zones?
+```{r}
+with(training.data,
+     table(MSSubClass, MSZoning))
+```
