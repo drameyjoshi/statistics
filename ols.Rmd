@@ -171,7 +171,10 @@ The data may not be far from normal. Let us also see the histogram and the
 density of the residuals before subjecting them to Shapiro-Wilk test.
 ```{r}
 library(MASS)
-truehist(m.1$residuals, xlab = "residual", main = "Histogram and density of residuals", nbins = 10)
+truehist(m.1$residuals, 
+         xlab = "residual", 
+         main = "Histogram and density of residuals", 
+         nbins = 10)
 lines(density(m.1$residuals))
 ```
 
@@ -290,7 +293,7 @@ for $y_i$. Therefore, the 'explained sum of squares' is
 ESS = \sum_{i=1}^N (\hat{y}_i - \bar{y})^2.
 \end{equation}
 The difference between $SS$ and $ESS$ is called the residual sum of squares, 
-$RSS$. Let us get them for our model.
+$RSS$. It is also called the *deviance*. Let us get them for our model.
 ```{r}
 SS <- sum((cars$dist - mean(cars$dist))^2)
 ESS <- sum((fitted(m.1) - mean(cars$dist))^2)
@@ -322,12 +325,15 @@ The 'unexplained variances' is thus,
 unexplained.variance <- RSS/(N - 2)
 ```
 
-The ratio os variances gives us the $F$-statistic for the model. The number of
+The ratio of variances gives us the $F$-statistic for the model. The number of
 degrees of freedom are $1$ for the numerator and $48$ for the denominator.
 ```{r}
 F.stat <- explained.variance/unexplained.variance
 cat(paste("F statistic =", F.stat, "\n"))
 ```
+
+$F$-statistic is quite sensitive to lack of normality of the residual data. It is
+important to check the $QQ$-plot of the residuals while interpreting the $F$-statistic.
 
 The $p$-value for the model is
 ```{r}
