@@ -22,6 +22,14 @@ analysis.
 2.  It might be useful to collapse sale type into 'Normal', 'New' and 'Others'.
     Sale type and sale condition seem to be closely related to each other. We can
     think of retaining only one of them.
+3.  We need both Zoning classification and the dwelling type.
+4.  Neither lot frontage nor lot area are strongly correlated with sale price.
+5.  Street and Alley may not be a good predictor of sale price.
+6.  Lot shape may be a predictor of sale price.
+7.  Land contour too may be a predictor of sale price.
+8.  Utilities cannot be used used to predict sale price.
+9.  Lot configuration may be a good predictor but it may be helpful to collapse
+    a few levels.
     
 ## Condition of sale
 We first find the distribution of 'condition of sale'
@@ -202,6 +210,235 @@ Medium density) zones.
 
 How are the dwelling types distributed across zones?
 ```{r}
-with(training.data,
-     table(MSSubClass, MSZoning))
+tbl.1 <- with(training.data,
+              table(MSSubClass, MSZoning))
 ```
+
+Are the classes 'RL' and 'RM' different? To check that we will first find the
+distribution of the number of sales in 'RL' across MSSubClass. We will then run 
+a 'goodness of fit' test to check if the 'expected distribution' that mimics that 
+of 'RL' is similar to the actual 'RM' data.
+```{r}
+fisher.test(tbl.1[, c(4, 5)], simulate.p.value = TRUE)
+```
+
+The $p$-value indicates that the two distributions are not related. Let us also
+check their correlation.
+```{r}
+cat(paste("Correlation between RL and RH is", 
+          round(cor(tbl.1[, 4], tbl.1[, 5]), 4), "\n"))
+rm(tbl.1)
+```
+
+Thus, we need both Zoning classification and the dwelling type.
+
+## Lot frontage
+It is the linear feet of road connecting the property. Let us summarize the
+lot frontage data.
+```{r}
+summary(training.data$LotFrontage)
+boxplot(training.data$LotFrontage,
+        main = "Lot frontage")
+```
+
+Is there a correlation between lot frontage and sale price? Before we find it
+we must remove the NAs.
+```{r}
+cc.lf <- complete.cases(training.data[, c("LotFrontage", "SalePrice")])
+X <- training.data[cc.lf, c("LotFrontage", "SalePrice")]
+cat(paste("Correlation between lot frontage and sale price is", 
+          round(with(X, cor(LotFrontage, SalePrice)), 4),
+          "\n"))
+```
+
+There is some correlation between the two. Let us visualize the data.
+```{r}
+with(X, plot(LotFrontage, 
+             SalePrice, 
+             xlab = "Lot frontage",
+             ylab = "Sale price",
+             main = "Sale price v Lot frontage"))
+rm(cc.lf, X)
+```
+
+It is difficult to imagine a linear model predicting sale price using lot
+frontage. Before leaving the variable. let us examine the histogram of the lot
+frontage.
+```{r}
+library(MASS)
+truehist(training.data$LotFrontage, xlab = "Lot frontage")
+```
+
+## Lot area
+Lot area is the size of the land in square feet. Its summary is
+```{r}
+summary(training.data$LotArea)
+truehist(training.data$LotArea, xlab = "Lot area")
+```
+
+The lot area data is highly skewed. There are a very large number of lots with
+a size around the median and mean (~ $10,000$ square feet) and a few with very
+large size. Let us examine the correlation between lot area and sale price.
+```{r}
+cat(paste("Correlation between lot area and sale price is", 
+          round(with(training.data, cor(LotArea, SalePrice)), 4),
+          "\n"))
+```
+
+It is interesting to note that two variables do not have a very high correlation.
+Perhaps, the land size is a poor predictor of the house price. A plot of sale 
+price against the lot area is
+```{r}
+with(training.data,
+     plot(LotArea,
+          SalePrice,
+          xlab = "Lot area",
+          ylab = "Sale price"))
+```
+
+## Street
+There are only two levels to the variable 'Street', namely 'Grvl' for graveled
+and 'Pave' for paved. Let us examine the mean sale price for these factors.
+```{r}
+with(training.data,
+     tapply(SalePrice, Street, mean))
+```
+
+On of them is almost $50\%$ higher than the other. Let us confirm that they
+are significant using an ANOVA.
+```{r}
+oneway.test(SalePrice ~ Street, data = training.data)
+```
+
+Interestingly, ANOVA does not tell that the two means are statistically 
+different. This perhaps indicates that Street might not be a good predictor of
+sale price.
+
+We repeat the analysis for the variable 'Alley' which has the same two levels.
+```{r}
+with(training.data,
+     tapply(SalePrice, Alley, mean))
+```
+
+The difference is not as sharp as it is in the case of Street. However, if we 
+run an ANOVA
+```{r}
+oneway.test(SalePrice ~ Alley, data = training.data)
+```
+
+we realize that Alley matters. The two group means are statistically different.
+
+It is a little baffling that Street and Alley should be so different. Let us 
+look a little deeper in the data. We first check the number of NAs.
+```{r}
+street.na <- sum(is.na(training.data$Street))
+alley.na <- sum(is.na(training.data$Alley))
+cat(paste("A proportion", 
+          round(street.na/nrow(training.data), 4), 
+          "of Street values are NA.\n"))
+cat(paste("A proportion", 
+          round(alley.na/nrow(training.data), 4), 
+          "of Alley values are NA.\n"))
+rm(street.na, alley.na)
+```
+
+A very large proportion of cases do not have an Alley. Therefore, the statistical
+difference in the group means of the levels of Alley may not be useful to predict
+the sale price.
+
+## Lot shape
+Does regularity of lot shape matter. The group means are
+```{r}
+with(training.data, 
+     tapply(SalePrice,
+            LotShape,
+            mean))
+```
+
+The are distinct. Yet we would like to see the box plot of sale price for each
+type of lot shape.
+```{r}
+with(training.data,
+     boxplot(SalePrice ~ LotShape))
+```
+
+Are the differences in the means statistically significant?
+```{r}
+oneway.test(SalePrice ~ LotShape, data = training.data)
+```
+
+ANOVA indicates that they are different.
+
+## Land contour
+There are four levels of land contour. Their group means are
+```{r}
+with(training.data, 
+     tapply(SalePrice,
+            LandContour,
+            mean))
+```
+
+Their box plot is
+```{r}
+with(training.data,
+     boxplot(SalePrice ~ LandContour))
+```
+
+Let us run an ANOVA to compare the group means.
+```{r}
+oneway.test(SalePrice ~ LandContour, data = training.data)
+```
+
+The difference are indeed significant.
+
+## Utilities
+Do utilities matter? Do we have enough data?
+```{r}
+utils.na <- sum(is.na(training.data$Utilities))
+cat(paste("The proportion of values for which Utilities is NA is",
+          utils.na/nrow(training.data),
+          "\n"))
+with(training.data,
+     tapply(SalePrice,
+            Utilities,
+            length))
+rm(utils.na)
+```
+
+With just one case available for 'NoSeWa' and all others for 'AllPub' we cannot
+use this variable to predict sale price.
+
+## Lot configuration
+We first check that we have enough data.
+```{r}
+lc.na <- sum(is.na(training.data$LotConfig))
+cat(paste("The proportion of values for which lot configuration is NA is",
+          lc.na/nrow(training.data),
+          "\n"))
+with(training.data,
+     tapply(SalePrice,
+            LotConfig,
+            length))
+rm(lc.na)
+```
+
+Although the attribute has data there are only a few cases with FR2 and FR3. We
+may want to combine them at a later stage. The group means, ANOVA and box plots 
+are
+```{r}
+with(training.data,
+     tapply(SalePrice,
+            LotConfig,
+            mean))
+oneway.test(SalePrice ~ LotConfig, data = training.data)
+with(training.data,
+     boxplot(SalePrice ~ LotConfig))
+```
+
+The differences in the means are statistically siginificant. Yet, the mean of
+FR3 and FR2 are far apart. In fact, 'Corner', 'FR2' and 'Inside' seem be to closer
+to each other. Even the box plot seems to suggest the same. We should, therefore,
+examine the following possibilities:
+
+1. Combine 'Corner', 'FR2' and 'Inside' in a single category 'CFI'.
+2. Keep 'Inside' separate in view of the large number of outliers.
