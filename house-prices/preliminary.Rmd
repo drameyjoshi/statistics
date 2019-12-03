@@ -10,7 +10,53 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
+library(MASS)
+
 training.data <- read.csv("train.csv")
+```
+
+```{r}
+data_availability <- function(column.name, show.grp.size = TRUE) {
+    num.na <- sum(is.na(training.data$column.name))
+    cat(
+        paste(
+            "The proportion of values for which",
+            column.name,
+            "is NA is",
+            num.na / nrow(training.data),
+            "\n"
+        )
+    )
+    
+    if (show.grp.size) {
+        grp.size <- tapply(training.data$SalePrice,
+                           training.data[[column.name]],
+                           length)
+        cat(paste("Group size of", column.name, "are:\n"))
+        print(grp.size)
+        cat("\n")
+    }
+    
+    rm(num.na)
+}
+
+check_group_means <- function(column.name) {
+    grp.means <- tapply(training.data$SalePrice,
+                        training.data[[column.name]],
+                        mean)
+    cat(paste("Group means of", column.name, "are:\n"))
+    cat(grp.means)
+    cat("\n")
+    
+    anova.res <-
+        oneway.test(training.data$SalePrice ~ training.data[[column.name]])
+    print(anova.res)
+    rm(anova.res)
+    
+    boxplot(training.data$SalePrice ~ training.data[[column.name]],
+            xlab = column.name,
+            ylab = "Sale Price")
+}
 ```
 
 ## Observations
@@ -42,6 +88,8 @@ analysis.
 16. YearBuilt and YearRemodAdd are useful to predict sale price. However, we
     must transform them to intervals of age and 'years since last remodeling'
     before we can use them.
+17. Roof style may be used as a predictor. Roof material can be used only if
+    we collapse its eight levels into two.
     
 ## Condition of sale
 We first find the distribution of 'condition of sale'
@@ -277,7 +325,6 @@ It is difficult to imagine a linear model predicting sale price using lot
 frontage. Before leaving the variable. let us examine the histogram of the lot
 frontage.
 ```{r}
-library(MASS)
 truehist(training.data$LotFrontage, xlab = "Lot frontage")
 ```
 
@@ -338,20 +385,13 @@ run an ANOVA
 oneway.test(SalePrice ~ Alley, data = training.data)
 ```
 
-we realize that Alley matters. The two group means are statistically different.
+We realize that Alley matters. The two group means are statistically different.
 
 It is a little baffling that Street and Alley should be so different. Let us 
 look a little deeper in the data. We first check the number of NAs.
 ```{r}
-street.na <- sum(is.na(training.data$Street))
-alley.na <- sum(is.na(training.data$Alley))
-cat(paste("A proportion", 
-          round(street.na/nrow(training.data), 4), 
-          "of Street values are NA.\n"))
-cat(paste("A proportion", 
-          round(alley.na/nrow(training.data), 4), 
-          "of Alley values are NA.\n"))
-rm(street.na, alley.na)
+data_availability("Street")
+data_availability("Alley")
 ```
 
 A very large proportion of cases do not have an Alley. Therefore, the statistical
@@ -406,15 +446,7 @@ The difference are indeed significant.
 ## Utilities
 Do utilities matter? Do we have enough data?
 ```{r}
-utils.na <- sum(is.na(training.data$Utilities))
-cat(paste("The proportion of values for which Utilities is NA is",
-          utils.na/nrow(training.data),
-          "\n"))
-with(training.data,
-     tapply(SalePrice,
-            Utilities,
-            length))
-rm(utils.na)
+data_availability("Utilities")
 ```
 
 With just one case available for 'NoSeWa' and all others for 'AllPub' we cannot
@@ -423,28 +455,14 @@ use this variable to predict sale price.
 ## Lot configuration
 We first check that we have enough data.
 ```{r}
-lc.na <- sum(is.na(training.data$LotConfig))
-cat(paste("The proportion of values for which lot configuration is NA is",
-          lc.na/nrow(training.data),
-          "\n"))
-with(training.data,
-     tapply(SalePrice,
-            LotConfig,
-            length))
-rm(lc.na)
+data_availability("LotConfig")
 ```
 
 Although the attribute has data there are only a few cases with FR2 and FR3. We
 may want to combine them at a later stage. The group means, ANOVA and box plots 
 are
 ```{r}
-with(training.data,
-     tapply(SalePrice,
-            LotConfig,
-            mean))
-oneway.test(SalePrice ~ LotConfig, data = training.data)
-with(training.data,
-     boxplot(SalePrice ~ LotConfig))
+check_group_means("LotConfig")
 ```
 
 The differences in the means are statistically siginificant. Yet, the mean of
@@ -459,24 +477,12 @@ examine the following possibilities:
 There are three levels of land slope. We first check if there is enough data
 for this attribute.
 ```{r}
-ls.na <- sum(is.na(training.data$LandSlope))
-cat(paste("The proportion of values for which land slope is NA is",
-          ls.na/nrow(training.data),
-          "\n"))
-with(training.data,
-     tapply(SalePrice,
-            LandSlope,
-            length))
-rm(ls.na)
+data_availability("LandSlope")
 ```
 
 The group means, ANOVA and box plots are
 ```{r}
-with(training.data,
-     tapply(SalePrice, LandSlope, mean))
-oneway.test(SalePrice ~ LandSlope, data = training.data)
-with(training.data,
-     boxplot(SalePrice ~ LandSlope))
+check_group_means("LandSlope")
 ```
 
 The differences between the group means are not statistically significant. 
@@ -485,24 +491,12 @@ The differences between the group means are not statistically significant.
 There are $25$ levels to this attribute. We check the characteristics of the
 data.
 ```{r}
-nb.na <- sum(is.na(training.data$Neighborhood))
-cat(paste("The proportion of values for which neighborhood is NA is",
-          nb.na/nrow(training.data),
-          "\n"))
-with(training.data,
-     tapply(SalePrice,
-            Neighborhood,
-            length))
-rm(nb.na)
+data_availability("Neighborhood")
 ```
 
 The group means, ANOVA and box plots are
 ```{r}
-with(training.data,
-     tapply(SalePrice, Neighborhood, mean))
-oneway.test(SalePrice ~ Neighborhood, data = training.data)
-with(training.data,
-     boxplot(SalePrice ~ Neighborhood))
+check_group_means("Neighborhood")
 ```
 
 Not surprisingly, neighborhood is a predictor of sale price. 
@@ -511,25 +505,8 @@ Not surprisingly, neighborhood is a predictor of sale price.
 We will study the two conditions together.
 
 ```{r}
-num.na <- sum(is.na(training.data$Condition1))
-cat(paste("The proportion of values for which condition 1 is NA is",
-          num.na/nrow(training.data),
-          "\n"))
-with(training.data,
-     tapply(SalePrice,
-            Condition1,
-            length))
-rm(num.na)
-
-num.na <- sum(is.na(training.data$Condition2))
-cat(paste("The proportion of values for which condition 2 is NA is",
-          num.na/nrow(training.data),
-          "\n"))
-with(training.data,
-     tapply(SalePrice,
-            Condition2,
-            length))
-rm(num.na)
+data_availability("Condition1")
+data_availability("Condition2")
 ```
 
 The data is quite skewed toward normal conditions. Further, almost all data for
@@ -549,11 +526,7 @@ attribute are
 - RRAe	    Adjacent to East-West Railroad
 
 ```{r}
-with(training.data,
-     tapply(SalePrice, Condition1, mean))
-oneway.test(SalePrice ~ Condition1, data = training.data)
-with(training.data,
-     boxplot(SalePrice ~ Condition1))
+check_group_means("Condition1")
 ```
 
 The conditions which tend to reduce the price are
@@ -599,24 +572,12 @@ These three levels too can be coalesced.
 ## Building type
 There are $5$ levels of this attribute. The characteristic of the data are
 ```{r}
-num.na <- sum(is.na(training.data$BldgType))
-cat(paste("The proportion of values for which BldgType is NA is",
-          num.na/nrow(training.data),
-          "\n"))
-with(training.data,
-     tapply(SalePrice,
-            BldgType,
-            length))
-rm(num.na)
+data_availability("BldgType")
 ```
 
 The group means, ANOVA and box plots are
 ```{r}
-with(training.data,
-     tapply(SalePrice, BldgType, mean))
-oneway.test(SalePrice ~ BldgType, data = training.data)
-with(training.data,
-     boxplot(SalePrice ~ BldgType))
+check_group_means("BldgType")
 ```
 
 We may have scope to group the attributes. For example, the group means of 
@@ -641,48 +602,19 @@ One again, the group means can be considered to be equal.
 ## House style
 There are $8$ levelsof house style. The characteristics of the data are
 ```{r}
-num.na <- sum(is.na(training.data$HouseStyle))
-cat(paste("The proportion of values for which HouseStyle is NA is",
-          num.na/nrow(training.data),
-          "\n"))
-with(training.data,
-     tapply(SalePrice,
-            HouseStyle,
-            length))
-rm(num.na)
+data_availability("HouseStyle")
 ```
 
 The group means, ANOVA and box plots are
 ```{r}
-with(training.data,
-     tapply(SalePrice, HouseStyle, mean))
-oneway.test(SalePrice ~ HouseStyle, data = training.data)
-with(training.data,
-     boxplot(SalePrice ~ HouseStyle))
+check_group_means("HouseStyle")
 ```
 
 ## Overall quality and condition
 These are numeric attributes. We first check their availablity.
 ```{r}
-num.na <- sum(is.na(training.data$OverallQual))
-cat(paste("The proportion of values for which OverallQual is NA is",
-          num.na/nrow(training.data),
-          "\n"))
-with(training.data,
-     tapply(SalePrice,
-            OverallQual,
-            length))
-rm(num.na)
-
-num.na <- sum(is.na(training.data$OverallCond))
-cat(paste("The proportion of values for which OverallCond is NA is",
-          num.na/nrow(training.data),
-          "\n"))
-with(training.data,
-     tapply(SalePrice,
-            OverallCond,
-            length))
-rm(num.na)
+data_availability("OverallQual")
+data_availability("OverallCond")
 ```
 
 Is there a correlation between these attributes?
@@ -705,11 +637,7 @@ cat(paste("Correlation between overall quality and overall condition is",
 Indeed, the two variables are poorly correlated. Let us now check if they are
 good predictors of sale price.
 ```{r}
-with(training.data,
-     tapply(SalePrice, OverallQual, mean))
-oneway.test(SalePrice ~ OverallQual, data = training.data)
-with(training.data,
-     boxplot(SalePrice ~ OverallQual))
+check_group_means("OverallQual")
 ```
 
 The overall quality, not surprisingly, is a very strong indicator of sale
@@ -737,25 +665,8 @@ These are not dates but years. Further, the remodel date is the same as original
 construction date if the house has not been remodeled. 
 We first check their availablity.
 ```{r}
-num.na <- sum(is.na(training.data$YearBuilt))
-cat(paste("The proportion of values for which YearBuilt is NA is",
-          num.na/nrow(training.data),
-          "\n"))
-with(training.data,
-     tapply(SalePrice,
-            YearBuilt,
-            length))
-rm(num.na)
-
-num.na <- sum(is.na(training.data$YearRemodAdd))
-cat(paste("The proportion of values for which YearRemodAdd is NA is",
-          num.na/nrow(training.data),
-          "\n"))
-with(training.data,
-     tapply(SalePrice,
-            YearRemodAdd,
-            length))
-rm(num.na)
+data_availability("YearBuilt")
+data_availability("YearRemodAdd")
 ```
 
 There is enough data. However, we must handle this data in a different way. Instead
@@ -819,6 +730,47 @@ confirm our observations about the box plots by ANOVA test.
 ```{r}
 oneway.test(SalePrice ~ Age.1, data = age.data)
 oneway.test(SalePrice ~ YrSinceLastMod.1, data = age.data)
+rm(age.data)
 ```
 
 The group means are indeed different.
+
+## Roof style and material
+These attributes are nominal data. We first check their availability.
+```{r}
+data_availability("RoofStyle")
+data_availability("RoofStyle")
+```
+
+Several roof styles have a single observation. Therefore, RoofStyle might not
+be a great choice of an attribute to predict sale price. We now examine the 
+group means, ANOVA and box plot of RoofStyle.
+```{r}
+check_group_means("RoofStyle")
+```
+
+The group means of RoofStyle are statistically distinct. We will not be able
+to conduct an ANOVA for RoofMatl owing to lack of data. We can compute the
+group means, nevertheless.
+```{r}
+with(training.data, tapply(SalePrice, RoofMatl, length))
+with(training.data, tapply(SalePrice, RoofMatl, mean))
+```
+
+We may want to combine Membran, WdShake and WdShngl into a single category, 
+say 'HighEnd' and the remaining into 'Normal'. Let us see if that makes
+a difference.
+```{r}
+roof.mat.data <- training.data[, c("RoofMatl", "SalePrice")]
+roof.mat.data$RoofMatl.1 <- 
+    ifelse(roof.mat.data$RoofMatl %in% c("Membran", "WdShake", "WdShngl"), 
+           "HighEnd", 
+           "Normal")
+with(roof.mat.data,
+     tapply(SalePrice, RoofMatl.1, mean))
+oneway.test(SalePrice ~ RoofMatl.1, data = roof.mat.data)
+rm(roof.mat.data)
+```
+
+Thus, collapsing levels of roof material into two helps determine the mean sale
+price.
