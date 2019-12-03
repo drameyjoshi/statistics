@@ -30,6 +30,18 @@ analysis.
 8.  Utilities cannot be used used to predict sale price.
 9.  Lot configuration may be a good predictor but it may be helpful to collapse
     a few levels.
+10. Land slope is not a candidate predictor of sale price.  
+11. Neighborhood is a predictor of sale price.
+12. Proximity to various conditions (Condition1) may be good predictors of sale 
+    price. However, Condition2 might not be very helpful. The $9$ levels of 
+    Condition1 can be coalesced into three.
+13. BldgType may be a predictor of sale price. Its $5$ levels can be coalesced
+    into $2$.
+14. HouseStyle may be a predictor of sale price.
+15. Overall quality and condition are strong predictors of sale price.
+16. YearBuilt and YearRemodAdd are useful to predict sale price. However, we
+    must transform them to intervals of age and 'years since last remodeling'
+    before we can use them.
     
 ## Condition of sale
 We first find the distribution of 'condition of sale'
@@ -442,3 +454,371 @@ examine the following possibilities:
 
 1. Combine 'Corner', 'FR2' and 'Inside' in a single category 'CFI'.
 2. Keep 'Inside' separate in view of the large number of outliers.
+
+## Land slope
+There are three levels of land slope. We first check if there is enough data
+for this attribute.
+```{r}
+ls.na <- sum(is.na(training.data$LandSlope))
+cat(paste("The proportion of values for which land slope is NA is",
+          ls.na/nrow(training.data),
+          "\n"))
+with(training.data,
+     tapply(SalePrice,
+            LandSlope,
+            length))
+rm(ls.na)
+```
+
+The group means, ANOVA and box plots are
+```{r}
+with(training.data,
+     tapply(SalePrice, LandSlope, mean))
+oneway.test(SalePrice ~ LandSlope, data = training.data)
+with(training.data,
+     boxplot(SalePrice ~ LandSlope))
+```
+
+The differences between the group means are not statistically significant. 
+
+## Neighborhood
+There are $25$ levels to this attribute. We check the characteristics of the
+data.
+```{r}
+nb.na <- sum(is.na(training.data$Neighborhood))
+cat(paste("The proportion of values for which neighborhood is NA is",
+          nb.na/nrow(training.data),
+          "\n"))
+with(training.data,
+     tapply(SalePrice,
+            Neighborhood,
+            length))
+rm(nb.na)
+```
+
+The group means, ANOVA and box plots are
+```{r}
+with(training.data,
+     tapply(SalePrice, Neighborhood, mean))
+oneway.test(SalePrice ~ Neighborhood, data = training.data)
+with(training.data,
+     boxplot(SalePrice ~ Neighborhood))
+```
+
+Not surprisingly, neighborhood is a predictor of sale price. 
+
+## Proximity to various conditions
+We will study the two conditions together.
+
+```{r}
+num.na <- sum(is.na(training.data$Condition1))
+cat(paste("The proportion of values for which condition 1 is NA is",
+          num.na/nrow(training.data),
+          "\n"))
+with(training.data,
+     tapply(SalePrice,
+            Condition1,
+            length))
+rm(num.na)
+
+num.na <- sum(is.na(training.data$Condition2))
+cat(paste("The proportion of values for which condition 2 is NA is",
+          num.na/nrow(training.data),
+          "\n"))
+with(training.data,
+     tapply(SalePrice,
+            Condition2,
+            length))
+rm(num.na)
+```
+
+The data is quite skewed toward normal conditions. Further, almost all data for
+'Condition2' is normal making it ineffective for prediction. Let us check if
+deviation from normal changes the sale price. We will first analyze with all 
+levels of 'Condition1'. The levels of the 'Condition1' (and 'Condition2')
+attribute are
+
+- Artery	Adjacent to arterial street
+- Feedr	    Adjacent to feeder street	
+- Norm	    Normal	       
+- RRNn	    Within 200' of North-South Railroad 
+- RRAn	    Adjacent to North-South Railroad 
+- PosN	    Near positive off-site feature--park, greenbelt, etc. 
+- PosA	    Adjacent to postive off-site feature 
+- RRNe	    Within 200' of East-West Railroad 
+- RRAe	    Adjacent to East-West Railroad
+
+```{r}
+with(training.data,
+     tapply(SalePrice, Condition1, mean))
+oneway.test(SalePrice ~ Condition1, data = training.data)
+with(training.data,
+     boxplot(SalePrice ~ Condition1))
+```
+
+The conditions which tend to reduce the price are
+- Artery
+- Feedr
+- RRAe
+
+```{r}
+oneway.test(SalePrice ~ Condition1, 
+            data = training.data, 
+            subset = Condition1 %in% c("Artery", "Feedr", "RRAe"))
+```
+
+The null hypothesis, that the differences between group means are not 
+statistically different, cannot be rejected.
+
+The conditions which probably have no effect are
+- Norm (by default)
+- RRAn
+- RRNe
+
+```{r}
+oneway.test(SalePrice ~ Condition1, 
+            data = training.data, 
+            subset = Condition1 %in% c("Norm", "RRAn", "RRNe"))
+```
+
+These three conditions can also be grouped together.
+
+The conditions which tend to increase the price are
+- PosA
+- PosN
+- RRNn
+
+```{r}
+oneway.test(SalePrice ~ Condition1, 
+            data = training.data, 
+            subset = Condition1 %in% c("PosA", "PosN", "RRNn"))
+```
+
+These three levels too can be coalesced.
+
+## Building type
+There are $5$ levels of this attribute. The characteristic of the data are
+```{r}
+num.na <- sum(is.na(training.data$BldgType))
+cat(paste("The proportion of values for which BldgType is NA is",
+          num.na/nrow(training.data),
+          "\n"))
+with(training.data,
+     tapply(SalePrice,
+            BldgType,
+            length))
+rm(num.na)
+```
+
+The group means, ANOVA and box plots are
+```{r}
+with(training.data,
+     tapply(SalePrice, BldgType, mean))
+oneway.test(SalePrice ~ BldgType, data = training.data)
+with(training.data,
+     boxplot(SalePrice ~ BldgType))
+```
+
+We may have scope to group the attributes. For example, the group means of 
+1Fam and TwnHse are quite close. The group means of the other three attributes
+too are close enough. It is tempting to check this possiblity right away.
+```{r}
+oneway.test(SalePrice ~ BldgType, 
+            data = training.data, 
+            subset = BldgType %in% c("1Fam", "TwnhsE"))
+```
+
+The group means can be considered to be equal.
+
+```{r}
+oneway.test(SalePrice ~ BldgType, 
+            data = training.data, 
+            subset = BldgType %in% c("2fmCon", "Duplex", "Twnhs"))
+```
+
+One again, the group means can be considered to be equal.
+
+## House style
+There are $8$ levelsof house style. The characteristics of the data are
+```{r}
+num.na <- sum(is.na(training.data$HouseStyle))
+cat(paste("The proportion of values for which HouseStyle is NA is",
+          num.na/nrow(training.data),
+          "\n"))
+with(training.data,
+     tapply(SalePrice,
+            HouseStyle,
+            length))
+rm(num.na)
+```
+
+The group means, ANOVA and box plots are
+```{r}
+with(training.data,
+     tapply(SalePrice, HouseStyle, mean))
+oneway.test(SalePrice ~ HouseStyle, data = training.data)
+with(training.data,
+     boxplot(SalePrice ~ HouseStyle))
+```
+
+## Overall quality and condition
+These are numeric attributes. We first check their availablity.
+```{r}
+num.na <- sum(is.na(training.data$OverallQual))
+cat(paste("The proportion of values for which OverallQual is NA is",
+          num.na/nrow(training.data),
+          "\n"))
+with(training.data,
+     tapply(SalePrice,
+            OverallQual,
+            length))
+rm(num.na)
+
+num.na <- sum(is.na(training.data$OverallCond))
+cat(paste("The proportion of values for which OverallCond is NA is",
+          num.na/nrow(training.data),
+          "\n"))
+with(training.data,
+     tapply(SalePrice,
+            OverallCond,
+            length))
+rm(num.na)
+```
+
+Is there a correlation between these attributes?
+```{r}
+with(training.data,
+     plot(OverallQual, 
+          OverallCond, 
+          xlab = "Overall quality", 
+          ylab = "Overall condition"))
+```
+
+Visually, there is none. Yet. we support our observation by calculating the
+correlation coefficient.
+```{r}
+cat(paste("Correlation between overall quality and overall condition is",
+          round(with(training.data, cor(OverallQual, OverallCond)), 4),
+          "\n"))
+```
+
+Indeed, the two variables are poorly correlated. Let us now check if they are
+good predictors of sale price.
+```{r}
+with(training.data,
+     tapply(SalePrice, OverallQual, mean))
+oneway.test(SalePrice ~ OverallQual, data = training.data)
+with(training.data,
+     boxplot(SalePrice ~ OverallQual))
+```
+
+The overall quality, not surprisingly, is a very strong indicator of sale
+price.
+
+```{r}
+with(training.data,
+     tapply(SalePrice, OverallCond, mean))
+with(training.data,
+     boxplot(SalePrice ~ OverallCond))
+```
+
+We are unable to carry out a full ANOVA because some levels lack data. Let us
+check if we can get results by dropping them.
+```{r}
+oneway.test(SalePrice ~ OverallQual, 
+            data = training.data,
+            subset = !(OverallQual %in% c(1, 2)))
+```
+
+The group means are indeed different.
+
+## Original construction date and remodel date
+These are not dates but years. Further, the remodel date is the same as original
+construction date if the house has not been remodeled. 
+We first check their availablity.
+```{r}
+num.na <- sum(is.na(training.data$YearBuilt))
+cat(paste("The proportion of values for which YearBuilt is NA is",
+          num.na/nrow(training.data),
+          "\n"))
+with(training.data,
+     tapply(SalePrice,
+            YearBuilt,
+            length))
+rm(num.na)
+
+num.na <- sum(is.na(training.data$YearRemodAdd))
+cat(paste("The proportion of values for which YearRemodAdd is NA is",
+          num.na/nrow(training.data),
+          "\n"))
+with(training.data,
+     tapply(SalePrice,
+            YearRemodAdd,
+            length))
+rm(num.na)
+```
+
+There is enough data. However, we must handle this data in a different way. Instead
+of considering the raw numbers we should consider the age of the house and the
+number of years since last remodeling. We will create a temporary dataframe to
+carry out this analysis.
+```{r}
+age.data <- training.data[, c("YearBuilt", "YearRemodAdd", "YrSold", "SalePrice")]
+age.data$Age <- age.data$YrSold - age.data$YearBuilt
+age.data$YrSinceLastMod <- age.data$YrSold - age.data$YearRemodAdd
+```
+
+Further, the age of the house and the number of years since last remodeling can
+be split into intervals. To do so, we need their summary.
+```{r}
+summary(age.data$Age)
+truehist(age.data$Age, xlab = "Age")
+```
+
+We will create levels of $20$ years each for the age of the house.
+```{r}
+summary(age.data$YrSinceLastMod)
+truehist(age.data$YrSinceLastMod, xlab = "# years since last remodeling")
+```
+
+An interval of $10$ years might suit the attribute 'years since last modeling'.
+We now create the interval attributes for each of these variables.
+```{r}
+age.data$Age.1 <- cut(age.data$Age, 
+                      breaks = seq(from = 0, 
+                                   to = round(max(age.data$Age)/10)*10, 
+                                   by = 20))
+age.data$YrSinceLastMod.1 <- 
+    cut(age.data$YrSinceLastMod,
+        breaks = seq(from = 0, 
+                     to = round(max(age.data$YrSinceLastMod)/10)*10, 
+                     by = 10))
+```
+
+We will now check if the age and years since last modeling are candidate 
+predictors of sale price. We first check the group means and box plots.
+```{r}
+with(age.data,
+     tapply(SalePrice, Age.1, mean))
+with(age.data,
+     boxplot(SalePrice ~ Age.1, xlab = "Age"))
+```
+
+The house price decreases with age up to a limit and then rises as houses grow
+older. 
+
+```{r}
+with(age.data,
+     tapply(SalePrice, YrSinceLastMod.1, mean))
+with(age.data,
+     boxplot(SalePrice ~ YrSinceLastMod.1, xlab = "Age"))
+```
+
+Quite expectedly, recently renovated houses fetch a better price. We will 
+confirm our observations about the box plots by ANOVA test.
+```{r}
+oneway.test(SalePrice ~ Age.1, data = age.data)
+oneway.test(SalePrice ~ YrSinceLastMod.1, data = age.data)
+```
+
+The group means are indeed different.
