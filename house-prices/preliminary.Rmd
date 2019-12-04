@@ -41,7 +41,10 @@ data_availability <- function(column.name, show.grp.size = TRUE) {
     rm(num.na)
 }
 
-check_group_means <- function(column.name, run.anova = TRUE) {
+check_group_means <-
+  function(column.name,
+           run.anova = TRUE,
+           do.transpose = FALSE) {
     grp.means <- tapply(training.data$SalePrice,
                         training.data[[column.name]],
                         mean)
@@ -49,16 +52,23 @@ check_group_means <- function(column.name, run.anova = TRUE) {
     print(grp.means)
     
     if (run.anova) {
-        anova.res <-
-            oneway.test(training.data$SalePrice ~ training.data[[column.name]])
-        print(anova.res)
-        rm(anova.res)
+      anova.res <-
+        oneway.test(training.data$SalePrice ~ training.data[[column.name]])
+      print(anova.res)
+      rm(anova.res)
     }
     
-    boxplot(training.data$SalePrice ~ training.data[[column.name]],
-            xlab = column.name,
-            ylab = "Sale Price")
-}
+    if (do.transpose) {
+      bwplot(training.data[[column.name]] ~ training.data$SalePrice,
+             xlab = column.name,
+             ylab = "Sale Price")
+    } else {
+      bwplot(training.data$SalePrice ~ training.data[[column.name]],
+             xlab = column.name,
+             ylab = "Sale Price")
+    }
+    
+  }
 ```
 
 ## Observations
@@ -187,7 +197,7 @@ with(training.data,
 A significant percentage of sales were normal. Is there a statistically
 significant difference in their sale price? We first view the data
 ```{r}
-with(training.data, boxplot(SalePrice ~ SaleCondition))
+bwplot(SalePrice ~ SaleCondition, data = training.data)
 ```
 
 The data shows a large number of outliers even in the 'normal' case. Further,
@@ -247,8 +257,7 @@ that there are only two transactions with sale type 'Cond'.
 
 Does sale type determine sale price? 
 ```{r}
-with(training.data,
-     boxplot(SalePrice ~ SaleType))
+bwplot(SalePrice ~ SaleType, data = training.data)
 ```
 
 The 'WD' class shows a large number of outliers. But this class also tend to 
@@ -276,8 +285,7 @@ with(temp.ds,
 
 The distribution of data is
 ```{r}
-with(temp.ds,
-     boxplot(SalePrice ~ SaleType.1))
+bwplot(SalePrice ~ SaleType.1, data = temp.ds)
 ```
 
 Among the 'Non-WD' is 'New' sufficiently different?
@@ -298,8 +306,7 @@ with(temp.ds,
 
 The distribution of data is
 ```{r}
-with(temp.ds,
-     boxplot(SalePrice ~ SaleType.2))
+bwplot(SalePrice ~ SaleType.2, data = temp.ds)
 ```
 
 How different are "Others" from "WD"?
@@ -315,8 +322,10 @@ rm(temp.ds)
 ## Type of dwelling
 A distribution of sale price across dwelling types is
 ```{r}
-with(training.data,
-     boxplot(SalePrice ~ MSSubClass))
+X <- data.frame(MSSubClass = as.factor(training.data$MSSubClass), 
+                SalePrice = training.data$SalePrice)
+bwplot(SalePrice ~ MSSubClass, data = X)
+rm(X)
 ```
 
 Sale price seems to be strongly dependent on the type of the dwelling. The 
@@ -336,8 +345,7 @@ by one class alone.
 
 ## Zoning classification
 ```{r}
-with(training.data,
-     boxplot(SalePrice ~ MSZoning))
+bwplot(SalePrice ~ MSZoning, data = training.data)
 ```
 
 
@@ -381,8 +389,9 @@ It is the linear feet of road connecting the property. Let us summarize the
 lot frontage data.
 ```{r}
 summary(training.data$LotFrontage)
-boxplot(training.data$LotFrontage,
-        main = "Lot frontage")
+bwplot(training.data$LotFrontage,
+       xlab = "Lot frontage",
+       main = "Lot frontage")
 ```
 
 Is there a correlation between lot frontage and sale price? Before we find it
@@ -397,12 +406,14 @@ cat(paste("Correlation between lot frontage and sale price is",
 
 There is some correlation between the two. Let us visualize the data.
 ```{r}
-with(X, plot(LotFrontage, 
-             SalePrice, 
-             xlab = "Lot frontage",
-             ylab = "Sale price",
-             main = "Sale price v Lot frontage", 
-             cex = 0.1))
+xyplot(
+  SalePrice ~ LotFrontage,
+  data = X,
+  xlab = "Lot frontage",
+  ylab = "Sale price",
+  main = "Sale price v Lot frontage",
+  cex = 0.3
+)
 rm(cc.lf, X)
 ```
 
@@ -433,13 +444,13 @@ It is interesting to note that two variables do not have a very high correlation
 Perhaps, the land size is a poor predictor of the house price. A plot of sale 
 price against the lot area is
 ```{r}
-with(training.data,
-     plot(LotArea,
-          SalePrice,
-          xlab = "Lot area",
-          ylab = "Sale price", 
-          cex = 0.1
-          ))
+xyplot(
+  SalePrice ~ LotArea,
+  data = training.data,
+  xlab = "Lot area",
+  ylab = "Sale price",
+  cex = 0.3
+)
 ```
 
 ## Street
@@ -497,8 +508,7 @@ with(training.data,
 The are distinct. Yet we would like to see the box plot of sale price for each
 type of lot shape.
 ```{r}
-with(training.data,
-     boxplot(SalePrice ~ LotShape))
+bwplot(SalePrice ~ LotShape, data = training.data)
 ```
 
 Are the differences in the means statistically significant?
@@ -519,8 +529,7 @@ with(training.data,
 
 Their box plot is
 ```{r}
-with(training.data,
-     boxplot(SalePrice ~ LandContour))
+bwplot(SalePrice ~ LandContour, data = training.data)
 ```
 
 Let us run an ANOVA to compare the group means.
@@ -583,7 +592,14 @@ data_availability("Neighborhood")
 
 The group means, ANOVA and box plots are
 ```{r}
-check_group_means("Neighborhood")
+# We do not use check_group_means function because we want a slightly different
+# format of the boxplot.
+with(training.data,
+     tapply(SalePrice,
+            Neighborhood,
+            mean))
+oneway.test(SalePrice ~ Neighborhood, data = training.data)
+bwplot(Neighborhood ~ SalePrice, data = training.data)
 ```
 
 Not surprisingly, neighborhood is a predictor of sale price. 
@@ -706,12 +722,13 @@ data_availability("OverallCond")
 
 Is there a correlation between these attributes?
 ```{r}
-with(training.data,
-     plot(OverallQual, 
-          OverallCond, 
-          xlab = "Overall quality", 
-          ylab = "Overall condition", 
-          cex = 0.1))
+xyplot(
+  OverallQual ~ OverallCond,
+  data = training.data,
+  xlab = "Overall quality",
+  ylab = "Overall condition",
+  cex = 0.1
+)
 ```
 
 Visually, there is none. Yet. we support our observation by calculating the
@@ -725,7 +742,14 @@ cat(paste("Correlation between overall quality and overall condition is",
 Indeed, the two variables are poorly correlated. Let us now check if they are
 good predictors of sale price.
 ```{r}
-check_group_means("OverallQual")
+# We do not use check_group_means function because we want a slightly different
+# format of the boxplot.
+with(training.data,
+     tapply(SalePrice,
+            OverallQual,
+            mean))
+oneway.test(SalePrice ~ OverallQual, data = training.data)
+bwplot(OverallQual ~ SalePrice, data = training.data)
 ```
 
 The overall quality, not surprisingly, is a very strong indicator of sale
@@ -734,8 +758,7 @@ price.
 ```{r}
 with(training.data,
      tapply(SalePrice, OverallCond, mean))
-with(training.data,
-     boxplot(SalePrice ~ OverallCond))
+bwplot(OverallCond ~ SalePrice, data = training.data)
 ```
 
 We are unable to carry out a full ANOVA because some levels lack data. Let us
@@ -799,8 +822,7 @@ predictors of sale price. We first check the group means and box plots.
 ```{r}
 with(age.data,
      tapply(SalePrice, Age.1, mean))
-with(age.data,
-     boxplot(SalePrice ~ Age.1, xlab = "Age"))
+bwplot(SalePrice ~ Age.1, data = age.data, xlab = "Age")
 ```
 
 The house price decreases with age up to a limit and then rises as houses grow
@@ -809,8 +831,7 @@ older.
 ```{r}
 with(age.data,
      tapply(SalePrice, YrSinceLastMod.1, mean))
-with(age.data,
-     boxplot(SalePrice ~ YrSinceLastMod.1, xlab = "Age"))
+bwplot(SalePrice ~ YrSinceLastMod.1, data = age.data, xlab = "Age")
 ```
 
 Quite expectedly, recently renovated houses fetch a better price. We will 
@@ -1096,8 +1117,7 @@ data_availability("MasVnrType")
 A related variable is MasVnrArea. Let us explore their relationship through
 box plots.
 ```{r}
-with(training.data,
-     boxplot(MasVnrArea ~ MasVnrType))
+bwplot(MasVnrArea ~ MasVnrType, data = training.data)
 ```
 
 It is quite strange to see the category 'None' having non-zero area and the
@@ -1241,28 +1261,33 @@ data_availability("TotalBsmtSF", show.grp.size = FALSE)
 
 Variation of sale price for BsmtFinSF1 is
 ```{r}
-with(training.data[training.data$BsmtFinSF1 != 0, ], 
-     plot(BsmtFinSF1, SalePrice, cex = 0.1))
+xyplot(SalePrice ~ BsmtFinSF1, 
+       data = training.data[training.data$BsmtFinSF1 != 0,], 
+       cex = 0.1)
 ```
 
 Basement area of type 1 influences sale price.
 
 ```{r}
-with(training.data[training.data$BsmtFinSF2 != 0, ], 
-     plot(BsmtFinSF2, SalePrice, cex = 0.1))
+xyplot(SalePrice ~ BsmtFinSF2, 
+       data = training.data[training.data$BsmtFinSF2 != 0,], 
+       cex = 0.1)
 ```
 
 Basement area of type 2 is not a very strong influencer of sale price.
 
 ```{r}
-with(training.data[training.data$BsmtUnfSF != 0, ], 
-     plot(BsmtUnfSF, SalePrice, cex = 0.1))
+xyplot(SalePrice ~ BsmtUnfSF, 
+       data = training.data[training.data$BsmtUnfSF != 0,], 
+       cex = 0.1)
 ```
 
 Unfinished area of the basement is not a very strong influencer of sale price.
 
 ```{r}
-with(training.data[training.data$TotalBsmtSF != 0, ], plot(TotalBsmtSF, SalePrice))
+xyplot(SalePrice ~ TotalBsmtSF, 
+       data = training.data[training.data$TotalBsmtSF != 0,], 
+       cex = 0.1)
 ```
 
 Sale price is strongly correlated to total basement area. It might help to look
@@ -1356,10 +1381,10 @@ data_availability("GrLivArea", show.grp.size = FALSE)
 ```
 
 ```{r}
-with(training.data, plot(X1stFlrSF, SalePrice))
-with(training.data[training.data$X2ndFlrSF != 0, ], plot(X2ndFlrSF, SalePrice, cex = 0.1))
-with(training.data[training.data$LowQualFinSF != 0, ], plot(LowQualFinSF, SalePrice, cex = 0.1))
-with(training.data, plot(GrLivArea, SalePrice, cex = 0.1))
+xyplot(SalePrice ~ X1stFlrSF, data = training.data, cex = 0.1)
+xyplot(SalePrice ~ X2ndFlrSF, data = training.data[training.data$X2ndFlrSF != 0,], cex = 0.1)
+xyplot(SalePrice ~ LowQualFinSF, data = training.data[training.data$LowQualFinSF != 0,], cex = 0.1)
+xyplot(SalePrice ~ GrLivArea, data = training.data, cex = 0.1)
 ```
 
 Not surprisingly, the above grade (ground) living area square feet is strongly
@@ -1381,10 +1406,10 @@ data_availability("HalfBath")
 
 We now look at the group means.
 ```{r}
-check_group_means("BsmtFullBath", run.anova = FALSE)
-check_group_means("BsmtHalfBath")
-check_group_means("FullBath")
-check_group_means("HalfBath")
+check_group_means("BsmtFullBath", run.anova = FALSE, do.transpose = TRUE)
+check_group_means("BsmtHalfBath", do.transpose = TRUE)
+check_group_means("FullBath", do.transpose = TRUE)
+check_group_means("HalfBath", do.transpose = TRUE)
 ```
 
 The number of half-basements in the basement do not matter to the sale price. 
@@ -1399,7 +1424,7 @@ data_availability("BedroomAbvGr")
 
 There is only case with $8$ bedrooms. Therefore, we will not run a full ANOVA.
 ```{r}
-check_group_means("BedroomAbvGr", run.anova = FALSE)
+check_group_means("BedroomAbvGr", run.anova = FALSE, do.transpose = TRUE)
 ```
 
 I would have expected sale price to be a monotone function of the number of
@@ -1457,7 +1482,7 @@ data_availability("TotRmsAbvGrd")
 
 The group means are
 ```{r}
-check_group_means("TotRmsAbvGrd", run.anova = FALSE)
+check_group_means("TotRmsAbvGrd", run.anova = FALSE, do.transpose = TRUE)
 ```
 
 The behavior is not as baffling as in the number of bedrooms above ground. The
@@ -1490,7 +1515,7 @@ data_availability("FireplaceQu")
 ```
 
 ```{r}
-check_group_means("Fireplaces")
+check_group_means("Fireplaces", do.transpose = TRUE)
 check_group_means("FireplaceQu")
 ```
 
@@ -1581,7 +1606,7 @@ data_availability("GarageCars")
 
 There are enough cases in each level. We can, therefore, look at the group means.
 ```{r}
-check_group_means("GarageCars")
+check_group_means("GarageCars", do.transpose = TRUE)
 ```
 
 The sale price is well-resolved though higher capacity does not give higher sale
