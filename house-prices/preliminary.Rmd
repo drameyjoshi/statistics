@@ -18,13 +18,13 @@ training.data <- read.csv("train.csv")
 
 ```{r}
 data_availability <- function(column.name, show.grp.size = TRUE) {
-    num.na <- sum(is.na(training.data$column.name))
+    num.na <- nrow(training.data[is.na(training.data[[column.name]]), ])
     cat(
         paste(
             "The proportion of values for which",
             column.name,
             "is NA is",
-            num.na / nrow(training.data),
+            round(num.na / nrow(training.data), 4),
             "\n"
         )
     )
@@ -102,7 +102,7 @@ analysis.
     type is not 'None'. Perhaps, the type of veneer is may not strongly influence
     sale price.
 20. External quality and condition are very strong indicators of sale price.  
-21. Basement related variables.
+21. Basement related variables:
     + Basement quality and condition strongly influence sale price.
     + Basement exposure strongly influences sale price.
     + Basement finishing is a candidate influencer. However, a few levels can 
@@ -115,6 +115,60 @@ analysis.
 24. Electrical system is also a strong candidate to determine sale price.
 25. Of the four area variables X1stFlrSF, X2ndFlrSF, LowQualFinSF and GrLivArea, 
     the last one is most strongly correlated with sale price.
+26. The number of full bathrooms is the best indicator of sale price among, the
+    four variables related to bathrooms.
+27. The sale price is sharply different for different number of bedrooms above
+     ground. However, the relation between the two is counter-intuitive. The
+     mean sale price for houses with no bedrooms above ground is among the 
+     highest. The group also has a small sample and a very high variance. I 
+     think, to the extent possible, I should avoid this variable in a model.
+28. The quality of the kitchens matter more than their number. 
+29. The number of rooms above ground does seem to predict the sale price. It does
+    not have the anomalies that the number of bedrooms had.
+30. The variable 'Functional' is a predictor of sale price.
+31. The quality of the fireplaces is a good predictor of sale price than just 
+    their number.
+32. Garage related variables:
+    + Garage type does resolve sale price but two of six types have statistically
+      similar mean sale price.
+    + The age of the garage may have only a weak influence on the sale price.
+      Additionally, the are a few NAs for this attribute.
+    + Garage finish is a good predictor of sale price.
+    + The capacity of the garage resolves the sale price. However, the variation
+      is not monotonic. One house with a capacity for four cars was sold at a 
+      price much lower compared to others. The data is also not eenly distributed
+      across its levels.
+    + The quality of the garage may predict sale price. However, two of its levels
+      have similar group means.
+    I think that the condition of the garage cannot be different from the rest
+    of the house. Therefore, we need not consider them unless we have to.
+33. Paved drive is a predictor of sale price.
+34. More than half the houses do not have a wood deck. Further, for the ones
+    that have it, the correlation between its area and the sale price is not
+    very significant. We may, therefore, drop it from the first step of our 
+    analysis.
+35. Variable related to porch:
+    + More than a quarter of the houses do not have an open porch. For the ones
+      that have it, the correlation between its area and the sale price is not 
+      very significant. We may not consider this variable in the first iteration
+      of our model.
+    + A very large number of houses do not have an enclosed porch. Therefore, we
+      do not consider EnclosedPorc.
+    + Very few houses have a three seasons porch or a screened porch. Therefore,
+      we do not consider these variables in the first iteration of the model.
+    Only high-end houses have a porch. It may be a differentiator only for them.
+    Unless we build a separate model for high-end houses, we may not use these 
+    variables.
+36. Pool related variables:    
+    + A very large number of houses does not have a pool.
+    + Pool quality data is available only for $7$ houses.
+37. The four levels of the Fence variable do not resolve the sale price data 
+    well enough.
+38. Only $3.7\%$ cases have miscellaneous features. Therefore, the variables
+    'MiscFeature' and 'MiscVal' may not be of use in our model.
+39. The month and year a house was sold may have an effect on the sale price.
+    However, the effect may be more because of economic conditions prevalent in
+    the month than anything related to the house.
     
 All these observations are made with the simple assumption that an attribute is 
 a candidate predictor if price changes as the attribute value changes. We may
@@ -347,7 +401,8 @@ with(X, plot(LotFrontage,
              SalePrice, 
              xlab = "Lot frontage",
              ylab = "Sale price",
-             main = "Sale price v Lot frontage"))
+             main = "Sale price v Lot frontage", 
+             cex = 0.1))
 rm(cc.lf, X)
 ```
 
@@ -382,7 +437,9 @@ with(training.data,
      plot(LotArea,
           SalePrice,
           xlab = "Lot area",
-          ylab = "Sale price"))
+          ylab = "Sale price", 
+          cex = 0.1
+          ))
 ```
 
 ## Street
@@ -653,7 +710,8 @@ with(training.data,
      plot(OverallQual, 
           OverallCond, 
           xlab = "Overall quality", 
-          ylab = "Overall condition"))
+          ylab = "Overall condition", 
+          cex = 0.1))
 ```
 
 Visually, there is none. Yet. we support our observation by calculating the
@@ -695,8 +753,8 @@ These are not dates but years. Further, the remodel date is the same as original
 construction date if the house has not been remodeled. 
 We first check their availablity.
 ```{r}
-data_availability("YearBuilt")
-data_availability("YearRemodAdd")
+data_availability("YearBuilt", show.grp.size = FALSE)
+data_availability("YearRemodAdd", show.grp.size = FALSE)
 ```
 
 There is enough data. However, we must handle this data in a different way. Instead
@@ -1070,7 +1128,7 @@ Looks like they are no different and can be combined in a single category.
 Let us see how sale price varies with veneer area for all types except 'None'.
 
 ```{r}
-xyplot(SalePrice ~ MasVnrArea | MasVnrType, data = training.data)
+xyplot(SalePrice ~ MasVnrArea | MasVnrType, data = training.data, cex = 0.1)
 ```
 
 As expected, there is a positive correlation between veneer area and sale price.
@@ -1183,25 +1241,28 @@ data_availability("TotalBsmtSF", show.grp.size = FALSE)
 
 Variation of sale price for BsmtFinSF1 is
 ```{r}
-xyplot(SalePrice ~ BsmtFinSF1, data = training.data[training.data$BsmtFinSF1 != 0, ])
+with(training.data[training.data$BsmtFinSF1 != 0, ], 
+     plot(BsmtFinSF1, SalePrice, cex = 0.1))
 ```
 
 Basement area of type 1 influences sale price.
 
 ```{r}
-xyplot(SalePrice ~ BsmtFinSF2, data = training.data[training.data$BsmtFinSF2 != 0, ])
+with(training.data[training.data$BsmtFinSF2 != 0, ], 
+     plot(BsmtFinSF2, SalePrice, cex = 0.1))
 ```
 
 Basement area of type 2 is not a very strong influencer of sale price.
 
 ```{r}
-xyplot(SalePrice ~ BsmtUnfSF, data = training.data[training.data$BsmtUnfSF != 0, ])
+with(training.data[training.data$BsmtUnfSF != 0, ], 
+     plot(BsmtUnfSF, SalePrice, cex = 0.1))
 ```
 
 Unfinished area of the basement is not a very strong influencer of sale price.
 
 ```{r}
-xyplot(SalePrice ~ TotalBsmtSF, data = training.data[training.data$TotalBsmtSF != 0, ])
+with(training.data[training.data$TotalBsmtSF != 0, ], plot(TotalBsmtSF, SalePrice))
 ```
 
 Sale price is strongly correlated to total basement area. It might help to look
@@ -1296,9 +1357,9 @@ data_availability("GrLivArea", show.grp.size = FALSE)
 
 ```{r}
 with(training.data, plot(X1stFlrSF, SalePrice))
-with(training.data[training.data$X2ndFlrSF != 0, ], plot(X2ndFlrSF, SalePrice))
-with(training.data[training.data$LowQualFinSF != 0, ], plot(LowQualFinSF, SalePrice))
-with(training.data, plot(GrLivArea, SalePrice))
+with(training.data[training.data$X2ndFlrSF != 0, ], plot(X2ndFlrSF, SalePrice, cex = 0.1))
+with(training.data[training.data$LowQualFinSF != 0, ], plot(LowQualFinSF, SalePrice, cex = 0.1))
+with(training.data, plot(GrLivArea, SalePrice, cex = 0.1))
 ```
 
 Not surprisingly, the above grade (ground) living area square feet is strongly
@@ -1308,4 +1369,404 @@ sum of the remaining three.
 with(training.data, any(GrLivArea - X1stFlrSF - X2ndFlrSF - LowQualFinSF != 0))
 ```
 
+## Bathrooms
+The number of bathrooms is going to be limited. Therefore, when we check 
+availability of data, we can display the group data.
+```{r}
+data_availability("BsmtFullBath")
+data_availability("BsmtHalfBath")
+data_availability("FullBath")
+data_availability("HalfBath")
+```
 
+We now look at the group means.
+```{r}
+check_group_means("BsmtFullBath", run.anova = FALSE)
+check_group_means("BsmtHalfBath")
+check_group_means("FullBath")
+check_group_means("HalfBath")
+```
+
+The number of half-basements in the basement do not matter to the sale price. 
+The number of full bathrooms in the house do matter, so do the number of half
+bathrooms in the house. But of the two, the former variable seems to be showing
+the greatest impact.
+
+## Bedrooms above ground
+```{r}
+data_availability("BedroomAbvGr")
+```
+
+There is only case with $8$ bedrooms. Therefore, we will not run a full ANOVA.
+```{r}
+check_group_means("BedroomAbvGr", run.anova = FALSE)
+```
+
+I would have expected sale price to be a monotone function of the number of
+bedrooms. Therefore, it is baffling that the group mean of houses with zero 
+bedrooms is the highest. Let us investigate the group more.
+```{r}
+with(training.data[training.data$BedroomAbvGr == 0, ], summary(SalePrice))
+```
+
+The range of prices is quite large. Moreover, the sample is quite small.
+```{r}
+training.data[training.data$BedroomAbvGr == 0, c("SalePrice")]
+```
+
+Although the house prices are 'well-resolved' by the number of bedrooms above
+ground, the trend is counter-intuitive. Therefore, I would hesitate building a
+model using it.
+
+## Kitchen
+```{r}
+data_availability("KitchenAbvGr")
+data_availability("KitchenQual")
+```
+
+All except three houses have one or two kitchens. I will, therefore, run an
+ANOVA only for these two categories.
+```{r}
+oneway.test(SalePrice ~ KitchenAbvGr,
+            data = training.data,
+            subset = KitchenAbvGr %in% c(1, 2))
+```
+
+The number of Kitchens, if they are either $1$ or $2$, do result in different
+sale price. The group means are
+```{r}
+aggregate(cbind(avg.price = SalePrice) ~ KitchenAbvGr, 
+          data = training.data, 
+          FUN = function(x) mean(x))
+```
+
+Going by past experience, I think that the quality of the kitchen will be a 
+significant predictor of sale price than the number of kitchens.
+```{r}
+check_group_means("KitchenQual")
+```
+
+The quality of the kitchen indeed matters more.
+
+## Total number of rooms above ground.
+Let us find if the total number of rooms has the same behavior as the total 
+number of bedrooms.
+```{r}
+data_availability("TotRmsAbvGrd")
+```
+
+The group means are
+```{r}
+check_group_means("TotRmsAbvGrd", run.anova = FALSE)
+```
+
+The behavior is not as baffling as in the number of bedrooms above ground. The
+average price rises monotonically up to $11$ rooms. It drops thereafter.
+
+## Functionality
+The meaning of this variable is not very clear to me.
+```{r}
+data_availability("Functional")
+```
+
+The group means are
+```{r}
+check_group_means("Functional", run.anova = FALSE)
+```
+
+We will look at the ANOVA results by dropping the levels with only one case.
+```{r}
+oneway.test(SalePrice ~ Functional,
+            data = training.data,
+            subset = Functional != "Sev")
+```
+
+The differences in groups means are statistically significant.
+
+## Fireplaces
+```{r}
+data_availability("Fireplaces")
+data_availability("FireplaceQu")
+```
+
+```{r}
+check_group_means("Fireplaces")
+check_group_means("FireplaceQu")
+```
+
+The group means of the quality variable are more apart from each other than just
+the number.
+
+## Garage
+```{r}
+data_availability("GarageType")
+```
+
+```{r}
+check_group_means("GarageType")
+```
+
+Are garage types '2Types' and 'Basment' sufficiently different?
+```{r}
+oneway.test(SalePrice ~ GarageType,
+            data = training.data,
+            subset = GarageType %in% c("2Types", "Basment"))
+```
+
+They are not.
+
+The year in which a garage was built can be used to determine its weight. We will
+therefore find out how old the garage was when the house was sold. But before that,
+we will check if there are NAs.
+```{r}
+data_availability("GarageYrBlt", show.grp.size = FALSE)
+```
+
+```{r}
+X.1 <- training.data[!is.na(training.data$GarageYrBlt), c("GarageYrBlt", "YrSold", "SalePrice")]
+X.1$garage.age <- X.1$YrSold - X.1$GarageYrBlt
+```
+
+Summary of garage age is
+```{r}
+summary(X.1$garage.age)
+```
+
+Let us view the histogram of age of the garage before splitting them into 
+intervals.
+```{r}
+truehist(X.1$garage.age, xlab = "Age of the garage")
+```
+
+An interval of $10$ years seems appropriate.
+```{r}
+X.1$garage.age.1 <- cut(X.1$garage.age,
+                        seq(from = 0, 
+                            to = round(max(X.1$garage.age)/10)*10, 
+                            by = 10))
+```
+
+We will now examine the group means.
+```{r}
+with(X.1, tapply(SalePrice, garage.age.1, mean))
+oneway.test(SalePrice ~ garage.age.1, data = X.1)
+```
+
+Although the group means are not all identical, neither are they monotonic. I
+suspect that the age of the garage has only a weak influence on sale price.
+
+```{r}
+rm(X.1)
+```
+
+Let us now consider the garage finish.
+```{r}
+data_availability("GarageFinish")
+```
+
+There are a few NAs. We remove them.
+```{r}
+X.1 <- training.data[!is.na(training.data$GarageFinish), ]
+with(X.1, tapply(SalePrice, GarageFinish, mean))
+oneway.test(SalePrice ~ GarageFinish, data = X.1)
+rm(X.1)
+```
+
+Garage finish seems to be good predictor of the sale price.
+
+Moving on to the number of cars that can be parked in the garage.
+```{r}
+data_availability("GarageCars")
+```
+
+There are enough cases in each level. We can, therefore, look at the group means.
+```{r}
+check_group_means("GarageCars")
+```
+
+The sale price is well-resolved though higher capacity does not give higher sale
+price. To get th reasons, we look at the five cases with a garage capacity of 
+four cars.
+```{r}
+training.data[training.data$GarageCars == 4, c("SalePrice")]
+```
+
+One of the houses was sold very cheap.
+
+We now consider the quality of the garage.
+```{r}
+data_availability("GarageQual")
+```
+
+Although the data is skewed, we can still consider group means.
+```{r}
+check_group_means("GarageQual")
+```
+
+The quality of the garage is a strong predictor of the house price.
+
+We now conside the last variable related to garage, its condition.
+```{r}
+data_availability("GarageCond")
+```
+
+Once again the data is skewed yet there are enough cases to carry out ANOVA.
+```{r}
+check_group_means("GarageCond")
+```
+
+The levels 'Fa' and 'Po' seem to have means close to each other. Let us examine
+them separately.
+```{r}
+oneway.test(SalePrice ~ GarageCond,
+            data = training.data,
+            subset = GarageCond %in% c("Fa", "Po"))
+```
+
+The differences in the group means are not statistically significant.
+
+## Paved drive
+```{r}
+data_availability("PavedDrive")
+```
+
+The group means analysis is
+```{r}
+check_group_means("PavedDrive")
+```
+
+Are the group means of levels N and P statistically different?
+```{r}
+oneway.test(SalePrice ~ PavedDrive,
+            data = training.data,
+            subset = PavedDrive %in% c("N", "P"))
+```
+
+The differences in group means are statistically significant.
+
+## Wooddeck 
+It is a numeric variable describing the area in square feet of the wooden deck.
+```{r}
+data_availability("WoodDeckSF", show.grp.size = FALSE)
+```
+
+A summary of the data is
+```{r}
+summary(training.data$WoodDeckSF)
+```
+
+If the median is zero then more than half of the houses do not have a wooden
+deck. When it is present, does it have an impact on the sale price?
+```{r}
+xyplot(SalePrice ~ WoodDeckSF, 
+       data = training.data[training.data$WoodDeckSF > 0, ],
+       cex = 0.3)
+```
+
+The correlation does not appear to be very strong. In any case, if this varible
+is significant for less than half of the cases, it might not be very useful in
+predicting the sale price.
+
+## Porch
+OpenPorchSF is a numeric variable describing the area in square feet of the porch.
+```{r}
+data_availability("OpenPorchSF", show.grp.size = FALSE)
+```
+
+A summary of the data is
+```{r}
+summary(training.data$OpenPorchSF)
+```
+
+At least a quarter of the cases do not have an open porch. Nevertheless, for 
+those that have it, let us look at the trend of sale price versus porch area.
+```{r}
+xyplot(SalePrice ~ OpenPorchSF,
+       data = training.data[training.data$OpenPorchSF != 0, ],
+       cex = 0.3)
+```
+
+The correlation does not appear to be very strong.
+
+EnclosedPorch is a numeric variable describing measuring the area of enclosed
+porch.
+```{r}
+data_availability("EnclosedPorch", show.grp.size = FALSE)
+```
+
+A summary of the data is
+```{r}
+summary(training.data$EnclosedPorch)
+```
+
+A very large number of houses do not have an enclosed porch. 
+```{r}
+nrow(training.data[training.data$EnclosedPorch == 0, ])
+```
+
+Moving to X3SsnPorch, the area of three seasons porch. Its summary is
+```{r}
+summary(training.data$X3SsnPorch)
+```
+
+More than $75\%$ of the houses do not have it.
+
+The last porch related variable is ScreenPorch. It is the area of screened porch.
+Its summary is
+```{r}
+summary(training.data$ScreenPorch)
+```
+
+More than $75\%$ of the houses do not have it.
+
+## Pool
+A large number of houses do not have a pool. A summary of PoolArea variable 
+should confirm this understanding.
+```{r}
+summary(training.data$PoolArea)
+```
+
+Nevertheless, we look at the sale price as a function of pool condition, whenever
+it is present.
+```{r}
+with(training.data[!is.na(training.data$PoolQC), ],
+     tapply(SalePrice, PoolQC, length))
+with(training.data[!is.na(training.data$PoolQC), ],
+     tapply(SalePrice, PoolQC, mean))
+```
+
+Only $7$ houses have a data about pool quality.
+
+## Fence
+```{r}
+data_availability("Fence")
+```
+
+An analysis of the group means is
+```{r}
+check_group_means("Fence")
+```
+
+Let us check if the categories 'GdWo' and 'MnWw' are distinct.
+```{r}
+oneway.test(SalePrice ~ Fence,
+            data = training.data,
+            subset = Fence %in% c("GdWo", "MnWw"))
+```
+
+They are not. What about 'GdWo' and 'MnPrv'?
+```{r}
+oneway.test(SalePrice ~ Fence,
+            data = training.data,
+            subset = Fence %in% c("GdWo", "MnPrv"))
+```
+
+They too are not distinct.
+
+## Miscellaneous features
+```{r}
+data_availability("MiscFeature")
+```
+
+Only $3.7\%$ cases had a miscellaneous feature. Therefore, we may not find this
+attribute useful.
