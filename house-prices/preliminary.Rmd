@@ -2,7 +2,7 @@
 title: "Preliminary examination"
 author: "Amey Joshi"
 date: "29/11/2019"
-output: html_document
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
@@ -111,34 +111,35 @@ analysis.
     of veneer area and sale price are not too dissimilar in the cases when veneer
     type is not 'None'. Perhaps, the type of veneer is may not strongly influence
     sale price.
-20. External quality and condition are very strong indicators of sale price.  
-21. Basement related variables:
+20. External quality and condition are very strong indicators of sale price. 
+21. Foundation is useful if we combine 'Stone' and 'Wood' together.
+22. Basement related variables:
     + Basement quality and condition strongly influence sale price.
     + Basement exposure strongly influences sale price.
     + Basement finishing is a candidate influencer. However, a few levels can 
       be grouped together.
     + Of the four areas related to the basement only the total area is strongly
       correlated with the sale price.
-22. Heating is not a strong indicator of sale price but HeatingQC is.     
-23. Presence or absence of central air-conditioning strongly influences sale 
+23. Heating is not a strong indicator of sale price but HeatingQC is.     
+24. Presence or absence of central air-conditioning strongly influences sale 
     price.
-24. Electrical system is also a strong candidate to determine sale price.
-25. Of the four area variables X1stFlrSF, X2ndFlrSF, LowQualFinSF and GrLivArea, 
+25. Electrical system is also a strong candidate to determine sale price.
+26. Of the four area variables X1stFlrSF, X2ndFlrSF, LowQualFinSF and GrLivArea, 
     the last one is most strongly correlated with sale price.
-26. The number of full bathrooms is the best indicator of sale price among, the
+27. The number of full bathrooms is the best indicator of sale price among, the
     four variables related to bathrooms.
-27. The sale price is sharply different for different number of bedrooms above
+28. The sale price is sharply different for different number of bedrooms above
      ground. However, the relation between the two is counter-intuitive. The
      mean sale price for houses with no bedrooms above ground is among the 
      highest. The group also has a small sample and a very high variance. I 
      think, to the extent possible, I should avoid this variable in a model.
-28. The quality of the kitchens matter more than their number. 
-29. The number of rooms above ground does seem to predict the sale price. It does
+29. The quality of the kitchens matter more than their number. 
+30. The number of rooms above ground does seem to predict the sale price. It does
     not have the anomalies that the number of bedrooms had.
-30. The variable 'Functional' is a predictor of sale price.
-31. The quality of the fireplaces is a good predictor of sale price than just 
+31. The variable 'Functional' is a predictor of sale price.
+32. The quality of the fireplaces is a good predictor of sale price than just 
     their number.
-32. Garage related variables:
+33. Garage related variables:
     + Garage type does resolve sale price but two of six types have statistically
       similar mean sale price.
     + The age of the garage may have only a weak influence on the sale price.
@@ -152,12 +153,12 @@ analysis.
       have similar group means.
     I think that the condition of the garage cannot be different from the rest
     of the house. Therefore, we need not consider them unless we have to.
-33. Paved drive is a predictor of sale price.
-34. More than half the houses do not have a wood deck. Further, for the ones
+34. Paved drive is a predictor of sale price.
+35. More than half the houses do not have a wood deck. Further, for the ones
     that have it, the correlation between its area and the sale price is not
     very significant. We may, therefore, drop it from the first step of our 
     analysis.
-35. Variable related to porch:
+36. Variable related to porch:
     + More than a quarter of the houses do not have an open porch. For the ones
       that have it, the correlation between its area and the sale price is not 
       very significant. We may not consider this variable in the first iteration
@@ -169,14 +170,14 @@ analysis.
     Only high-end houses have a porch. It may be a differentiator only for them.
     Unless we build a separate model for high-end houses, we may not use these 
     variables.
-36. Pool related variables:    
+37. Pool related variables:    
     + A very large number of houses does not have a pool.
     + Pool quality data is available only for $7$ houses.
-37. The four levels of the Fence variable do not resolve the sale price data 
+38. The four levels of the Fence variable do not resolve the sale price data 
     well enough.
-38. Only $3.7\%$ cases have miscellaneous features. Therefore, the variables
+39. Only $3.7\%$ cases have miscellaneous features. Therefore, the variables
     'MiscFeature' and 'MiscVal' may not be of use in our model.
-39. The month and year a house was sold may have an effect on the sale price.
+40. The month and year a house was sold may have an effect on the sale price.
     However, the effect may be more because of economic conditions prevalent in
     the month than anything related to the house.
     
@@ -1189,6 +1190,30 @@ table(training.data[, c("ExterQual", "ExterCond")])
 ```
 
 External condition is also a strong predictor of sale price.
+
+## Foundation
+```{r}
+data_availability("Foundation")
+```
+
+```{r}
+check_group_means("Foundation")
+```
+
+We will confirm whether 'BrkTil' and 'CBlock' are sufficiently different.
+```{r}
+oneway.test(SalePrice ~ Foundation,
+            data = training.data,
+            subset = Foundation %in% c("BrkTil", "CBlock"))
+```
+
+They are. We repeat the exercise for 'Stone' and 'Wood'.
+```{r}
+oneway.test(SalePrice ~ Foundation,
+            data = training.data,
+            subset = Foundation %in% c("Stone", "Wood"))
+```
+They are not different.
 
 ## Basement quality and condition
 Their data availability is
