@@ -1,0 +1,227 @@
+---
+title: "Level-1"
+author: "Amey Joshi"
+date: "05/12/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(MASS)
+library(lattice)
+
+training.data <- read.csv("train.csv")
+```
+
+## Candidate variables
+Of the $81$ variables in the data set, we chose to retain $36$ after a 
+preliminary analysis. In this next stage of analysis, we check if the variables
+selected have a strong correlation with each other.
+
+1.  MSSubClass
+2.  MSZoning
+3.  LotShape
+4.  LandContour
+5.  LotConfig
+6.  Neighborhood
+7.  Condition1
+8.  BldgType
+9.  HouseStyle
+10. OverallQual
+11. OverallCond
+12. RoofStyle
+13. ExterQual
+14. ExterCond
+15. Foundation
+16. BsmtQual
+17. BsmtCond
+18. BsmtExposure
+19. TotalBsmtSF
+20. HeatingQC
+21. CentralAir
+22. Electrical
+23. GrLivArea
+24. BsmtFullBath
+25. FullBath
+26. KitchenQual
+27. TotRmsAbvGrd
+28. Functional
+29. FireplaceQu
+30. GarageFinish
+31. GarageCond
+32. PavedDrive
+33. YrSold
+34. SaleType
+35. SaleCondition
+36. SalePrice
+
+## MSSubClass and MSZoning
+A contingency table of these variables.
+```{r}
+with(training.data,
+     table(MSSubClass, MSZoning))
+```
+
+Even in the heavilty populated 'RL' and 'RM' classes, the data is not evenly 
+distributed across MSSubClass. Therefore, the two are not correlated.
+
+## Lot shape and configuration
+```{r}
+with(training.data, table(LotShape, LotConfig))
+```
+
+These variables too do not seem to be correlated. How does mean sale price vary
+across them?
+```{r}
+aggregate(SalePrice ~ LotShape, data = training.data, mean)
+aggregate(SalePrice ~ LotConfig, data = training.data, mean)
+```
+
+The average sale price for LotConfig values 'Corner', 'FR2' and 'Inside' are quite close to
+each other. Let us check if they can be considered to be unequal.
+```{r}
+oneway.test(SalePrice ~ LotConfig,
+            data = training.data,
+            subset = LotConfig %in% c("Corner","FR2", "Inside"))
+```
+
+The $p$-value indicates that they should be clubbed together in a level 'CF2I'.
+```{r}
+X <- training.data[, c("LotConfig", "LotShape", "SalePrice")]
+# We need as.character because LotConfig is a factor, not a string.
+X$LotConfig.1 <- ifelse(X$LotConfig %in% c("Corner","FR2", "Inside"), 
+                        "CF2I", 
+                        as.character(X$LotConfig))
+with(X, table(LotShape, LotConfig.1))
+```
+
+Even after collapsing three LotConfig levels into one, there is not corelation
+between the two variables. We, therefore, retain both, the second one after
+combining levels.
+
+
+## Land contour
+Average sale price varies by land contour as
+```{r}
+aggregate(cbind(avg.price = SalePrice) ~ LandContour, 
+          data = training.data, 
+          mean)
+```
+
+The division seems quite sharp and so far I haven't discovered another variable
+that could be related to it. We will retain it.
+
+## Neighborhood
+Average sale price varies with neighborhood as
+```{r}
+X <- aggregate(cbind(avg.price = SalePrice) ~ Neighborhood,
+          data = training.data,
+          mean)
+X[order(X$avg.price), ]
+```
+
+Although the group means are different, there is scope to collapse the 
+neighborhoods into fewer number of classes.
+```{r}
+oneway.test(
+  SalePrice ~ Neighborhood,
+  data = training.data,
+  subset = Neighborhood %in% c("MeadowV", "IDOTRR", "BrDale")
+)
+oneway.test(
+  SalePrice ~ Neighborhood,
+  data = training.data,
+  subset = Neighborhood %in% c("BrkSide", "Edwards", "OldTown")
+)
+oneway.test(
+  SalePrice ~ Neighborhood,
+  data = training.data,
+  subset = Neighborhood %in% c("SWISU", "Blueste", "Sawyer", "NPkVill", "NAmes", "Mitchel")
+)
+oneway.test(
+  SalePrice ~ Neighborhood,
+  data = training.data,
+  subset = Neighborhood %in% c("CollgCr", "Blmngtn", "Gilbert", "NWAmes", "SawyerW")
+)
+oneway.test(
+  SalePrice ~ Neighborhood,
+  data = training.data,
+  subset = Neighborhood %in% c("Somerst", "ClearCr", "Crawfor", "Veenker", "Timber")
+)
+oneway.test(
+  SalePrice ~ Neighborhood,
+  data = training.data,
+  subset = Neighborhood %in% c("StoneBr", "NridgHt", "NoRidge")
+)
+```
+
+Thus, we will classify neighborhoods as
+```{r}
+nbd.class <-
+  data.frame(Neighborhood = X[order(X$avg.price), "Neighborhood"],
+             class = c(rep(1, 3), rep(2, 3), rep(3, 6), rep(4, 5), rep(5, 5), rep(6, 3)))
+rm(X)
+```
+
+We will now use the new neighborhood classes and find out if sale price 
+continues to be well resolved.
+```{r}
+X <- merge(training.data, nbd.class)[, c("class", "SalePrice")]
+oneway.test(SalePrice ~ class, data = X)
+```
+
+The average sale prices are
+```{r}
+aggregate(cbind(avg.price = SalePrice) ~ class, data = X, mean)
+```
+
+We confirm that the neighborhood classes 2 and 3 are indeed different.
+```{r}
+oneway.test(SalePrice ~ class, data = X, subset = class %in% c(2, 3))
+rm(X, nbd.class)
+```
+
+We retain Neighborhood after collapsing $25$ levels into $6$.
+
+## Condition1
+We sort the levels by average sale price.
+```{r}
+X <- aggregate(cbind(avg.price = SalePrice) ~ Condition1,
+               training.data,
+               mean)
+X[order(X$avg.price), ]
+```
+
+We explore if we can have three levels instead of nine.
+```{r}
+oneway.test(
+  SalePrice ~ Condition1,
+  data = training.data,
+  subset = Condition1 %in% c("Artery", "RRAe", "Feedr")
+)
+oneway.test(
+  SalePrice ~ Condition1,
+  data = training.data,
+  subset = Condition1 %in% c("RRNe", "Norm", "RRAn")
+)
+oneway.test(
+  SalePrice ~ Condition1,
+  data = training.data,
+  subset = Condition1 %in% c("RRNn", "PosN", "PosA")
+)
+```
+
+We will now confirm that this grouping of levels of Condition1 resolves sale 
+price.
+```{r}
+cond1.map = data.frame(Condition1 = X[order(X$avg.price), "Condition1"],
+                      cond1.class = c(rep(1, 3), rep(2, 3), rep(3, 3)))
+rm(X)
+X <- merge(training.data, cond1.map)[, c("cond1.class", "SalePrice")]
+oneway.test(SalePrice ~ cond1.class, X)
+```
+
+Thus, we retain Condition1 after reducing nine levels to three.
