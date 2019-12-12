@@ -25,13 +25,13 @@ selected have a strong correlation with each other.
 2.  MSZoning
 3.  LotShape
 4.  LandContour
-5.  LotConfig
-6.  Neighborhood
-7.  Condition1
-8.  BldgType
-9.  HouseStyle
-10. OverallQual
-11. OverallCond
+5.  LotConfig *combine "Corner","FR2", "Inside" into one*.
+6.  Neighborhood * collapse 25 levels into 6*.
+7.  Condition1 * collapse 9 levels into 3*.
+8.  BldgType * collapse 5 levels into 2*.
+9.  HouseStyle *drop it in first model*.
+10. OverallQual *collapse first two levels.*
+11. OverallCond *drop it in favor of OverallQual.*
 12. RoofStyle
 13. ExterQual
 14. ExterCond
@@ -160,16 +160,17 @@ oneway.test(
 
 Thus, we will classify neighborhoods as
 ```{r}
-nbd.class <-
+nbd.map <-
   data.frame(Neighborhood = X[order(X$avg.price), "Neighborhood"],
-             class = c(rep(1, 3), rep(2, 3), rep(3, 6), rep(4, 5), rep(5, 5), rep(6, 3)))
+             nbd.class = c(rep(1, 3), rep(2, 3), rep(3, 6), rep(4, 5), rep(5, 5), rep(6, 3)))
+nbd.map$nbd.class <- as.factor(nbd.map$nbd.class)
 rm(X)
 ```
 
 We will now use the new neighborhood classes and find out if sale price 
 continues to be well resolved.
 ```{r}
-X <- merge(training.data, nbd.class)[, c("class", "SalePrice")]
+X <- merge(training.data, nbd.map)[, c("nbd.class", "SalePrice")]
 oneway.test(SalePrice ~ class, data = X)
 ```
 
@@ -181,7 +182,12 @@ aggregate(cbind(avg.price = SalePrice) ~ class, data = X, mean)
 We confirm that the neighborhood classes 2 and 3 are indeed different.
 ```{r}
 oneway.test(SalePrice ~ class, data = X, subset = class %in% c(2, 3))
-rm(X, nbd.class)
+```
+
+Before closing, we check the box plot of sale prices with new classes.
+```{r}
+bwplot(SalePrice ~ nbd.class, X)
+rm(X, nbd.map)
 ```
 
 We retain Neighborhood after collapsing $25$ levels into $6$.
@@ -219,9 +225,155 @@ price.
 ```{r}
 cond1.map = data.frame(Condition1 = X[order(X$avg.price), "Condition1"],
                       cond1.class = c(rep(1, 3), rep(2, 3), rep(3, 3)))
+cond1.map$cond1.class <- as.factor(cond1.map$cond1.class)
 rm(X)
 X <- merge(training.data, cond1.map)[, c("cond1.class", "SalePrice")]
 oneway.test(SalePrice ~ cond1.class, X)
 ```
 
+A distribution of sale prices across the new classes is
+```{r}
+bwplot(SalePrice ~ cond1.class, X)
+rm(X, cond1.map)
+```
+
 Thus, we retain Condition1 after reducing nine levels to three.
+
+## BldgType
+We can possibly have only two types of buildings.
+```{r}
+X <- aggregate(cbind(avg.price = SalePrice) ~ BldgType, training.data, mean)
+X[order(X$avg.price), ]
+```
+
+We will use the following mapping.
+```{r}
+bldgtype.map <- data.frame(BldgType = X[order(X$avg.price), "BldgType"],
+                           BldgType.class = c(rep(1, 3), rep(2, 2)))
+rm(X)
+X <- merge(training.data, bldgtype.map)[, c("BldgType.class", "SalePrice")]
+aggregate(cbind(avg.price = SalePrice) ~ BldgType.class, X, mean)
+oneway.test(SalePrice ~ BldgType.class, X)
+```
+
+Let us see a distribution of prices across the new classes.
+```{r}
+bwplot(BldgType.class ~ SalePrice, X)
+```
+
+```{r}
+rm(X, bldgtype.map)
+```
+
+Thus, we can collapse five levels of BldgType into two.
+
+## HouseStyle
+We can reduce the levels in HouseStyle as well.
+```{r}
+X <- aggregate(cbind(avg.price = SalePrice) ~ HouseStyle, training.data, mean)
+X[order(X$avg.price), ]
+```
+
+Choosing the right group of variables will need a closer examination.
+```{r}
+oneway.test(SalePrice ~ HouseStyle,
+            data = training.data,
+            subset = HouseStyle %in% c("1.5Unf", "SFoyer"))
+oneway.test(
+  SalePrice ~ HouseStyle,
+  data = training.data,
+  subset = HouseStyle %in% c("1.5Unf", "SFoyer", "1.5Fin")
+)
+```
+
+These are not the right groupings.
+```{r}
+oneway.test(SalePrice ~ HouseStyle,
+            data = training.data,
+            subset = HouseStyle %in% c("SFoyer", "1.5Fin"))
+oneway.test(
+  SalePrice ~ HouseStyle,
+  data = training.data,
+  subset = HouseStyle %in% c("SFoyer", "1.5Fin", "2.5Unf")
+)
+oneway.test(
+  SalePrice ~ HouseStyle,
+  data = training.data,
+  subset = HouseStyle %in% c("SFoyer", "1.5Fin", "2.5Unf", "SLvl")
+)
+oneway.test(SalePrice ~ HouseStyle,
+            data = training.data,
+            subset = HouseStyle %in% c("2.5Unf", "SLvl"))
+```
+
+The groups so far are, {"1.5Unf"}, {"SFoyer", "1.5Fn"}, {"2.5Unf", "SLvl"}.
+```{r}
+oneway.test(SalePrice ~ HouseStyle, data = training.data, subset = HouseStyle %in% c("2.5Unf", "SLvl"))
+```
+
+I am not seeing a satisfactory grouping evolve. A distribution of prices across
+building types is
+```{r}
+bwplot(SalePrice ~ HouseStyle, data = training.data)
+```
+
+A wide overlap of prices across house styles and a large number of outliers
+suggests that HouseStyle is probably not a good predictor of sale price.
+
+## Overall condition and quality
+We first check if there is a correlation between the two.
+```{r}
+with(training.data, table(OverallCond, OverallQual))
+```
+
+This does not give much insight. It would be nice to see the mean instead.
+```{r}
+X <- with(training.data, tapply(SalePrice, list(OverallCond, OverallQual), mean))
+```
+
+Row wise range of average sale price is
+```{r}
+Xr <- apply(X, 1, function(x) range(x, na.rm = TRUE))
+Xr[2, ] - Xr[1, ]
+```
+
+Column wise range of average sale price is
+```{r}
+Xc <- apply(X, 2, function(x) range(x, na.rm = TRUE))
+Xc[2, ] - Xc[1, ]
+```
+
+Column-wise range is narrower than row-wise range. Therefore, we will use overall
+quality instead of overall condition in our analysis.
+
+How do the group means look like?
+```{r}
+rm(X, Xc, Xr)
+X <-
+  aggregate(cbind(avg.price = SalePrice) ~ OverallQual, 
+            training.data, mean)[, c("OverallQual", "avg.price")]
+X[order(X$avg.price),]
+```
+
+Let us check if the classes 1 and 2 could be combined?
+```{r}
+oneway.test(SalePrice ~ OverallQual, 
+            data = training.data, 
+            subset = OverallQual %in% c(1, 2))
+```
+
+There is a strong evidence that they are the same. Although this looks like a 
+great predictor, we will still review a distribution of sale price across its 
+levels after combining levels 1 and 2.
+```{r}
+overall.qual.map <- 
+  data.frame(OverallQual = X[order(X$avg.price), "OverallQual"],
+             overall.qual.class = c(2, 2, 3, 4, 5, 6, 7, 8 ,9 ,10))
+rm(X)
+X <- merge(training.data, overall.qual.map)[, c("overall.qual.class", "SalePrice")]
+X$overall.qual.class <- as.factor(X$overall.qual.class)
+bwplot(SalePrice ~ overall.qual.class, X)
+rm(X, overall.qual.map)
+```
+
+This looks quite good.
