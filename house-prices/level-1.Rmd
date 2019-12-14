@@ -53,9 +53,9 @@ selected have a strong correlation with each other.
 30. GarageFinish *retain*
 31. GarageCond *drop*
 32. PavedDrive *retain*
-33. YrSold
-34. SaleType
-35. SaleCondition
+33. YrSold *create bins.*
+34. SaleType *retain after collapsing into 5 levels.*
+35. SaleCondition *retain after collapsing into 4 levels.*
 36. SalePrice
 
 ## MSSubClass and MSZoning
@@ -927,6 +927,7 @@ The group means are
 X <- aggregate(cbind(avg.price = SalePrice) ~ FireplaceQu,
                training.data, mean)
 X[order(X$avg.price), ]
+rm(X)
 ```
 
 The group means are well separated. Is FireplaceQu correlated with OverallQual?
@@ -956,5 +957,86 @@ level TA. Which is also the reason why there are such a large number of outliers
 in its boxplot. Moreover, a GarageCond of Ex, which stands for excellent, does
 not fetch a great sale price.
 
-## 
+## Sale type and condition
+The group means of sale type are
+```{r}
+X <- aggregate(cbind(avg.price = SalePrice) ~ SaleType,
+               data = training.data,
+               mean)
+X[order(X$avg.price), ]
+```
 
+Let us explore a few opportunities to combine the levels.
+```{r}
+oneway.test(SalePrice ~ SaleType,
+            data = training.data,
+            subset = SaleType %in% c("ConLI", "CWD"))
+```
+
+They can be grouped together.
+
+```{r}
+oneway.test(SalePrice ~ SaleType,
+            data = training.data,
+            subset = SaleType %in% c("ConLD", "ConLW", "COD"))
+```
+
+These too can be clubbed together.
+```{r}
+oneway.test(SalePrice ~ SaleType,
+            data = training.data,
+            subset = SaleType %in% c("Con", "New"))
+```
+
+We can group them together as well.
+
+Let us map the levels to new ones.
+```{r}
+saletype.map <-
+  data.frame(SaleType = X[order(X$avg.price), "SaleType"],
+             st.class = as.factor(c(1, rep(2, 3), 3, rep(4, 2), rep(5, 2))))
+rm(X)
+X <- merge(training.data, saletype.map)[, c("st.class", "SalePrice")]
+bwplot(SalePrice ~ st.class, X)
+aggregate(cbind(avg.price = SalePrice) ~ st.class, X, mean)
+rm(X, saletype.map)
+```
+
+We now look at sale condition. From preliminary analysis we know that the 
+sale type WD is distributed across sale conditions. Therefore, we cannot 
+treat the two as correlated with each other. Let us check if we can collapse
+the levels of SaleCondition.
+```{r}
+X <- aggregate(cbind(avg.price = SalePrice) ~ SaleCondition, 
+               training.data, mean)
+X[order(X$avg.price), ]
+```
+
+Are 'Abnorml' and 'Family' similar?
+```{r}
+oneway.test(SalePrice ~ SaleCondition,
+            data = training.data,
+            subset = SaleCondition %in% c("Abnorml", "Family"))
+```
+
+They can be grouped together.
+
+Are 'Alloca' and 'Normal' similar?
+```{r}
+oneway.test(SalePrice ~ SaleCondition,
+            data = training.data,
+            subset = SaleCondition %in% c("Alloca", "Normal"))
+```
+
+They too can be clubbed together.
+
+Let us check the new levels.
+```{r}
+sc.map <-
+  data.frame(SaleCondition = X[order(X$avg.price), "SaleCondition"],
+             sc.class = as.factor(c(1, 2, 2, 3, 3, 4)))
+rm(X)
+X <- merge(training.data, sc.map)[, c("sc.class", "SalePrice")]
+bwplot(SalePrice ~ sc.class, X)
+rm(sc.map, X)
+```            
