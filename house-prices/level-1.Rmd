@@ -21,6 +21,7 @@ Of the $81$ variables in the data set, we chose to retain $36$ after a
 preliminary analysis. In this next stage of analysis, we check if the variables
 selected have a strong correlation with each other.
 
+0.  Id *retain*
 1.  MSSubClass *retain.*
 2.  MSZoning *retain after reducing to $4$ levels.*
 3.  LotShape *drop*
@@ -56,7 +57,7 @@ selected have a strong correlation with each other.
 33. YrSold *create bins.*
 34. SaleType *retain after collapsing into 5 levels.*
 35. SaleCondition *retain after collapsing into 4 levels.*
-36. SalePrice
+36. SalePrice *retain*
 
 ## MSSubClass and MSZoning
 A contingency table of these variables.
