@@ -35,24 +35,24 @@ selected have a strong correlation with each other.
 12. RoofStyle *drop it.*
 13. ExterQual *drop, retain OverallQual instead.*
 14. ExterCond *drop*
-15. Foundation
-16. BsmtQual
-17. BsmtCond
-18. BsmtExposure
-19. TotalBsmtSF
-20. HeatingQC
-21. CentralAir
-22. Electrical
-23. GrLivArea
-24. BsmtFullBath
-25. FullBath
-26. KitchenQual
-27. TotRmsAbvGrd
-28. Functional
-29. FireplaceQu
-30. GarageFinish
-31. GarageCond
-32. PavedDrive
+15. Foundation *retain.*
+16. BsmtQual *drop it in favor of OverallQual.*
+17. BsmtCond *drop*
+18. BsmtExposure *retain*
+19. TotalBsmtSF *retain but remove cases with zero area.*
+20. HeatingQC *retain.*
+21. CentralAir *retain*
+22. Electrical *retain, club all fuse types together.*
+23. GrLivArea *retain*
+24. BsmtFullBath *collapse into two levels before retaining.*
+25. FullBath *retain*
+26. KitchenQual *drop it in favor of OverallQual.*
+27. TotRmsAbvGrd *retain*
+28. Functional *retain after reducing the number of level from 7 to 3.*
+29. FireplaceQu *retain*
+30. GarageFinish *retain*
+31. GarageCond *drop*
+32. PavedDrive *retain*
 33. YrSold
 34. SaleType
 35. SaleCondition
@@ -145,6 +145,7 @@ rm(X)
 X <- merge(training.data, mss.map)[, c("SalePrice", "MSSubClass.class")]
 oneway.test(SalePrice ~ MSSubClass.class, X)
 bwplot(SalePrice ~ MSSubClass.class, X)
+rm(X, mss.map)
 ```
 
 ## Lot shape and configuration
@@ -614,3 +615,346 @@ oneway.test(SalePrice ~ Foundation.class, X)
 bwplot(SalePrice ~ Foundation.class, X)
 rm(X, foundation.map)
 ```
+
+We will retain this variable.
+
+## Basement quality, condition, exposure and surface area
+Te first three are categorical. We consider them separately. The unique levels 
+of these variables are
+```{r}
+unique(training.data$BsmtCond)
+unique(training.data$BsmtExposure)
+unique(training.data$BsmtQual)
+```
+
+Some houses lack basement. How many?
+```{r}
+nrow(training.data[is.na(training.data$BsmtCond), ])
+nrow(training.data[is.na(training.data$BsmtExposure), ])
+nrow(training.data[is.na(training.data$BsmtQual), ])
+```
+
+The aggregate sale prices are
+```{r}
+X.c <- aggregate(cbind(avg.price = SalePrice) ~ BsmtCond, training.data, mean)
+X.e <- aggregate(cbind(avg.price = SalePrice) ~ BsmtExposure, training.data, mean)
+X.q <- aggregate(cbind(avg.price = SalePrice) ~ BsmtQual, training.data, mean)
+
+X.c[order(X.c$avg.price), ]
+X.e[order(X.e$avg.price), ]
+X.q[order(X.q$avg.price), ]
+rm(X.c, X.e, X.q)
+```
+
+All resolve sale price equally well. Are they correlated?
+```{r}
+with(training.data, table(BsmtCond, BsmtQual))
+with(training.data, table(BsmtCond, BsmtExposure))
+with(training.data, table(BsmtExposure, BsmtQual))
+```
+
+Basement condition and quality are related to each other. Basement exposure is
+fundamentally a different variable. Let us now find out if we can select one of
+basement condition and quality.
+```{r}
+X <- with(training.data,
+          tapply(SalePrice, list(BsmtCond, BsmtQual), mean))
+Xr <- apply(X, 1, function(r) range(r, na.rm = TRUE))
+Xc <- apply(X, 2, function(c) range(c, na.rm = TRUE))
+print("Row ranges are:")
+Xr[2, ] - Xr[1, ]
+print("Column ranges are:")
+Xc[2, ] - Xc[1, ]
+rm(X, Xr, Xc)
+```
+
+The column ranges are narrower and hence we chose BsmtQual. Is basement quality
+related to overall quality?
+```{r}
+with(training.data, table(OverallQual, BsmtQual))
+```
+
+Excellent basements are mostly in best houses, good basements belong to those of
+better than average overall quality and typical/average basements are in middle
+quality houses. Thus the correlation between the two seems to be fairly strong. 
+Therefore, we choose overall quality over basement quality.
+A scatter plot of basement area with sale price is
+```{r}
+xyplot(SalePrice ~ TotalBsmtSF, data = training.data[-which(training.data$TotalBsmtSF == 0)])
+```
+
+Let us remove the cases where the basement area is zero.
+```{r}
+X <- training.data[training.data$TotalBsmtSF != 0, c("TotalBsmtSF", "SalePrice")]
+xyplot(SalePrice ~ TotalBsmtSF, X)
+```
+
+There is a strong correlation between the two, at least visually. The correlation
+coefficient is
+```{r}
+paste("cor = ", round(with(X, cor(SalePrice, TotalBsmtSF)), 4))
+rm(X)
+```
+
+We will retain this variable. However, we must remove the zeros to get a good 
+fit.
+
+## Heating quality
+How is heating quality correlated with overall quality?
+```{r}
+with(training.data,
+     table(OverallQual, HeatingQC))
+```
+
+The good and typical/average heating quality seem to have similar behavior. Can
+they be combined?
+```{r}
+oneway.test(SalePrice ~ HeatingQC,
+            data = training.data,
+            subset = HeatingQC %in% c("Fa", "Gd"))
+```
+
+How about good and TA? Or Fa and TA
+```{r}
+oneway.test(SalePrice ~ HeatingQC,
+            data = training.data,
+            subset = HeatingQC %in% c("TA", "Gd"))
+oneway.test(SalePrice ~ HeatingQC,
+            data = training.data,
+            subset = HeatingQC %in% c("TA", "Fa"))
+```
+
+The sale prices in all cases are statistically different. Let's see a 
+contingency table with mean sale price.
+```{r}
+X <- with(training.data,
+          tapply(SalePrice, list(OverallQual, HeatingQC), mean))
+```
+
+The two variables may be individually useful to predict sale price. A 
+distribution of sale prices across heating quality is
+```{r}
+bwplot(SalePrice ~ HeatingQC, training.data)
+```
+
+We will retain Heating quality.
+
+## Central air conditioning
+This is a binary variable. How are sale prices distributed across it?
+```{r}
+bwplot(SalePrice ~ CentralAir, training.data)
+```
+
+It is quite clear that houses with central airconditioning fetch a higher price.
+
+## Electrical
+The average sale price across the level is
+```{r}
+X <- aggregate(cbind(avg.price = SalePrice) ~ Electrical, training.data, mean)
+X[order(X$avg.price), ]
+```
+
+How similar are fuses P and F?
+```{r}
+oneway.test(SalePrice ~ Electrical,
+            data = training.data,
+            subset = Electrical %in% c("FuseP", "FuseF"))
+```
+
+They can be clubbed together. Can we also include fuse A?
+```{r}
+oneway.test(SalePrice ~ Electrical,
+            data = training.data,
+            subset = Electrical %in% c("FuseP", "FuseF", "FuseA"))
+```
+
+Thus, we can map the existing levels to Mix, Fuse and SBrkr.
+```{r}
+elec.map <- 
+  data.frame(Electrical = X[order(X$avg.price), "Electrical"],
+             Elec.class = as.factor(c(1, rep(2, 3), 3)))
+rm(X)
+X <- merge(training.data, elec.map)[, c("Elec.class", "SalePrice")]
+aggregate(SalePrice ~ Elec.class, X, mean)
+aggregate(SalePrice ~ Elec.class, X, length)
+```
+
+There is only one case with level '1'. Therefore our oneway test should be
+```{r}
+oneway.test(SalePrice ~ Elec.class,
+            data = X,
+            subset = Elec.class != 1)
+```
+
+Before leaving this variable, we check the distribution of sale price across
+levels.
+```{r}
+bwplot(SalePrice ~ Elec.class, X)
+rm(X, elec.map)
+```
+
+We will retain this variable after combining all fuse types to a single category.
+
+## GrLivArea - above grade living area
+This is a numerical variable. Its summary is
+```{r}
+summary(training.data$GrLivArea)
+```
+
+A scatter plot of sale price versus GrLivArea is
+```{r}
+xyplot(SalePrice ~ GrLivArea, training.data)
+```
+
+The correlation coefficient is
+```{r}
+paste("cor = ", with(training.data, cor(GrLivArea, SalePrice)))
+```
+
+Is is correlated with the other numerical variable we have seen so far?
+```{r}
+xyplot(GrLivArea ~ TotalBsmtSF, training.data)
+```
+
+Even without removing the cases with zero total basement area the correlation is
+```{r}
+paste("cor = ", with(training.data, cor(GrLivArea, TotalBsmtSF)))
+```
+
+If we remove the cases with zero total basement area,
+```{r}
+X <- training.data[training.data$TotalBsmtSF != 0, c("GrLivArea", "TotalBsmtSF")]
+paste("cor =", with(X, cor(GrLivArea, TotalBsmtSF)))
+rm(X)
+```
+
+We shall retain this variable.
+
+## BsmtFullBath and FullBath
+A contingency table of these variables with mean sale price is
+```{r}
+with(training.data, table(BsmtFullBath, FullBath))
+```
+
+A distribution of sale prices across their levels is
+```{r}
+bwplot(SalePrice ~ as.factor(BsmtFullBath), training.data, main = "BsmtFullBath")
+bwplot(SalePrice ~ as.factor(FullBath), training.data, main = "FullBath")
+```
+
+Let us examine the group means of BsmtFullBath in greater details.
+```{r}
+X <- aggregate(cbind(avg.price = SalePrice) ~ BsmtFullBath, training.data, mean)
+X[order(X$avg.price), ]
+```
+
+How close are levels 1 and 2?
+```{r}
+oneway.test(SalePrice ~ BsmtFullBath,
+            data = training.data,
+            subset = BsmtFullBath %in% c(1, 2))
+```
+
+They can be combined together.
+```{r}
+bsmt.map <- data.frame(
+  BsmtFullBath = X[order(X$avg.price), "BsmtFullBath"],
+  Bsmt.class = as.factor(c(rep(0, 2), rep(1, 2)))
+)
+X.b <- merge(training.data, bsmt.map)[, c("Bsmt.class", "FullBath", "SalePrice")]
+oneway.test(SalePrice ~ Bsmt.class, X.b)
+bwplot(SalePrice ~ Bsmt.class, X.b)
+```
+
+Let us see how the new levels of BsmtFullBath compare against FullBath.
+```{r}
+with(X.b, table(Bsmt.class, FullBath))
+rm(X, X.b, bsmt.map)
+```
+
+We will have to retain both.
+
+## KitchenQual
+How is it related to OverallQual?
+```{r}
+with(training.data, table(KitchenQual, OverallQual))
+```
+
+The table suggests that the two might be closely related. We will choose to keep
+OverallQual.
+
+## TotRmsAbvGrd
+Let us first examine the group means.
+```{r}
+X <- aggregate(cbind(avg.price = SalePrice) ~ TotRmsAbvGrd, training.data, mean)
+X[order(X$avg.price), ]
+rm(X)
+```
+
+We will retain this variable.
+
+## Functional
+The group means are
+```{r}
+X <- aggregate(cbind(avg.price = SalePrice) ~ Functional,
+               training.data,
+               mean)
+X[order(X$avg.price), ]
+```
+
+Can Min2, Min1, Maj1 and Mod be clubbed together?
+```{r}
+oneway.test(SalePrice ~ Functional,
+            data = training.data,
+            subset = Functional %in% c("Min2", "Min1", "Maj1", "Mod"))
+```
+
+Looks like they can be. We can also combine the lone "Sev" case with "Maj2". Let 
+us do that.
+```{r}
+func.map <- 
+  data.frame(Functional = X[order(X$avg.price), "Functional"],
+             Func.class = as.factor(c(1, 1, rep(2, 4), 3)))
+rm(X)
+X <- merge(training.data, func.map)[, c("Func.class", "SalePrice")]
+bwplot(SalePrice ~ Func.class, X)
+rm(X, func.map)
+```
+
+## FireplaceQu
+The group means are
+```{r}
+X <- aggregate(cbind(avg.price = SalePrice) ~ FireplaceQu,
+               training.data, mean)
+X[order(X$avg.price), ]
+```
+
+The group means are well separated. Is FireplaceQu correlated with OverallQual?
+```{r}
+with(training.data,
+     table(FireplaceQu, OverallQual))
+```
+
+It looks harder to guess one from another. We, therefore, keep both.
+
+## GarageFinish and GarageCond
+A contingency table of the two is
+```{r}
+with(training.data,
+     table(GarageFinish, GarageCond))
+```
+
+They are definitely uncorrelated. We will therefore retain both of them. Is
+GarageCond correlated to OverallQual?
+```{r}
+with(training.data,
+     table(GarageCond, OverallQual))
+```
+
+I think we should drop GarageCond because it is heavily concentrated in a single
+level TA. Which is also the reason why there are such a large number of outliers
+in its boxplot. Moreover, a GarageCond of Ex, which stands for excellent, does
+not fetch a great sale price.
+
+## 
+
