@@ -27,8 +27,8 @@
 26. KitchenQual *drop it in favor of OverallQual.*
 27. TotRmsAbvGrd *retain*
 28. Functional *retain after reducing the number of level from 7 to 3.*
-29. FireplaceQu *retain*
-30. GarageFinish *retain*
+29. FireplaceQu *drop*
+30. GarageFinish *drop*
 31. GarageCond *drop*
 32. PavedDrive *retain*
 33. YrSold *create bins.*

@@ -54,7 +54,9 @@ drop.list <- c(
   "BsmtQual",
   "BsmtCond",
   "KitchenQual",
-  "GarageCond"
+  "GarageCond",
+  "GarageFinish",
+  "FireplaceQu"
 )
 
 training.data <- read.csv("train.csv")
@@ -64,7 +66,7 @@ raw.data <- raw.data[,!colnames(raw.data) %in% drop.list]
 # Compute age and split age into bins
 max.age <- max(raw.data$YrSold - raw.data$YearBuilt)
 raw.data$Age.Lvl <- cut(raw.data$YrSold - raw.data$YearBuilt,
-                        breaks = seq(from = 0, to = round(max.age, -1), by = 10))
+                        breaks = seq(from = -10, to = round(max.age, -1), by = 10))
 
 # MSZoning
 X <-
@@ -172,8 +174,9 @@ high.limit <- round(max(raw.data$GrLivArea), -2) + 100
 raw.data$GrLivArea.Lvl <- cut(raw.data$GrLivArea, 
                               breaks = seq(low.limit, high.limit, by = 100))
 
-drop.list.2 <- c("YearBuilt", "YearSold", "Id", "GrLivArea")
+drop.list.2 <- c("YearBuilt", "YearSold", "GrLivArea")
 raw.data <- raw.data[, !(colnames(raw.data) %in% drop.list.2)]
 
-saveRDS(raw.data, "model_data.Rds")
+# We will use only complete cases for our analysis.
+saveRDS(raw.data[complete.cases(raw.data), ], "model_data.Rds")
 rm(list = ls())
