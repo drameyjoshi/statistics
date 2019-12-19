@@ -42,19 +42,71 @@ plot(
   pred.2,
   xlab = "Actual price",
   ylab = "Est. price",
-  main = "Predicted v actual sale price",
-  cex = 0.5,
+  main = "Predicted v actual sale price (V2)",
+  cex = 0.3,
   col = 2
 )
 abline(a = 0, b = 1, lty = 2)
 identify(model.data$SalePrice, pred.2, model.data$Id, cex = 0.5)
 
-# The fit isn't bad. How many cases were overestimated and how many were 
+# The fit isn't bad. How many cases were overestimated and how many were
 # underestimated?
 over.est <- length(pred.2[pred.2 > model.data$SalePrice])
 under.est <- length(pred.2[pred.2 < model.data$SalePrice])
+print(paste("# over est. =", over.est, "# under est. =", under.est))
 # Zoom the plot. It is quite clear that the dashed line seems to have more points
-# under it than over it. We are, in general, over-estimating the price. 
+# under it than over it. We are, in general, over-estimating the price.
 
 # The importance of variables is
 varImpPlot(rf.2, main = "Importance of variables", cex = 0.7)
+
+# Does growing more trees help?
+rf.3 <- update(rf.2, ntree = 1000)
+pred.3 <- predict(rf.3, model.data)
+plot(
+  model.data$SalePrice,
+  pred.3,
+  xlab = "Actual price",
+  ylab = "Est. price",
+  main = "Predicted v actual sale price (V3)",
+  cex = 0.3,
+  col = 3
+)
+abline(a = 0, b = 1, lty = 2)
+#identify(model.data$SalePrice, pred.2, model.data$Id, cex = 0.5)
+
+over.est <- length(pred.3[pred.3 > model.data$SalePrice])
+under.est <- length(pred.3[pred.3 < model.data$SalePrice])
+print(paste("# over est. =", over.est, "# under est. =", under.est))
+
+# Looks like growing more trees makes the model worse. Let us add GrLivArea as
+# a numerical variable.
+selected.predictors <- c(selected.predictors, "GrLivArea")
+rf.4 <-  randomForest(
+  reformulate(response = "SalePrice",
+              termlabels = selected.predictors),
+  data = model.data,
+  importance = TRUE,
+  ntree = 2000
+)
+pred.4 <- predict(rf.4, model.data)
+plot(
+  model.data$SalePrice,
+  pred.4,
+  xlab = "Actual price",
+  ylab = "Est. price",
+  main = "Predicted v actual sale price (V4)",
+  cex = 0.3,
+  col = 4
+)
+abline(a = 0, b = 1, lty = 2)
+identify(model.data$SalePrice, pred.2, model.data$Id, cex = 0.5)
+
+over.est <- length(pred.4[pred.4 > model.data$SalePrice])
+under.est <- length(pred.4[pred.4 < model.data$SalePrice])
+print(paste("# over est. =", over.est, "# under est. =", under.est))
+summary(pred.4 - model.data$SalePrice)
+summary(pred.2 - model.data$SalePrice)
+
+saveRDS(rf.4, "rf-v4.Rds")
+
