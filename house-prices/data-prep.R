@@ -174,7 +174,7 @@ high.limit <- round(max(raw.data$GrLivArea), -2) + 100
 raw.data$GrLivArea.Lvl <- cut(raw.data$GrLivArea, 
                               breaks = seq(low.limit, high.limit, by = 100))
 
-drop.list.2 <- c("YearBuilt", "YearSold", "GrLivArea")
+drop.list.2 <- c("YearBuilt", "YearSold")
 raw.data <- raw.data[, !(colnames(raw.data) %in% drop.list.2)]
 
 # We will use only complete cases for our analysis.
