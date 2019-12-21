@@ -94,6 +94,7 @@ rf.final <- randomForest(
   importance = TRUE,
   ntree = 600
 )
+saveRDS(rf.final, "rf-final.Rds")
 predict.final <- predict(rf.final, model.data.imputed)
 plot(
   model.data.imputed$SalePrice,
