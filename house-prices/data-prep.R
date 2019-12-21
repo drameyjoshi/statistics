@@ -1,3 +1,6 @@
+DROP_COLS <- FALSE # Should columns that are transformed be dropped?
+ONLY_COMPLETE_CASES <- FALSE
+
 # The list of variables was generated using the shell command
 # cat variables.txt | grep Keep | cut -d":" -f1 | sed 's/\([[:alnum:]][[:alnum:]]*\)/"\1",/g'
 var.list <- c(
@@ -61,7 +64,6 @@ drop.list <- c(
 
 training.data <- read.csv("train.csv")
 raw.data <- training.data[, var.list]
-raw.data <- raw.data[,!colnames(raw.data) %in% drop.list]
 
 # Compute age and split age into bins
 max.age <- max(raw.data$YrSold - raw.data$YearBuilt)
@@ -161,7 +163,7 @@ rm(mapper)
 drop.list.1 <- c(drop.list.1, "SaleCondition")
 
 # Drop the old columns
-raw.data <- raw.data[,!(colnames(raw.data) %in% drop.list.1)]
+
 
 # Convert a few variables into levels, which they are
 raw.data$MSSubClass <- as.factor(raw.data$MSSubClass)
@@ -175,8 +177,19 @@ raw.data$GrLivArea.Lvl <- cut(raw.data$GrLivArea,
                               breaks = seq(low.limit, high.limit, by = 100))
 
 drop.list.2 <- c("YearBuilt", "YearSold")
-raw.data <- raw.data[, !(colnames(raw.data) %in% drop.list.2)]
 
-# We will use only complete cases for our analysis.
-saveRDS(raw.data[complete.cases(raw.data), ], "model_data.Rds")
+if (DROP_COLS) {
+  raw.data <- raw.data[,!colnames(raw.data) %in% drop.list]
+  raw.data <- raw.data[,!(colnames(raw.data) %in% drop.list.1)]
+  raw.data <- raw.data[, !(colnames(raw.data) %in% drop.list.2)]
+}
+
+
+if (ONLY_COMPLETE_CASES) {
+  # We will use only complete cases for our analysis.
+  saveRDS(raw.data[complete.cases(raw.data), ], "model_data.Rds")
+} else {
+  saveRDS(raw.data, "model_data.Rds")
+}
+
 rm(list = ls())

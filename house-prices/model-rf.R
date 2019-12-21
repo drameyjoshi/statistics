@@ -2,7 +2,7 @@ library(randomForest)
 setwd("house-prices")
 
 model.data <- readRDS("model_data.Rds")
-all.predictors <- colnames(model.data)[-c(1, 13)]
+all.predictors <- colnames(model.data)[-c(10, 38)]
 rf.1 <-
   randomForest(
     reformulate(response = "SalePrice", termlabels = all.predictors),
@@ -47,7 +47,7 @@ plot(
   col = 2
 )
 abline(a = 0, b = 1, lty = 2)
-identify(model.data$SalePrice, pred.2, model.data$Id, cex = 0.5)
+#identify(model.data$SalePrice, pred.2, model.data$Id, cex = 0.5)
 
 # The fit isn't bad. How many cases were overestimated and how many were
 # underestimated?
@@ -110,3 +110,45 @@ summary(pred.2 - model.data$SalePrice)
 
 saveRDS(rf.4, "rf-v4.Rds")
 
+selected.predictors <-
+  c(
+    selected.predictors,
+    "MSSubClass",
+    "MSZoning",
+    "LandContour",
+    "BsmtExposure",
+    "CentralAir",
+    "FullBath",
+    "FireplaceQu",
+    "GarageFinish",
+    "PavedDrive"
+  )
+# The new predictors have NAs. Let us impute them.
+model.data.imputed <- 
+  rfImpute(reformulate(response = "SalePrice",
+                       termlabels = selected.predictors),
+           data = model.data)
+rf.5 <-  randomForest(
+  reformulate(response = "SalePrice",
+              termlabels = selected.predictors),
+  data = model.data.imputed,
+  importance = TRUE,
+  ntree = 1000,
+  do.trace = TRUE)
+pred.5 <- predict(rf.5, model.data.imputed)
+plot(
+  model.data.imputed$SalePrice,
+  pred.5,
+  xlab = "Actual price",
+  ylab = "Est. price",
+  main = "Predicted v actual sale price (V5)",
+  cex = 0.3,
+  col = 6
+)
+abline(a = 0, b = 1, lty = 2)
+summary(pred.2 - model.data$SalePrice)
+summary(pred.3 - model.data$SalePrice)
+summary(pred.4 - model.data$SalePrice)
+summary(pred.5 - model.data$SalePrice)
+
+saveRDS(rf.5, "rf.5.Rds")
