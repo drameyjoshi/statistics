@@ -1,0 +1,109 @@
+\chapter{Introduction}\label{c1}
+\section{Problems}
+\begin{enumerate}
+\item In this problem, $w = (w_0, \ldots, w_M) \in \sor^{M+1}$, $x, y \in \sor$. Likewise, the $n$
+observations $y_1, \ldots, y_n$ for each one of $x_1, \ldots, x_n$ are also real numbers. $y$
+is modelled as a polynomial in $x$. That is,
+\begin{equation}\label{c1pe1}
+y = y(x, w) = \sum_{i=0}^Mw_ix^i.
+\end{equation}
+The model error is given by
+\begin{equation}\label{c1pe2}
+E(w) = \frac{1}{2}\sum_{j=1}^N \left(y(x_j, w) - t_j\right)^2,
+\end{equation}
+where $t_j$ is the true value of $y$ at $x_j$. The goal of the exercise is to choose $w$ such 
+that for a given set of observations $(x_j, t_j)$, $E$ is minimal. Therefore, we find the
+gradient of $E$,
+\[
+DE = \sum_{j=1}^N\left(y(x_j, w) - t_j\right)Dy.
+\]
+The gradient of $y$ with respect to $w$ is
+\[
+Dy = \sum_{i=0}^M x^i,
+\]
+so that
+\[
+DE = \sum_{j=1}^N\left(y(x_j, w) - t_j\right)\sum_{i=0}^M x_j^i.
+\]
+The condition for an extremum is $DE = 0$. The vector $DE$ is zero if and only if each one
+of its components is zero.
+\[
+\sum_{j=1}^N\left(\sum_{k=0}^M w_k x_j^{k+i} - t_jx_j^i\right) = 0, \forall i = 0, \ldots, M
+\]
+We can simplify it as
+\[
+\sum_{k=0}^M \sum_{j=1}^N w_k x_j^{k+i} = \sum_{i=0}^M\sum_{j=1}^N t_jx_j^i.
+\]
+Let,
+\begin{eqnarray*}
+T_i &=& \sum_{j=1}^N t_jx_j^i \\
+A_{ik} &=& \sum_{j=1}^N x_j^{k+i}
+\end{eqnarray*}
+so that the condition from an extremum becomes
+\[
+\sum_{k=0}^M A_{ik}w_k = T_i
+\]
+
+\item The regularized error function is
+\begin{equation}\label{c1pe3}
+E(w) = \frac{1}{2}\sum_{j=1}^N \left(y(x_j, w) - t_j\right)^2 + \frac{\lambda}{2}\norm{w}^2.
+\end{equation}
+Its gradient is
+\[
+DE = \sum_{j=1}^N\left(y(x_j, w) - t_j\right)Dy + \lambda w,
+\]
+where we have used the fact that 
+\[
+D\norm{w}^2 = \left(\frac{\partial}{\partial w_0}\sum_{i=0}^M w_i^2, \ldots, \frac{\partial}{\partial w_M}\sum_{i=0}^M w_i^2\right) = 2w.
+\]
+The vector $DE = 0$ if and only if all its components are zero. Therefore,
+\[
+\sum_{j=1}^N\left(\sum_{k=0}^M w_k x_j^{k+i} - t_jx_j^i\right) + \lambda w_i = 0, \forall i = 0, \ldots, M
+\]
+Using the definitions of $A_{ik}$ and $T_i$ introduced in the previous problem, the condition
+for extremum becimes
+\[
+\sum_{k=0}^M A_{ik}w_k = T_i - \lambda w_i.
+\]
+
+\item We are given that $p(r) = 0.2, p(b) = 0.2, p(b) = 0.6$. The conditional probabilities are
+$p(a|r) = 0.3, p(o|r) = 0.4, p(l|r) = 0.3$, $p(a|b) = 0.5, p(o|b) = 0.5$ and $p(a|g) = 0.3, p(o|g)
+= 0.3, p(l|g) = 0.6$.
+
+Now, 
+\[
+p(a) = p(a|r)p(r) + p(a|b)p(b) + p(a|g)p(g) = 0.34.
+\]
+
+If the selected fruit is orange, the probability that it came from the green box is $p(g|o)$. Using
+Bayes theorem,
+\[
+p(g|o) = \frac{p(g, o)}{p(o)} = \frac{p(o|g)p(g)}{p(o)}.
+\]
+The denominator is calculated as
+\[
+p(o) = p(o|r)p(r) + p(o|b)p(b) + p(o|g)p(g) = 0.36
+\]
+Therefore,
+\[
+p(g|o) = \frac{0.3 \times 0.6}{0.36} = 0.5.A
+\]
+
+\item Consider equation (1.27) of the book. Instead of writing it with modulus, we write it as
+\[
+p_y(y) = \pm p_x(g(y))g^\prime(y),
+\]
+where we chose the sign to make $p_y \ge 0$ for all $y$. The extremum of this function is found
+using the relation
+\begin{equation}\label{c1pe4}
+p_y^\prime(y) = \pm\left(\frac{dp_x}{dg}\left(g^\prime(y)\right)^2 + p_x(g(y))g^{\prime\prime}(y)\right)
+\end{equation}
+and equating it to zero. If instead of a probability density, we had an ordinary
+function $h(y) = f(g(y))$. Then $h^\prime(y) = df/dg g^\prime(y)$ and the condition for extremum
+would be $df/dg = 0$ if $g^\prime(y) \ne 0$. The value of $y$ obtained using this relation
+is related to the $x$ found using $f^\prime(x) = 0$ is precisely $x = g(y)$. However, it
+is not so because of the second term on the right hand side of equation \eqref{c1pe4}.
+
+However, if $g$ is a linear function of $y$ then its second derivative vanishes and the two
+equations become similar.
+\end{enumerate}
