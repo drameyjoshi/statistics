@@ -10,9 +10,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
-library(MASS)
-library(lattice)
-
 training.data <- read.csv("train.csv")
 ```
 
@@ -58,15 +55,21 @@ check_group_means <-
       rm(anova.res)
     }
     
-    if (do.transpose) {
-      bwplot(training.data[[column.name]] ~ training.data$SalePrice,
-             xlab = column.name,
-             ylab = "Sale Price")
-    } else {
-      bwplot(training.data$SalePrice ~ training.data[[column.name]],
-             xlab = column.name,
-             ylab = "Sale Price")
-    }
+    title.text <- paste("Sale price for", column.name)
+    boxplot(training.data$SalePrice ~ as.factor(training.data[[column.name]]),
+            cex = 0.7,
+            main = title.text,
+            xlab = column.name,
+            ylab = "Sale price")
+    # if (do.transpose) {
+    #   bwplot(training.data[[column.name]] ~ training.data$SalePrice,
+    #          xlab = column.name,
+    #          ylab = "Sale Price")
+    # } else {
+    #   bwplot(training.data$SalePrice ~ training.data[[column.name]],
+    #          xlab = column.name,
+    #          ylab = "Sale Price")
+    # }
     
   }
 ```
@@ -198,7 +201,7 @@ with(training.data,
 A significant percentage of sales were normal. Is there a statistically
 significant difference in their sale price? We first view the data
 ```{r}
-bwplot(SalePrice ~ SaleCondition, data = training.data)
+boxplot(SalePrice ~ SaleCondition, data = training.data, cex = 0.5)
 ```
 
 The data shows a large number of outliers even in the 'normal' case. Further,
@@ -258,7 +261,7 @@ that there are only two transactions with sale type 'Cond'.
 
 Does sale type determine sale price? 
 ```{r}
-bwplot(SalePrice ~ SaleType, data = training.data)
+boxplot(SalePrice ~ SaleType, data = training.data, cex = 0.5)
 ```
 
 The 'WD' class shows a large number of outliers. But this class also tend to 
@@ -286,7 +289,7 @@ with(temp.ds,
 
 The distribution of data is
 ```{r}
-bwplot(SalePrice ~ SaleType.1, data = temp.ds)
+boxplot(SalePrice ~ SaleType.1, data = temp.ds, cex = 0.5)
 ```
 
 Among the 'Non-WD' is 'New' sufficiently different?
@@ -307,7 +310,7 @@ with(temp.ds,
 
 The distribution of data is
 ```{r}
-bwplot(SalePrice ~ SaleType.2, data = temp.ds)
+boxplot(SalePrice ~ SaleType.2, data = temp.ds, cex = 0.5)
 ```
 
 How different are "Others" from "WD"?
@@ -325,7 +328,7 @@ A distribution of sale price across dwelling types is
 ```{r}
 X <- data.frame(MSSubClass = as.factor(training.data$MSSubClass), 
                 SalePrice = training.data$SalePrice)
-bwplot(SalePrice ~ MSSubClass, data = X)
+boxplot(SalePrice ~ MSSubClass, data = X, cex = 0.5)
 rm(X)
 ```
 
@@ -346,7 +349,7 @@ by one class alone.
 
 ## Zoning classification
 ```{r}
-bwplot(SalePrice ~ MSZoning, data = training.data)
+boxplot(SalePrice ~ MSZoning, data = training.data, cex = 0.5)
 ```
 
 
@@ -390,9 +393,10 @@ It is the linear feet of road connecting the property. Let us summarize the
 lot frontage data.
 ```{r}
 summary(training.data$LotFrontage)
-bwplot(training.data$LotFrontage,
+boxplot(training.data$LotFrontage,
        xlab = "Lot frontage",
-       main = "Lot frontage")
+       main = "Lot frontage",
+       cex = 0.5)
 ```
 
 Is there a correlation between lot frontage and sale price? Before we find it
@@ -407,7 +411,7 @@ cat(paste("Correlation between lot frontage and sale price is",
 
 There is some correlation between the two. Let us visualize the data.
 ```{r}
-xyplot(
+plot(
   SalePrice ~ LotFrontage,
   data = X,
   xlab = "Lot frontage",
@@ -422,14 +426,20 @@ It is difficult to imagine a linear model predicting sale price using lot
 frontage. Before leaving the variable. let us examine the histogram of the lot
 frontage.
 ```{r}
-truehist(training.data$LotFrontage, xlab = "Lot frontage")
+hist(training.data$LotFrontage, 
+     xlab = "Lot frontage",
+     breaks = 50,
+     main = "Histogram of lot frontage")
 ```
 
 ## Lot area
 Lot area is the size of the land in square feet. Its summary is
 ```{r}
 summary(training.data$LotArea)
-truehist(training.data$LotArea, xlab = "Lot area")
+hist(training.data$LotArea, 
+     xlab = "Lot area", 
+     breaks = 50, 
+     main = "Histogram of lot area")
 ```
 
 The lot area data is highly skewed. There are a very large number of lots with
@@ -445,7 +455,7 @@ It is interesting to note that two variables do not have a very high correlation
 Perhaps, the land size is a poor predictor of the house price. A plot of sale 
 price against the lot area is
 ```{r}
-xyplot(
+plot(
   SalePrice ~ LotArea,
   data = training.data,
   xlab = "Lot area",
@@ -509,7 +519,12 @@ with(training.data,
 The are distinct. Yet we would like to see the box plot of sale price for each
 type of lot shape.
 ```{r}
-bwplot(SalePrice ~ LotShape, data = training.data)
+boxplot(SalePrice ~ LotShape, 
+        data = training.data,
+        cex = 0.7,
+        xlab = "LotShape",
+        ylab = "SalePrice",
+        main = "SalePrice for LotShape")
 ```
 
 Are the differences in the means statistically significant?
@@ -530,7 +545,12 @@ with(training.data,
 
 Their box plot is
 ```{r}
-bwplot(SalePrice ~ LandContour, data = training.data)
+boxplot(SalePrice ~ LandContour, 
+        data = training.data,
+        cex = 0.7,
+        xlab = "LandContour",
+        ylab = "SalePrice",
+        main = "SalePrice for LandContour")
 ```
 
 Let us run an ANOVA to compare the group means.
@@ -600,7 +620,7 @@ with(training.data,
             Neighborhood,
             mean))
 oneway.test(SalePrice ~ Neighborhood, data = training.data)
-bwplot(Neighborhood ~ SalePrice, data = training.data)
+boxplot(SalePrice ~ Neighborhood, data = training.data, cex = 0.5)
 ```
 
 Not surprisingly, neighborhood is a predictor of sale price. 
@@ -723,7 +743,7 @@ data_availability("OverallCond")
 
 Is there a correlation between these attributes?
 ```{r}
-xyplot(
+plot(
   OverallQual ~ OverallCond,
   data = training.data,
   xlab = "Overall quality",
@@ -750,7 +770,7 @@ with(training.data,
             OverallQual,
             mean))
 oneway.test(SalePrice ~ OverallQual, data = training.data)
-bwplot(OverallQual ~ SalePrice, data = training.data)
+boxplot(SalePrice ~ OverallQual, data = training.data, cex = 0.5)
 ```
 
 The overall quality, not surprisingly, is a very strong indicator of sale
@@ -759,7 +779,7 @@ price.
 ```{r}
 with(training.data,
      tapply(SalePrice, OverallCond, mean))
-bwplot(OverallCond ~ SalePrice, data = training.data)
+boxplot(SalePrice ~ OverallCond, data = training.data, cex = 0.5)
 ```
 
 We are unable to carry out a full ANOVA because some levels lack data. Let us
@@ -795,13 +815,16 @@ Further, the age of the house and the number of years since last remodeling can
 be split into intervals. To do so, we need their summary.
 ```{r}
 summary(age.data$Age)
-truehist(age.data$Age, xlab = "Age")
+hist(age.data$Age, xlab = "Age", breaks = 14, main = "Histogram of age")
 ```
 
 We will create levels of $20$ years each for the age of the house.
 ```{r}
 summary(age.data$YrSinceLastMod)
-truehist(age.data$YrSinceLastMod, xlab = "# years since last remodeling")
+hist(age.data$YrSinceLastMod, 
+     xlab = "# years since last remodeling", 
+     breaks = 14,
+     main = "Histogram of # years since last remodeling")
 ```
 
 An interval of $10$ years might suit the attribute 'years since last modeling'.
@@ -823,7 +846,7 @@ predictors of sale price. We first check the group means and box plots.
 ```{r}
 with(age.data,
      tapply(SalePrice, Age.1, mean))
-bwplot(SalePrice ~ Age.1, data = age.data, xlab = "Age")
+boxplot(SalePrice ~ Age.1, data = age.data, xlab = "Age", cex = 0.5)
 ```
 
 The house price decreases with age up to a limit and then rises as houses grow
@@ -832,7 +855,7 @@ older.
 ```{r}
 with(age.data,
      tapply(SalePrice, YrSinceLastMod.1, mean))
-bwplot(SalePrice ~ YrSinceLastMod.1, data = age.data, xlab = "Age")
+boxplot(SalePrice ~ YrSinceLastMod.1, data = age.data, xlab = "Age", cex = 0.5)
 ```
 
 Quite expectedly, recently renovated houses fetch a better price. We will 
@@ -1118,7 +1141,7 @@ data_availability("MasVnrType")
 A related variable is MasVnrArea. Let us explore their relationship through
 box plots.
 ```{r}
-bwplot(MasVnrArea ~ MasVnrType, data = training.data)
+boxplot(MasVnrArea ~ MasVnrType, data = training.data, cex = 0.5)
 ```
 
 It is quite strange to see the category 'None' having non-zero area and the
@@ -1149,7 +1172,7 @@ Looks like they are no different and can be combined in a single category.
 Let us see how sale price varies with veneer area for all types except 'None'.
 
 ```{r}
-xyplot(SalePrice ~ MasVnrArea | MasVnrType, data = training.data, cex = 0.1)
+coplot(SalePrice ~ MasVnrArea | MasVnrType, data = training.data, cex = 0.1)
 ```
 
 As expected, there is a positive correlation between veneer area and sale price.
@@ -1286,7 +1309,7 @@ data_availability("TotalBsmtSF", show.grp.size = FALSE)
 
 Variation of sale price for BsmtFinSF1 is
 ```{r}
-xyplot(SalePrice ~ BsmtFinSF1, 
+plot(SalePrice ~ BsmtFinSF1, 
        data = training.data[training.data$BsmtFinSF1 != 0,], 
        cex = 0.1)
 ```
@@ -1294,7 +1317,7 @@ xyplot(SalePrice ~ BsmtFinSF1,
 Basement area of type 1 influences sale price.
 
 ```{r}
-xyplot(SalePrice ~ BsmtFinSF2, 
+plot(SalePrice ~ BsmtFinSF2, 
        data = training.data[training.data$BsmtFinSF2 != 0,], 
        cex = 0.1)
 ```
@@ -1302,7 +1325,7 @@ xyplot(SalePrice ~ BsmtFinSF2,
 Basement area of type 2 is not a very strong influencer of sale price.
 
 ```{r}
-xyplot(SalePrice ~ BsmtUnfSF, 
+plot(SalePrice ~ BsmtUnfSF, 
        data = training.data[training.data$BsmtUnfSF != 0,], 
        cex = 0.1)
 ```
@@ -1310,7 +1333,7 @@ xyplot(SalePrice ~ BsmtUnfSF,
 Unfinished area of the basement is not a very strong influencer of sale price.
 
 ```{r}
-xyplot(SalePrice ~ TotalBsmtSF, 
+plot(SalePrice ~ TotalBsmtSF, 
        data = training.data[training.data$TotalBsmtSF != 0,], 
        cex = 0.1)
 ```
@@ -1406,10 +1429,10 @@ data_availability("GrLivArea", show.grp.size = FALSE)
 ```
 
 ```{r}
-xyplot(SalePrice ~ X1stFlrSF, data = training.data, cex = 0.1)
-xyplot(SalePrice ~ X2ndFlrSF, data = training.data[training.data$X2ndFlrSF != 0,], cex = 0.1)
-xyplot(SalePrice ~ LowQualFinSF, data = training.data[training.data$LowQualFinSF != 0,], cex = 0.1)
-xyplot(SalePrice ~ GrLivArea, data = training.data, cex = 0.1)
+plot(SalePrice ~ X1stFlrSF, data = training.data, cex = 0.1)
+plot(SalePrice ~ X2ndFlrSF, data = training.data[training.data$X2ndFlrSF != 0,], cex = 0.1)
+plot(SalePrice ~ LowQualFinSF, data = training.data[training.data$LowQualFinSF != 0,], cex = 0.1)
+plot(SalePrice ~ GrLivArea, data = training.data, cex = 0.1)
 ```
 
 Not surprisingly, the above grade (ground) living area square feet is strongly
@@ -1585,7 +1608,9 @@ summary(X.1$garage.age)
 Let us view the histogram of age of the garage before splitting them into 
 intervals.
 ```{r}
-truehist(X.1$garage.age, xlab = "Age of the garage")
+hist(X.1$garage.age, 
+     xlab = "Age of the garage", 
+     main = "Histogram of garage age")
 ```
 
 An interval of $10$ years seems appropriate.
@@ -1708,7 +1733,7 @@ summary(training.data$WoodDeckSF)
 If the median is zero then more than half of the houses do not have a wooden
 deck. When it is present, does it have an impact on the sale price?
 ```{r}
-xyplot(SalePrice ~ WoodDeckSF, 
+plot(SalePrice ~ WoodDeckSF, 
        data = training.data[training.data$WoodDeckSF > 0, ],
        cex = 0.3)
 ```
@@ -1731,7 +1756,7 @@ summary(training.data$OpenPorchSF)
 At least a quarter of the cases do not have an open porch. Nevertheless, for 
 those that have it, let us look at the trend of sale price versus porch area.
 ```{r}
-xyplot(SalePrice ~ OpenPorchSF,
+plot(SalePrice ~ OpenPorchSF,
        data = training.data[training.data$OpenPorchSF != 0, ],
        cex = 0.3)
 ```
