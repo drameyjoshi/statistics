@@ -14,7 +14,79 @@ The hessian of $f$ is
 (D^2 f)_{ij} := \frac{\partial^2 f}{\partial x_i \partial x_j}.
 \end{equation}
 
-\section{Problems}
+\section{Bayesian curve fitting}\label{c1s2}
+The problem consists of using the data $\{(x_i, t_i) : 1 \le i \le n\}$ to find the value
+of $t$ when a new $x$ is given. We shall fit the data using the polynomial
+\begin{equation}\label{c1s2e1}
+y(x, w) = \sum_{i=0}^M w_i x^i.
+\end{equation}
+The polynomial coefficients $w_0, \ldots, w_M$ can be considered to be components of a 
+vector $w \in \sor^M$. We assume that for a given value of $x_i$, the target $t_i$ has a 
+gaussian distribution with mean $y(x, w)$ and precision $\beta$ (or variance $\beta^{-1}$).
+Thus,
+\begin{equation}\label{c1s2e2}
+p(t_i | x_i, w, \beta) = \mathcal{N}(t | y(x_i, w), \beta^{-1/2}).
+\end{equation}
+We will use the training data $\{(x_i, t_i): 1 \le i \le N\}$ to estimate the values of $w$
+and $\beta$ using maximizing the likelihood function. If the data are assumed to be drawn
+independently from the distribution of equation \eqref{c1s2e2} then the likelihood function
+is
+\[
+p(t | x, w, \beta) = \prod_{i=1}^N p(t_i | x_i, w, \beta) = \prod_{i=1}^N \mathcal{N}(y(x_i, w), \beta^{-1/2})
+\]
+where $x, t \in \sor^n$, $w \in \sor^{M+1}$ and $y$ is given by \eqref{c1s2e1}. The log-likelihood
+function is
+\begin{equation}\label{c1s2e3}
+\ln p(t|x,w,\beta) = -\frac{\beta}{2}\sum_{i=1}^N(y(x_i, w) - t_i)^2 + \frac{N}{2}\ln\beta - \frac{N}{2}\ln(2\pi).
+\end{equation}
+Maximizing $\ln p$ with respect to $w$ is the same as minimizing the quantity,
+\begin{equation}\label{c1s2e4}
+\sum_{i=1}^N(y(x_i, w) - t_i)^2.
+\end{equation}
+This quantity is the sum of squares of residuals and the problem of finding optimal $w$ reduces
+to that of ordinary least squares regression. In order to find $\beta$ that maximizes $\ln p$
+we differentiate the equation with respect to $\beta$ to get
+\[
+\frac{\partial}{\partial\beta}\ln p(t|x,w,\beta) = -\frac{1}{2}\sum_{i=1}^N(y(x_i, w) - t_i)^2 + \frac{N}{2\beta}
+\]
+The derivative vanishes when $\beta = \beta_{ML}$, where
+\begin{equation}\label{c1s2e5}
+\frac{1}{\beta_{ML}} = \frac{1}{N}\sum_{i=1}^N(y(x_i, w) - t_i)^2.
+\end{equation}
+If we are now given a new $x$, say $x_{N+1}$ then the corresponding target value $t_{N+1}$ has
+a distribution
+\[
+p(t_{N+1} | x_{N+1}, w_{ML}, \beta_{ML}) = \mathcal{N}(t_{N+1}| y(x_{N+1}, w_{ML}), \beta_{ML}^{-1}).
+\]
+
+We now choose a prior distribution for $w$. Let it be a gaussian with mean zero and variance-covariance
+matrix $\alpha^{-1}I$, where $I$ is an $(M+1) \times (M+1)$ identity matrix. Thus,
+\begin{equation}\label{c1s2e6}
+p(w|\alpha) = \mathcal{N}(w|0, \alpha^{-1}I) = \left(\frac{\alpha}{2\pi}\right)^{(M+1)/2}\exp\left(-\frac{\alpha}{2}w^Tw\right).
+\end{equation}
+The posterior distribution for $w$ given $(x_i, t_i), \alpha, \beta$ is
+\begin{equation}\label{c1s2e7}
+p(w|x, t, \alpha, \beta) \propto p(t|x,w,\beta)p(w|\alpha).
+\end{equation}
+We can now find $w$ suitable for the data by maximizing the right hand side. The posterior probability
+on the right hand side is conditioned on the data $(x, t)$, the hyperparameter $\alpha$ and the maximum
+likelihood estimate $\beta$. Taking a logarithm of both sides of equation \eqref{c1s2e7},
+\[
+\ln p(w|x,t,\alpha,\beta) = \ln p(t|x,w,\beta) + \ln p(w|\alpha) + \ln K,
+\]
+where $K$ is the constant of proportionality in \eqref{c1s2e7}. From equations \eqref{c1s2e3} and
+\eqref{c1s2e6} we get
+\[
+\ln p(w|x,t,\alpha,\beta) = -\frac{\beta}{2}\sum_{i=1}^N(y(x_i, w) - t_i)^2 + \frac{N}{2}\ln\beta - \frac{N}{2}\ln(2\pi) - \frac{\alpha}{2}w^Tw + \ln K.
+\]
+Maximizing $\ln p(w|x,t,\alpha,\beta)$ with respect to $w$ is equivalent to minimizing the function
+\[
+\frac{\beta}{2}\sum_{i=1}^N(y(x_i, w) - t_i)^2 + \frac{\alpha}{2}w^Tw.
+\]
+This expression is the regularized least square error of equation (1.4) of the book. Equations (1.68) to (1.72)
+will be derived in chapter 3.
+
+\section{Problems}\label{c1p}
 \begin{enumerate}
 \item In this problem, $w = (w_0, \ldots, w_M) \in \sor^{M+1}$, $x, y \in \sor$. Likewise, the $n$
 observations $y_1, \ldots, y_n$ for each one of $x_1, \ldots, x_n$ are also real numbers. $y$
@@ -291,8 +363,8 @@ and hence $\var(X + Z) = \ev(X^2) - (\ev(X))^2 + \ev(Z^2) - (\ev(Z))^2 = \var(X)
 where $x = (x_1, \ldots, x_n) \in \sor^n$ is the vector of realizationf of $n$ independent and identically gaussian 
 distributed random variables with parameters $\mu$ and $\sigma$ respectively. Then,
 \begin{eqnarray*}
-\frac{d}{d\mu}\ln p(x | \mu, \sigma^2) &=& \frac{1}{\sigma^2}\sum_{n=1}^N (x_n - \mu) \\
-\frac{d}{d\sigma}\ln p(x | \mu, \sigma^2) &=& \frac{1}{\sigma^3}\sum_{n=1}^N (x_n - \mu)^2 - \frac{N}{\sigma} 
+\frac{\partial}{\partial\mu}\ln p(x | \mu, \sigma^2) &=& \frac{1}{\sigma^2}\sum_{n=1}^N (x_n - \mu) \\
+\frac{\partial}{\partial\sigma}\ln p(x | \mu, \sigma^2) &=& \frac{1}{\sigma^3}\sum_{n=1}^N (x_n - \mu)^2 - \frac{N}{\sigma} 
 \end{eqnarray*}
 Equating the derivatives to zero we get
 \begin{eqnarray*}
@@ -323,4 +395,56 @@ this with equation \eqref{c1pe10} we get
 \[
 \ev(X_iX_j) = \mu^2 + \sigma^2\delta_{ij}.
 \]
+
+Let us now find the expectation of the maximum likelihood estimates.
+\begin{equation}\label{c1pe12}
+\ev{\mu_{ML}} = \frac{1}{N}\sum_{n=1}^N\ev{x_n} = \mu.
+\end{equation}
+We also need its variance. As a first step, we need
+\[
+\var{\mu_{ML}} = \ev[(\mu_{ML} - \mu)^2] = \ev(\mu_{ML})^2 - 2\mu\ev(\mu_{ML}) + \mu^2) = \ev(\mu_{ML})^2 - \mu^2.
+\]
+In order to evaluate the first term, we need to find $\ev(x_nx_m)$. As they are i.i.d. variables, their
+covariance is zero. Therefore, when $n \ne m$,
+\[
+\ev[(x_n - \mu)(x_m - \mu)] = 0 \Rightarrow \ev(x_nx_m) = \mu^2,
+\]
+and when $n = m$,
+\[
+\ev[(x_n - \mu)^2] = \sigma^2 \Rightarrow \ev(x_n^2) = \sigma^2 + \mu^2.
+\]
+We can combine the previous two equations to get
+\begin{equation}\label{c1pe13}
+\ev(x_nx_m) = \mu^2 + \sigma^2\delta_{nm}.
+\end{equation}
+We now proceed to find
+\begin{equation}\label{c1pe14}
+\ev(\mu^2_{ML}) = \frac{1}{N^2}\sum_{m,n=1}^N\ev(x_nx_m) = \mu^2 + \frac{\sigma^2}{N}.
+\end{equation}
+
+The expectation value of $\sigma_{ML}^2$ is
+\[
+\ev(\sigma_{ML}^2) = \frac{1}{N}\sum_{n=1}^N[\ev(x_n^2) - 2\ev(x_n\mu_{ML}) + \ev(\mu_{ML}^2)]
+\]
+Using equations \eqref{c1pe14} and \eqref{c1pe13} we get
+\begin{eqnarray*}
+\ev(\sigma_{ML}^2) &=& \frac{1}{N}\sum_{n=1}^N\left[\mu^2 + \sigma^2 - 2\ev(x_n\mu_{ML}) + \mu^2 + \frac{\sigma^2}{N}\right] \\
+ &=& \frac{1}{N}\sum_{n=1}^N\left[2\mu^2 + \sigma^2 + \frac{\sigma^2}{N} - \frac{2}{N}\sum_{m=1}^N\ev(x_nx_m)\right] \\
+ &=& \frac{1}{N}\sum_{n=1}^N\left[2\mu^2 + \sigma^2 + \frac{\sigma^2}{N} - \frac{2}{N}\sum_{m=1}^n(\mu^2 + \sigma^2\delta_{mn})\right] \\
+ &=& \frac{1}{N}\sum_{n=1}^N \frac{N - 1}{N}\sigma^2
+\end{eqnarray*}
+so that
+\begin{equation}\label{c1pe15}
+\ev(\sigma_{ML}^2) = \frac{N - 1}{N}\sigma^2.
+\end{equation}
+
+\item Consider the quantity
+\[
+s^2 = \frac{1}{N}\sum_{n=1}^N (x_n - \mu)^2
+\]
+then
+\[
+\ev(s^2) = \frac{1}{N}\sum_{n=1}^n(\ev(x_n^2) - 2\mu\ev(x_n) + \mu^2) = \frac{1}{N}\sum_{n=1}^N(\sigma^2 + \mu^2 - \mu^2) = \sigma^2.
+\]
+
 \end{enumerate}
