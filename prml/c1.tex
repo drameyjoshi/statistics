@@ -2,11 +2,16 @@
 \section{Notation and definitions}\label{c1s1}
 We will follow the contemporary mathematical style of using unadorned symbols for vectors and
 matrices. The nature of a symbol will be determined by its definition and not appearance. For
-example, $x$ could be a real number or a point in $\sor^n$ depending on the context.
+example, $x$ could be a real number or a point in $\sor^n$ depending on the context. Random
+variables will be denoted by capital letters and their realizations by small letters.
 
 If $f$ is a function of $n$ variables, $x_1, \ldots, x_n$ then its gradient is defined as
 \begin{equation}\label{c1s1e1}
 Df := \left(\frac{\partial f}{\partial x_1}, \ldots, \frac{\partial f}{\partial x_n}\right).
+\end{equation}
+The hessian of $f$ is
+\begin{equation}\label{c1s1e2}
+(D^2 f)_{ij} := \frac{\partial^2 f}{\partial x_i \partial x_j}.
 \end{equation}
 
 \section{Problems}
@@ -189,7 +194,7 @@ the integral remain unchanged. Then,
 The second integral is zero because the integrand is an odd function of $u$ and the limits of the
 integral are symmetric around the origin.
 
-\item The variance of a normally distributed random variable is $\var(X) = \ev(X^2) - (\ev X)^2 
+The variance of a normally distributed random variable is $\var(X) = \ev(X^2) - (\ev X)^2 
 = \ev(X^2) - \mu^2$, where we have used the previous exercise. Thus, in order to get the variance
 we just need the expectation of $X^2$. It is
 \[
@@ -220,5 +225,102 @@ becomes
 \]
 from which it immediately follows that $\var{X} = \sigma^2$.
 
+\item The mode of a density function is its extremum. In the case of univariate normal distribution,
+\[
+\frac{d\mathcal{N}}{dx} = \frac{-1}{\sqrt{2\pi\sigma^2}}\frac{x - \mu}{2\sigma^2}\exp\left(-\frac{(x - \mu)^2}{2\sigma^2}\right).
+\]
+The right hand side vanishes at $x = \mu$. To confirm that the extremum is a maximum, we need the
+second derivative.
+\begin{eqnarray*}
+\frac{d^2\mathcal{N}}{dx^2} &=& \frac{-1}{2\sigma^3\sqrt{2\pi}}\exp\left(-\frac{(x - \mu)^2}{2\sigma^2}\right) \\
+ & & + \frac{1}{\sqrt{2\pi\sigma^2}}\frac{(x - \mu)^2}{4\sigma^4}\exp\left(-\frac{(x - \mu)^2}{2\sigma^2}\right) \\
+ &=& \frac{1}{\sigma\sqrt{2\pi}}\exp\left(-\frac{(x - \mu)^2}{2\sigma^2}\right)\left[\frac{(x - \mu)^2}{4\sigma^4} - \frac{1}{2\sigma^2}\right]
+\end{eqnarray*}
+The second derivative is negative at $x = \mu$ confirming that the extremum is indeed a maximum.
 
+The multivariate normal distribution is
+\[
+\mathcal{N}(x|\mu,\Sigma) = \frac{1}{(2\pi)^{n/2}\abs{\Sigma}^2}\exp\left(-\frac{1}{2}(x - \mu)^T\Sigma^{-1}(x - \mu)\right),
+\]
+where $x, \mu \in \sor^n$ and $\Sigma$ is the $n \times n$ variance-covariance matrix. Its gradient is
+\[
+D\mathcal{N} = \frac{-1}{(2\pi)^{n/2}\abs{\Sigma}^2}\exp\left(-\frac{(x - \mu)^T\Sigma^{-1}(x - \mu)}{2}\right)\left(\frac{\Sigma^{-1}(x - \mu)}{2} + \frac{(x - \mu)^T\Sigma^{-1}}{2}\right).
+\]
+As $\Sigma$ is a symmetric matrix, so is its inverse and hence $\Sigma^{-1}(x - \mu) = (x - \mu)^T\Sigma^{-1}$ and hence
+\[
+D\mathcal{N} = -\frac{1}{{2\pi}^{n/2}\abs{\Sigma}^2}\exp\left(-\frac{1}{2}(x - \mu)^T\Sigma^{-1}(x - \mu)\right)\Sigma^{-1}(x - \mu).
+\]
+The gradient vanishes when $x = \mu$. In order to examine the nature of the maximum, we need the
+hessian of the function. 
+\[
+D^2\mathcal{N} = \frac{1}{{2\pi}^{n/2}\abs{\Sigma}^2}\exp\left(-\frac{1}{2}(x - \mu)^T\Sigma^{-1}(x - \mu)\right)\left((x - \mu)^T(\Sigma^{-1})^T\Sigma^{-1}(x - mu) - \Sigma^{-1}\right).
+\]
+At $x = \mu$, the hessian becomes
+\[
+D^2\mathcal{N}(x = \mu) = -\frac{\Sigma^{-1}}{{2\pi}^{n/2}\abs{\Sigma}^2}.
+\]
+The variance-covariance matrix is positive semi-definite. So it is its inverse and hence $\tr(\Sigma^{-1}) \ge 0$.
+As a result, $\tr(D^2\mathcal{N}) < 0$ at $x = \mu$, making it a minimum point.
+
+\item As $X$ and $Z$ are independent random variables, $p(X, Z) = p_{X|Z}(x)p_Z(z) = p_X(x)p_Z(z)$. 
+\begin{eqnarray*}
+\ev(X+Z) &=& \iint p_{X+Z}(x+z)dxdz \\
+         &=& \iint p_X(x)p_Z(z)(x+z)dxdz \\
+         &=& \int p_X(x)dx\int p_Z(z)dz + \int p_X(x)dx\int p_Z(z)zdz \\
+         &=& \ev{X} + \ev{Z}
+\end{eqnarray*}
+Similarly,
+\begin{eqnarray*}
+\ev(X+Z)^2 &=& \ev(X^2 + 2XZ + Z^2) \\
+           &=& \ev(X^2) + 2\ev(XZ) + \ev(Z^2)
+\end{eqnarray*}
+Now,
+\[
+\ev(XZ) = \iint xzp(x,z)dxdz = \int p_X(x)dx\int p_Z(z)dz = \ev(X)\ev(Z)
+\]
+so that
+\[
+\ev(X+Z)^2 = (\ev(X) + \ev(Z))^2
+\]
+and hence $\var(X + Z) = \ev(X^2) - (\ev(X))^2 + \ev(Z^2) - (\ev(Z))^2 = \var(X) + \var(Z)$.
+
+\item The log-likelihood function for the gaussian is
+\[
+\ln p(x | \mu, \sigma^2) = -\frac{1}{2\sigma^2}\sum_{n=1}^N(x_n - \mu)^2 - \frac{N}{2}\ln\sigma^2 - \frac{N}{2}\ln 2\pi,
+\]
+where $x = (x_1, \ldots, x_n) \in \sor^n$ is the vector of realizationf of $n$ independent and identically gaussian 
+distributed random variables with parameters $\mu$ and $\sigma$ respectively. Then,
+\begin{eqnarray*}
+\frac{d}{d\mu}\ln p(x | \mu, \sigma^2) &=& \frac{1}{\sigma^2}\sum_{n=1}^N (x_n - \mu) \\
+\frac{d}{d\sigma}\ln p(x | \mu, \sigma^2) &=& \frac{1}{\sigma^3}\sum_{n=1}^N (x_n - \mu)^2 - \frac{N}{\sigma} 
+\end{eqnarray*}
+Equating the derivatives to zero we get
+\begin{eqnarray*}
+\mu_{ML} &=& \frac{1}{N}\sum_{n=1}^N x_n \\
+\sigma_{ML} &=& \left(\frac{1}{N}\sum_{n=1}^N(x_n - \mu)^2\right)^{1/2}
+\end{eqnarray*}
+
+\item Let $X_1, \ldots, X_n$ be $n$ i.i.d gaussian random variables with parameters $\mu$ and $\sigma$.
+\begin{equation}\label{c1pe10}
+\ev(X_i X_j) = \int x_i x_j \frac{1}{2\pi\abs{\Sigma}^2}\exp\left(-\frac{(x - \mu)^T\Sigma^{-1}(x - \mu)}{2}\right)dx_i dx_j,
+\end{equation}
+where $X = (X_i, X_j), \mu = (\mu, \mu)$ and $\Sigma$ is the variance-covariance matrix
+of $X$. Since $X_i$ and $X_j$ are independent, $\Sigma = \diag(\sigma^2, \sigma^2)$. Then,
+\[
+(x - \mu)^T\Sigma^{-1}(x - \mu) = \frac{(x_i - \mu)^2}{\sigma^2} + \frac{(x_j - \mu)^2}{\sigma^2}
+\]
+and $\abs{\Sigma} = \sigma^4$. If $i \ne j$, equation \eqref{c1pe10} then becomes
+\[
+E(X_iX_j) = \frac{1}{\sqrt{2\pi\sigma^2}}\int x_i \exp\left(-\frac{(x_i - \mu)^2}{2\sigma^2}\right)dx_i
+            \frac{1}{\sqrt{2\pi\sigma^2}}\int x_j \exp\left(-\frac{(x_j - \mu)^2}{2\sigma^2}\right)dx_j
+\]
+or
+\begin{equation}\label{c1pe11}
+E(X_iX_j) = \mu^2, i \ne j
+\end{equation}
+When $i = j$, $\ev(X_iX_j) = \ev(X_i^2) = \var(X_i) + (\ev(X_i))^2 = \sigma^2 + \mu^2$. Combining
+this with equation \eqref{c1pe10} we get
+\[
+\ev(X_iX_j) = \mu^2 + \sigma^2\delta_{ij}.
+\]
 \end{enumerate}
