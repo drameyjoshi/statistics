@@ -1,4 +1,14 @@
 \chapter{Introduction}\label{c1}
+\section{Notation and definitions}\label{c1s1}
+We will follow the contemporary mathematical style of using unadorned symbols for vectors and
+matrices. The nature of a symbol will be determined by its definition and not appearance. For
+example, $x$ could be a real number or a point in $\sor^n$ depending on the context.
+
+If $f$ is a function of $n$ variables, $x_1, \ldots, x_n$ then its gradient is defined as
+\begin{equation}\label{c1s1e1}
+Df := \left(\frac{\partial f}{\partial x_1}, \ldots, \frac{\partial f}{\partial x_n}\right).
+\end{equation}
+
 \section{Problems}
 \begin{enumerate}
 \item In this problem, $w = (w_0, \ldots, w_M) \in \sor^{M+1}$, $x, y \in \sor$. Likewise, the $n$
@@ -86,7 +96,7 @@ p(o) = p(o|r)p(r) + p(o|b)p(b) + p(o|g)p(g) = 0.36
 \]
 Therefore,
 \[
-p(g|o) = \frac{0.3 \times 0.6}{0.36} = 0.5.A
+p(g|o) = \frac{0.3 \times 0.6}{0.36} = 0.5.
 \]
 
 \item Consider equation (1.27) of the book. Instead of writing it with modulus, we write it as
@@ -106,4 +116,109 @@ is not so because of the second term on the right hand side of equation \eqref{c
 
 However, if $g$ is a linear function of $y$ then its second derivative vanishes and the two
 equations become similar.
+
+\item We start with the definition $\var(f) = \ev(f(x) - \ev(f(x)))^2 = \ev(f^2(x) - 2f(x)\ev(f(x)) + (\ev(f(x)))^2)
+= \ev(f^2(x)) - 2\ev(f(x))\ev(f(x)) + (\ev(f(x))^2) = \ev(f^2(x)) - (\ev(f(x)))^2$, where we 
+have used the fact that $\ev(x)$ is a constant and $\ev1(ax) = a\ev(x)$ for any constant $a$.
+
+\item The covariance of two random variables $X$ and $Y$ is given by $\cov(X, Y) = \ev(XY) - \ev(X)\ev(Y)$.
+If $p$ is the joint probability density of $X$ and $Y$ and if $p_X$ and $p_Y$ are the respective marginal 
+probability densities then,
+\begin{eqnarray*}
+\ev(XY) &=& \iint p(X, Y)Xy dXdy \\
+\ev(X)  &=& \int p_X(X) X dX \\
+\ev(Y)  &=& \int p_Y(Y) y dy
+\end{eqnarray*}
+If $X$ and $Y$ are independent $p(X, Y) = p_{X|Y}(X|Y)p_Y(Y) = p_X(X)p_Y(Y)$ and the $\ev(XY)$ simplifies
+to
+\[
+\ev(XY) = \int p_X(X)XdX \int p_Y(Y)ydy.
+\]
+The covariance of independent random variables thus vanishes.
+
+\item The proof of normality of the gaussian distribution depends on the integral of $\exp(-ax^2)$
+over the real line. Here $a$ is a real constant and $x$ a real variable. Let
+\[
+I = \int_\sor e^{-ax^2}dx = \int_\sor e^{-ay^2}dy.
+\]
+Therefore,
+\[
+I^2 = \iint_{\sor\times\sor}e^{-a(x^2+y^2)}dxdy.
+\]
+Change the coordinates from $(x, y)$ to $(r, \theta)$, where $x = r\cos\theta$ and $y = r\sin\theta$.
+The jacobian of transformation is $r$ so that
+\[
+I^2 = \int_0^\infty\int_0^{2\pi}e^{-ar^2}rdrd\theta = 2\pi\int_0^\infty e^{-ar^2}rdr.
+\]
+Introduce the variable $s = r^2$ so that $ds = 2rdr$ and hence,
+\[
+I^2 = \pi\int_0^\infty e^{-as}ds = \frac{\pi}{a}
+\]
+so that
+\begin{equation}\label{c1pe5}
+\int_\sor e^{-ax^2}dx = \sqrt{\frac{\pi}{a}}.
+\end{equation}
+The normal density is
+\[
+\mathcal{N}(x|\mu,\sigma) = \frac{1}{\sqrt{2\pi\sigma^2}}\exp\left(-\frac{(x - \mu)^2}{2\sigma^2}\right)
+\]
+so that
+\[
+\int_\sor\mathcal{N}(x|\mu,\sigma)dx = \frac{1}{\sqrt{2\pi\sigma^2}}\int_\sor\exp\left(-\frac{(x - \mu)^2}{2\sigma^2}\right)dx.
+\]
+Introduce the variable $u = (x - \mu)/(\sigma\sqrt{2})$ so that $dx = \sigma\sqrt{2}du$ and the limits of the integral
+remain unchanged. Thus,
+\[
+\int_\sor\mathcal{N}(x|\mu,\sigma)dx = \frac{1}{\sqrt{\pi}}\int_\sor e^{-u^2}du = 1.
+\]
+
+\item Let $X$ be a random variable with distribution $\mathcal{N}(x|\mu,\sigma)$. Then its expectation
+is
+\[
+\ev(X) = \int_\sor\mathcal{N}(x|\mu,\sigma)xdx.
+\]
+Introduce the variable
+\begin{equation}\label{c1pe6}
+u = \frac{x - \mu}{\sigma\sqrt{2}}
+\end{equation}
+so that $x = \mu + u\sigma\sqrt{2}$, $dx = \sigma\sqrt{2}du$ and the limits of
+the integral remain unchanged. Then,
+\[
+\ev(X) = \frac{1}{\sqrt{\pi}}\int_\sor e^{-u^2}(\mu + u\sigma\sqrt{2})du = \mu + \sigma\sqrt{\frac{2}{\pi}}\int_\sor ue^{-u^2}du.
+\]
+The second integral is zero because the integrand is an odd function of $u$ and the limits of the
+integral are symmetric around the origin.
+
+\item The variance of a normally distributed random variable is $\var(X) = \ev(X^2) - (\ev X)^2 
+= \ev(X^2) - \mu^2$, where we have used the previous exercise. Thus, in order to get the variance
+we just need the expectation of $X^2$. It is
+\[
+\ev(X^2) = \int_\sor\mathcal{N}(x|\mu,\sigma)x^2dx.
+\]
+We once again change the variable of integration to $u$ defined in equation \eqref{c1pe6} so that
+\begin{equation}\label{c1pe7}
+\ev(X^2) = \frac{1}{\sqrt{\pi}}\int_\sor e^{-u^2}(\mu^2 + 2\sqrt{2}\mu\sigma u + 2\sigma^2u^2)du.
+\end{equation}
+The right hand side is the sum of three integrals of which the first one evaluates to $\mu^2$ and
+the second one to $0$. The third one is
+\begin{equation}\label{c1pe8}
+I = \frac{2\sigma^2}{\sqrt{\pi}}\int_\sor e^{-u^2}u^2du.
+\end{equation}
+In order to evaluate this integral we differentiate equation \eqref{c1pe5} with respect to $a$ to
+get
+\[
+-\int_\sor e^{-ax^2}x^2dx = -\frac{1}{2}\frac{\pi}{a^{3/2}}
+\]
+or
+\begin{equation}\label{c1pe9}
+\int_\sor e^{-ax^2}x^2dx = \frac{\sqrt{\pi}}{2}\frac{1}{a^{3/2}}.
+\end{equation}
+Using equation \eqref{c1pe9} in \eqref{c1pe8} we get $I = \sigma^2$. Therefore, equation \eqref{c1pe7}
+becomes
+\[
+\ev{X^2} = \mu^2 + \sigma^2
+\]
+from which it immediately follows that $\var{X} = \sigma^2$.
+
+
 \end{enumerate}
