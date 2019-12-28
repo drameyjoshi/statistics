@@ -1,6 +1,8 @@
 \documentclass{report}
 \usepackage{amsmath, amssymb, amsthm, amsfonts}
 \usepackage{mathrsfs, bm, mathtools}
+\usepackage{graphicx}
+\usepackage{listings}
 
 \newcommand{\son}{\mathbf{N}}
 \newcommand{\sor}{\mathbf{R}}
@@ -16,9 +18,14 @@
 \DeclareMathOperator{\cov}{cov}
 \DeclareMathOperator{\tr}{tr}
 \DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
 
 \DeclarePairedDelimiter\abs{\lvert}{\rvert}
 \DeclarePairedDelimiter\norm{\lVert}{\rVert}
+
+\graphicspath{ {./images/} }
+\lstset{basicstyle=\ttfamily\footnotesize}
 
 \title{Pattern Recognition and Machine Learning \\ Solutions and Notes}
 \author{Amey Joshi}

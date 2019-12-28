@@ -5,6 +5,8 @@ matrices. The nature of a symbol will be determined by its definition and not ap
 example, $x$ could be a real number or a point in $\sor^n$ depending on the context. Random
 variables will be denoted by capital letters and their realizations by small letters.
 
+A matrix with entries $a_{ij}$ will sometimes be denoted by $((a_{ij}))$.
+
 If $f$ is a function of $n$ variables, $x_1, \ldots, x_n$ then its gradient is defined as
 \begin{equation}\label{c1s1e1}
 Df := \left(\frac{\partial f}{\partial x_1}, \ldots, \frac{\partial f}{\partial x_n}\right).
@@ -447,4 +449,352 @@ then
 \ev(s^2) = \frac{1}{N}\sum_{n=1}^n(\ev(x_n^2) - 2\mu\ev(x_n) + \mu^2) = \frac{1}{N}\sum_{n=1}^N(\sigma^2 + \mu^2 - \mu^2) = \sigma^2.
 \]
 
+\item Consider a matrix $W$ with elements $w_{ij}$. We can write it as
+\[
+w_{ij} = \frac{w_{ij} + w_{ji}}{2} + \frac{w_{ij} - w_{ji}}{2}.
+\]
+The first term on the right hand side is an element of a symmetric matrix $W^S$ and the second term 
+is an element of an anti-symmetric matrix $W^A$.
+
+Now consider the sum
+\[
+\sum_{i,j=1}^D w_{ij} x_ix_j = \sum_{i,j=1}^D w_{ij}^S x_ix_j + \sum_{i,j=1}^D w_{ij}^A x_ix_j.
+\]
+The diagonal terms of the anti-symmetric matrix are all zeros. Therefore, the sum in the second term
+can be restricted to the case $i \ne j$. We can split it as
+\[
+\sum_{i,j=1}^D w_{ij}^A x_ix_j = \sum_{i,j=1, i < j}^D w_{ij}^A x_ix_j + \sum_{i,j=1, i > j}^D w_{ij}^A x_ix_j.
+\]
+The two terms cancel each other.
+
+The number of terms in lower (or upper) half of a $D \times D$ matrix is the sum $D + (D-1) + \cdots + 1
+= D(D+1)/2$. These are the independent terms in the sum of equation (1.131) of the book.
+
+\item This problem can be solved in another way, using a combinatorial argument. The number of
+independent terms in equation (1.133) is the number of ways in which $M$ balls can be placed in
+$D$ bins. It is
+\[
+\binom{M + D - 1}{M} = \frac{(M + D - 1)!}{M!(D - 1)!}.
+\]
+
+\item This problem too can be solved using a combinatorial argument. The number of independent
+terms in a polynomial of degree $M$ in $D$ variables is the number of monomials of $D$
+variables with degree less than or equal to $M$. This is same as the number of ways in which
+$M$ balls can be placed in $D + 1$ bins. Of the $D + 1$ bins, the last one is to be ignored.
+It has the balls that do not need in a monomial of degree strictly less than $M$. The number
+of ways in which we can do this is
+\[
+\binom{M + (D + 1) - 1}{M} = \frac{(M + D)!}{M! D!}.
+\]
+
+\item The gamma function is defined as
+\[
+\Gamma(x) = \int_0^\infty u^{x-1} e^{-u}du.
+\]
+Integrating by parts,
+\[
+\Gamma(x) = -[u^{x-1}e^{-u}]_0^\infty + (x - 1)\int_0^\infty u^{x-2}e^{-x}dx = (x - 1)\Gamma(x - 1).
+\]
+
+\item In order to calculate the volume of a $D$ dimensional sphere of unit radius, consider 
+the integral
+\[
+I = \prod_{i=1}^D \int_\sor e^{-x_i^2}dx_i.
+\]
+Introduce the spherical coordinates where the radial component is $r^2 = x_1^2 + \cdots + x_D^2$.
+If $S_D$ is the corresponding surface area then
+\[
+I = S_D\int_0^\infty e^{-r^2}r^{D-1}dr.
+\]
+If $u = r^2$ then $2rdr = du$ and the integral transforms to
+\[
+I = \frac{S_D}{2}\int_0^\infty e^{-u}u^{(D - 2)/2}du = \frac{S_D}{2}\Gamma\left(\frac{D}{2}\right).
+\]
+However, we also know that
+\[
+\int_\sor e^{-x_i^2}dx_i = \sqrt{\pi}
+\]
+so that $I = \pi^{D/2}$. Using the two expressions for $I$ we get
+\begin{equation}\label{c1pe16}
+S_D = \frac{2\pi^{D/2}}{\Gamma(D/2)}.
+\end{equation}
+
+The surface area of a sphere of radius $r$ in $D$ dimensions is $S_D r^{D-1}$. The volume of a
+sphere of unit radius in $D$ dimensions is
+\[
+V_D = \int_0^1 S_D r^{D-1}dr = \frac{S_D}{D}.
+\]
+
+\item From the results of the previous exercise, the volume of a $D$-dimensional sphere of
+radius $a$ is
+\[
+V_D = \frac{S_D}{D}a^D = \frac{2\pi^{D/2}}{D\Gamma(D/2)}a^D.
+\]
+The volume of a hypercube of side $2a$ concentric with the sphere is $(2a)^D$. Therefore the
+ratio $v_r$ of the volume of the sphere to that of the hypercube is
+\[
+v_r = \frac{\pi^{D/2}}{D2^{D-1}\Gamma(D/2)}.
+\]
+Now $\Gamma(D/2) = (D/2 - 1)!$. For large $D$ we can use Stirling's approximation
+\[
+n! \approx n^ne^{-n}\sqrt{2\pi n}
+\]
+so that
+\[
+\left(\frac{D}{2} - 1\right)! = \frac{2}{D}\left(\frac{D}{2}\right)! \approx 
+\sqrt{2\pi D} \left(\frac{D}{2}\right)^{D/2 - 1} e^{-D/2}
+\]
+and hence
+\[
+v_r = \frac{\pi^{D/2}}{D2^{D-1}}\frac{e^{D/2}2^{D/2 - 1}}{D^{(D-1)/2}\sqrt{2\pi}}
+= \left(\frac{e\pi}{2D}\right)^{D/2}\frac{1}{\sqrt{2\pi D}}
+\]
+so that
+\[
+\lim_{D \to \infty}v_r = 0.
+\]
+Thus the ratio of the volume of the sphere of radius $a$ is incomparably small to
+the volume of the enclosing hypercube as the dimensions $D$ become very large.
+
+Further the distance of a corner of the hypercube from its centre is half the length
+of its main diagonal. The latter quantity is $2a\sqrt{D}$ and hence the former quantity 
+is $a\sqrt{D}$. The perpendicular distance of the centre from any one its faces is
+$a$. Therefore, the desired ratio is $\sqrt{D}$. Clearly, as $D \to \infty$, the corners
+of the hypercube are very far away from the centre.
+
+\item Consider a gaussian distribution in $D$-dimensions with mean zero and variance-
+covariance matrix $\sigma^2 I$, where $I$ is a $D \times D$ identity matrix. Its
+density is
+\[
+p(x) = \frac{1}{(2\pi\sigma^2)^{D/2}}\exp\left(-\frac{\norm{x}^2}{2\sigma^2}\right),
+\]
+where $x \in \sor^D$. $p(x)$ being a probability density, its integral over all
+of $D$-dimensional space is $1$. Thus,
+\[
+\int \cdots \int_{\sor^D}p(x)dx = 1.
+\]
+If we transform to polar coordinates and integrate the directional coordinates, the 
+volume $dx$ transforms to $S_D r^{D-1}dr$, where $r$ is the radial coordinate. Thus
+\[
+\frac{S_D}{(2\pi\sigma^2)^{D/2}}\int_0^\infty r^{D-1}\exp\left(-\frac{r^2}{2\sigma^2}\right)dr = \int_0^\infty\rho(r)dr = 1,
+\]
+where 
+\[
+\rho(r) = \frac{S_D}{(2\pi\sigma^2)}r^{D-1}\exp\left(-\frac{r^2}{2\sigma^2}\right).
+\]
+We choose to call this function $\rho$ and not $p$ because the former is a function of $r$ while
+the latter is a function of $x$.
+
+We not find the extremum of the integrand $f(r)$. Its derivative with respect to $r$
+is
+\[
+\frac{df}{dr} = (D-1)r^{D-2}\exp\left(-\frac{r^2}{2\sigma^2}\right) - \frac{r^D}{\sigma^2}\exp\left(-\frac{r^2}{2\sigma^2}\right).
+\]
+The extremum is at $r_0 = \sigma\sqrt{D - 1}$. Once again, as $D$ becomes very large, it 
+shifts very far away from the origin. Note that this is \emph{not} the mode of the
+density. It is still at the origin. Why? Look at the partial derivative of $p$ with
+respect to $x_i$,
+\[
+\frac{\partial p}{\partial x_i} = -\frac{x_i}{\sigma}\frac{1}{(2\pi\sigma^2)^{D/2}}\exp\left(-\frac{\norm{x}^2}{2\sigma^2}\right).
+\]
+It vanishes at $x_i = 0$.
+
+Let us now consider 
+\begin{equation}\label{c1pe17}
+f(r_0 + \epsilon) = (r_0 + \epsilon)^{D-1}\exp\left(-\frac{(r_0 + \epsilon)^2}{2\sigma^2}\right)
+= \exp\left((D-1)\ln(r_0 + \epsilon) -\frac{(r_0 + \epsilon)^2}{2\sigma^2}\right)
+\end{equation}
+We write
+\[
+\ln(r_0 + \epsilon) = \ln r_0 + \ln\left(1 + \frac{\epsilon}{r_0}\right) = \ln r_0 + \frac{\epsilon}{r_0} - \frac{\epsilon^2}{2r_0^2}
+\]
+Since $r_0 = \sigma\sqrt{D - 1}$,
+\begin{equation}\label{c1pe18}
+(D - 1)\ln(r_0 + \epsilon) = \ln r_0^{D-1} + \sqrt{D-1}\frac{\epsilon}{\sigma} - \frac{\epsilon^2}{2\sigma^2}.
+\end{equation}
+
+We also simplify the last term in the argument of the exponent in \eqref{c1pe17} as
+\begin{equation}\label{c1pe19}
+\frac{(r_0 + \epsilon)^2}{2\sigma^2} = \frac{r_0^2}{2\sigma^2} + \frac{\epsilon\sqrt{D-1}}{\sigma} + \frac{\epsilon^2}{2\sigma^2}.
+\end{equation}
+Substituting equations \eqref{c1pe18} and \eqref{c1pe19} in \eqref{c1pe17}, we get
+\[
+f(r_0 + \epsilon) = f(r_0)\exp\left(-\frac{\epsilon^2}{\sigma^2}\right).
+\]
+As $\rho$ is just a constant multiple of $f$, we immediately get
+\[
+\rho(r_0 + \epsilon) = \rho(r_0)\exp\left(-\frac{\epsilon^2}{\sigma^2}\right).
+\]
+
+Lastly, we observe that 
+\begin{eqnarray*}
+p(0) &=& \frac{1}{(2\pi\sigma^2)^{D/2}} \\
+p(r_0) &=&\frac{1}{(2\pi\sigma^2)^{D/2}}\exp\left(-\frac{D - 1}{2}\right), 
+\end{eqnarray*}
+so that
+\[
+\frac{p(0)}{p(r_0)} = e^{(D-1)/2} \approx e^{D/2},
+\]
+for large enough $D$. The plots of $\rho$ as a function of $r$ for various dimensions are
+shown in the figure below.
+\begin{figure}[ht]
+\includegraphics{c1f1}
+\end{figure}
+
+It was generated using the following R code.
+\begin{lstlisting}[language=R, frame=single]
+# Surface area of a unit hypersphere of D dimensions.
+surface_area <- function(D) {
+  2 * pi^(D/2)/gamma(D/2)
+}
+
+rho <- function(D, r) {
+  surface_area(D) * r^(D - 1) * exp(-r^2/2)/(2 * pi)^(D/2)
+}
+
+r.vals <- seq(from = 0, to = 10, by = 0.1)
+
+plot(
+  r.vals,
+  rho(1, r.vals),
+  type = "l",
+  col = 1,
+  xlab = expression(r),
+  ylab = expression(rho(r)),
+  main = "Radial part of gaussian distributions"
+)
+
+plot_p <- function(D, n) {
+  lines(r.vals, rho(D, r.vals), col = n)
+}
+
+sample_set <- data.frame(dim = c(2, 5, 10, 20, 40),
+                         col = c(2, 3, 4, 5, 6))
+apply(sample_set, 1, function(x)
+  plot_p(x[1], x[2]))
+legend(
+  "topright",
+  legend = paste(sep = "", "D=", c(1, sample_set$dim)),
+  col = c(1, sample_set$col),
+  lty = rep(1, 6),
+  cex = 0.6
+)
+
+\end{lstlisting}
+
+\item If $a \le b$, $a^2 \le ab$ and hence $a \le \sqrt{ab}$. Consider equation (1.78) of the book.
+Its first term is 
+\[
+T_1 = \int_{\mathcal{R}_1}p(x, C_2)dx \le \int_{\mathcal{R}_1}\sqrt{p(x, C_1)p(x, C_2)}dx.
+\]
+This is because if the decision boundaries are correctly set, $p(x, C_2) \le p(x, C_1)$ in the region
+$\mathcal{R}_1$. Similarly, the second term is
+\[
+T_2 = \int_{\mathcal{R}_2}p(x, C_1)dx \le \int_{\mathcal{R}_2}\sqrt{p(x, C_1)p(x, C_2)}dx.
+\]
+The probability of making a mistake is
+\[
+T_1 + T_2 \le \int_{\mathcal{R}}\left(p(x, C_1)p(x, C_2)\right)^{1/2}dx,
+\]
+where the region $\mathcal{R}$ is a union of regions $\mathcal{R}_1$ and $\mathcal{R}_2$.
+
+\item The matrix $((L_{ij}))$ has all ones except the main diagonal which has all zeros. A
+new $x$ is assigned to class $j$ for which the quantity
+\[
+\sum_{k}L_{kj}p(C_k|x) = \sum_k (1 - \delta_{kj})p(C_k|x) = \sum_k p(C_k|x) - p(C_j|x) = 1 - p(C_j|x)
+\]
+is minimal. Therefore, we end up selecting the class for which the posterior probability
+is maximal.
+
+\item We cannot classify unless we have the posterior probability $p(C_k|x)$. According to equation
+(1.81), we choose that $j$ for which the quantity $\sum_k L_{kj}p(C_k|x)$ is minimal. The 
+criterion can be written as
+\[
+i = \argmin_{1 \le j \le K}\left\{\sum_k L_{kj}p(C_k|x)\right\},
+\]
+where $K$ is the total number of classes.
+
+\item The problem states that the loss incurred in the reject option is $\lambda$. In other
+words, if the expected loss exceed $\lambda$ then we do not classify. Thus, we select class 
+$C_i$ if
+\[
+i = \argmin_{1 \le j \le K}\left\{\sum_k L_{kj}p(C_k|x)\right\},
+\]
+and if 
+\[
+\sum_{k} L_{ki}p(C_k|x) < \lambda.
+\]
+If $L_{ki} = 1 - \delta_{ki}$ then the previous inequality is
+\[
+1 - \sum_{k}\delta_{ki}p(C_k|x) = 1 - p(C_i|x) < \lambda 
+\]
+which is equivalent to $p(C_i|x) > 1 - \lambda$. Recall, that this is the criterion for 
+selection \emph{without} invoking the reject option. The reject option is invoked when
+$p(C_i|x) \le 1 - \lambda$. Thus $\theta$ mentioned in section 1.5.3 is the same as $1 - \lambda$.
+
+\item The expectation value of the loss is
+\[
+\ev(L(t, y(x))) = \iint \norm{y(x) - t}^2p(x, t)dxdt,
+\]
+where $x \in \sor^n$, $t \in \sor^m$ and $y:\sor^n \to \sor^m$. We can write $\norm{y(x) - t}^2 =
+(y^T(x) - t^T)(y(x) - t)$ so that the functional derivative of this equation with respect to $y(x)$ is
+\[
+\frac{\delta}{\delta y(x)}\norm{y(x) - t}^2 = 2(y(x) - t).
+\]
+Then
+\[
+\frac{\delta\ev(L(t, y(x)))}{\delta x} = 2\int (y(x) - t)p(x,t)dt.
+\]
+At an extremum,
+\[
+\int (y(x) - t)p(x, t)dt = 0,
+\]
+or $y(x) = \int t p(x, t)dt = \ev_t(t|x)$.
+
+\item We write the norm $N = \norm{y(x) - t}^2$ as 
+\begin{eqnarray*}
+N &=& \norm{y(x) - \ev_t(t|x) + \ev_t(t|x) - t}^2 \\
+ &=& \norm{y(x) - \ev_t(t|x)}^2 + \norm{\ev_t(t|x) - t}^2 + \\
+ & & (y(x) - \ev_t(t|x))^T(\ev(t|x) - t) + (\ev(t|x) - t)^T(y(x) - \ev_t(t|x)).
+\end{eqnarray*}
+
+The third term, after multiplying with $p(x,t)$ and integrated with respect to $t$ is
+\[
+\int (y(x) - \ev_t(t|x))^T(\ev(t|x) - t)p(x, t)dt = (y(x) - \ev_t(t|x))\left(\ev_t(t|x)\cdot 1 - \int t p(x,t)dt\right) 
+\]
+The second factor on the right hand side is zero because of which the integral vanishes. Note
+that $\ev_t(x|t)$ is a function of $x$.
+
+The fourth term is just the transpose of the third term and therefore vanishes. Therefore,
+\[
+\ev(L(t, y(x))) = \iint\norm{y(x) - \ev_t(t|x)}^2dxdt + \iint\norm{\ev_t(t|x) - t}^2dxdt.
+\]
+The only way to minimize the left hand side over the function $y$ is to let it be equal to $\ev_t(t|x)$.
+This leaves the irreducible loss as
+\[
+\ev(L(t, y(x))) = \iint\norm{\ev_t(t|x) - t}^2dxdt.
+\]
+
+\item From equation (1.91),
+\[
+\ev(L_1) = \iint |y(x) - t|p(x, t)dxdt = \int_{\sor^n}\int_{\sor}|y(x) - t|p(x,t)dxdt,
+\]
+where we have assumed that $x \in \sor^n, t \in \sor$ and $y: \sor^n \to \sor$. We can split
+the integral over $t$ to ensure that the integrand is always positive. Thus,
+\[
+\ev(L_1) = \int_{\sor^n}\int_{-\infty}^{y(x)} (y(x) - t)p(x, t)dxdt + \int_{\sor^n}\int_{y(x)}^{\infty}(t - y(x))p(x, t)dxdt.
+\]
+We now take the functional derivative with respect to $y(x)$ to get
+\[
+\frac{\delta\ev(L_1)}{\delta y(x)} = \int_{-\infty}^{y(x)}p(x,t)dt - \int_{y(x)}^{\infty}p(x, t)dt.
+\]
+At the extremum, the left hand side vanishes so that
+\[
+\int_{-\infty}^{y(x)}p(x,t)dt = \int_{y(x)}^{\infty}p(x, t)dt.
+\]
+Thus, $y(x)$ is the conditional median of $t$ given an $x$.
+
+I do not know of even a passably rigorous argument to conclude that $y(x)$ is the conditional 
+mode in the case $q \to 0$.
 \end{enumerate}
+
