@@ -855,9 +855,10 @@ Now consider
 I_3 = \int_\sor\frac{(x - m)^2}{s^2}p(x)dx = \int_\sor\frac{(x - \mu + \mu - m)^2}{\sigma^2}\frac{\sigma^2}{s^2}p(x)dx,
 \]
 or
-\[
-I_3 = \frac{\sigma^2}{s^2}\left(\int_\sor\frac{(x - \mu)^2}{\sigma^2}p(x)dx + \frac{2(\mu - m)}{\sigma^2}\int_\sor (x-\mu)p(x)dx + \frac{(\mu - m)^2}{\sigma^2}\int_\sor p(x)dx\right)
-\]
+\begin{eqnarray*}
+I_3 &=& \frac{\sigma^2}{s^2}\int_\sor\frac{(x - \mu)^2}{\sigma^2}p(x)dx + \frac{2(\mu - m)}{s^2}\int_\sor (x-\mu)p(x)dx + \\
+ & &  \frac{(\mu - m)^2}{s^2}\int_\sor p(x)dx
+\end{eqnarray*}
 Of these, the first integral is just $-I_2 = 1$. The second integral vanishes because the integrand
 is an odd function around $\mu$ and the limits are symmetric around it. The third integral is $1$ 
 following the normalization property of $p$. Therefore,
