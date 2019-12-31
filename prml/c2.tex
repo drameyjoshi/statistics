@@ -143,5 +143,101 @@ legend(locator(1),
 \end{center}
 \end{figure}
 
+\item Let $X$ be a binomial random variable with probability mass function
+\[
+p(X = m|\mu) = \binom{N}{n}\mu^n (1 - \mu)^{N-n}.
+\]
+Let the parameter $\mu$ be described by a prior distribution
+\begin{equation}\label{c2pe1}
+\mathrm{Beta}(\mu|a, b) = \frac{\Gamma(a + b)}{\Gamma(a)\Gamma(b)}\mu^{a-1}(1 - \mu)^{b-1}.
+\end{equation}
+The observed data of $m + l$ realizations of $X$ has $x = 1$ $m$ times and $x = 0$ $l$ times.
+Therefore, the likelihood function is
+\[
+p(\mathcal{D}|\mu) = \prod_{i=1}^{m}p(X=1|\mu)\prod_{j=1}^lp(X=0|\mu) = \mu^m(1 - \mu)^l.
+\]
+The posterior distribution of $\mu$ given the data $\mathcal{D}$ is
+\[
+p(\mu|D) \propto p(\mathcal{D}|\mu)\mathrm{Beta}(\mu|a, b) = \frac{\Gamma(a+b)}{\Gamma(a)\Gamma(b)}\mu^{m+a-1}(1-\mu)^{l+b-1}.
+\]
+The constant of proportionality is
+\[
+\frac{\Gamma(m+l+a+b)}{\Gamma(m+a)\Gamma(b+l)}
+\]
+so that
+\[
+p(\mu|\mathcal{D}) = \frac{\Gamma(m+l+a+b)}{\Gamma(m+a)\Gamma(b+l)}\mu^{m+a-1}(1-\mu)^{l+b-1}.
+\]
+The mean of $\mu$ conditioned on $\mathcal{D}$ is the posterior mean
+\begin{equation}\label{c2pe2}
+\mu_{post} = \frac{m+a}{m+a+l+b}.
+\end{equation}
+
+The log-likelihood function is
+\[
+\ln p(\mathcal{D}|\mu) = m\ln\mu + l\ln(1 - \mu)
+\]
+and its derivative is
+\[
+\frac{m}{\mu} - \frac{l}{1 - \mu}
+\]
+and its extremum is 
+\begin{equation}\label{c2pe3}
+\mu_{ML} = \frac{m}{m+l}.
+\end{equation}
+The mean of the prior distribution is that of equation \eqref{c2pe1}
+\begin{equation}\label{c2pe4}
+\mu_{prior} = \frac{a}{a+b}.
+\end{equation}
+
+Let us assume, for the moment that the maximum likelihood estimate is greater than the prior estimate.
+That is,
+\[
+\mu_{ML} - \mu_{prior} > 0.
+\]
+This is possible if and only if 
+\begin{equation}\label{c2pe5}
+bm > al.
+\end{equation}
+If equation \eqref{c2pe5} is true then it is easy to verify that $\mu_{ML} > \mu_{post} > \mu_{prior}$. 
+If \eqref{c2pe5} is not true then $\mu_{prior} \ge \mu_{post} \ge \mu_{ML}$.
+
+\item Let $X$ and $Y$ be random variables with joint distribution $p(x, y)$. Then,
+\[
+\ev_x(X|Y) = \int xp(x|y)dx
+\]
+and 
+\begin{eqnarray*}
+\ev_y(\ev_x(X|Y)) &=& \int p(y)\ev_x(X|Y)dy \\
+ &=& \iint xp(y)p(x|y)dxdy \\
+ &=& \iint xp(x, y)dxdy \\
+ &=& \ev(X).
+\end{eqnarray*}
+
+For sake of notational simplicity, let us denote $\ev_x(X|Y) = \phi(y)$. Then, 
+\begin{equation}\label{c2pe6}
+\var_y(\ev_x(X|Y)) = \var_y(\phi(y)) = \ev_y(\phi^2(y)) - (\ev_y\phi(y))^2
+\end{equation}
+Now, $\var_x(X|Y) = \ev_x(X^2|Y) - (\ev_x(X|Y))^2 = \ev_x(X^2|Y) - \phi^2(y)$ so that 
+\[
+\ev_y(\var_x(X|Y)) = \ev_y(\ev_x(X^2|Y)) - \ev_y(\phi^2(y))
+\]
+and hence
+\[
+\begin{split}
+\var_y(\ev_x(X|Y)) + \ev_y(\var_x(X|Y)) =& \ev_y(\phi^2(y)) - (\ev_y\phi(y))^2 + \\
+ & \ev_y(\ev_x(X^2|Y)) - \ev_y(\phi^2(y)) 
+\end{split}
+\]
+and finally
+\begin{equation}\label{c2pe7}
+\var_y(\ev_x(X|Y)) + \ev_y(\var_x(X|Y)) = \ev_y(\ev_x(X^2|Y)) - (\ev_y\phi(y))^2 
+\end{equation}
+Now,
+\begin{eqnarray*}
+\ev_y(\ev_x(X^2|Y)) &=& \iint x^2 p(x|y)p(y)dxdy = \var(X) \\
+\ev_y\phi(y) &=& \iint xp(x|y)p(y)dy = \ev(X)
+\end{eqnarray*}
+Using these in equation \eqref{c2pe7} we get the desired result.
 \end{enumerate}
 
