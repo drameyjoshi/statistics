@@ -1,4 +1,93 @@
 \chapter{Probability Distributions}\label{c2}
+\section{Multinomial variables}\label{c2s1}
+A multinomial variable can take one out of $K$ possible values. One can express it as a variable
+with a range restricted to $K$ integers, typically $1$ to $K$. Alternatively, we can express it as 
+a boolean  $K$ vector where exactly one component is $1$ and the rest are $0$. We choose the latter 
+alternative. We use the notation customary in linear algebra to denote the boolean vector with just 
+the $k$-th component $1$ and the remaining ones zero by $e_k$.
+
+Let a multinomial variable $X$ take a value $k$ with probability $\mu_k$. Then 
+\[
+\sum_{k=1}^K \mu_k = 1
+\]
+and 
+\begin{equation}\label{c2s1e1}
+p(X = e_k|\mu) = \prod_{k=1}^K \mu_k^{x_k},
+\end{equation}
+where $x_k$ is the $k$th component of the boolean $K$-vector representing the state
+$X = k$. Every component of the vector contributes a $1$ to the product except the
+one with $x_k = 1$, which contributes $\mu_k$. Therefore,
+\[
+p(X = e_k|\mu) = \mu_k
+\]
+and hence
+\begin{equation}\label{c2s1e2}
+\sum_{k=1}^K`p(X = e_k|\mu) = 1.
+\end{equation}
+
+The expectation of a multinomial random variable is
+\begin{equation}\label{c2s1e3}
+\ev(X|\mu) = \sum_{k=1}^K e_kp(X = e_k|\mu) = (\mu_1, \ldots, \mu_K) = \mu.
+\end{equation}
+A dataset $\mathcal{D}$ of $N$ i.i.d. multinomial random variables has a prior probability
+\[
+p(\mathcal{D}|\mu) = \prod_{n=1}^Np(X_n = e_k|\mu) = \prod_{n=1}^N\prod_{k=1}^K \mu_k^{(x_n)_k}.
+\]
+In this equation, the data set has vectors ${x_1, \ldots, x_N}$, all in $\{0, 1\}^K$ and whose
+$k$-th component is denoted by $(x_n)_k$. We can simplify the previous equation as
+\[
+p(\mathcal{D}|\mu) = \prod_{k=1}^K \mu_k^{\sum_{n=1}^N (x_n)_k}.
+\]
+The sum 
+\[
+\sum_{n=1}^N (x_n)_k
+\]
+is the number of $x_n$ whose $k$th component is $1$, that is the number of $x_n = e_k$. Let
+us call this number $m_k$, Then
+\begin{equation}\label{c2s1e4}
+p(\mathcal{D}|\mu) = \prod_{k=1}^K \mu_k^{m_k}.
+\end{equation}
+It is clear that 
+\begin{equation}\label{c2s1e5}
+\sum_{k=1}^K m_k = N.
+\end{equation}
+
+We could have arrived at equation \eqref{c2s1e4} with a much simpler analysis. If the probability
+that a multinomial random variable takes a value $k$ is $\mu_k$ and if a data set of $N$ such
+variables has $m_k$ variables taking the value $k$ then
+\[
+p(\mathcal{D}|\mu) = \prod_{k=1}^K \mu_k^{m_k}.
+\]
+We took the longer route only to demonstrate how to work with boolean $K$-vectors.
+
+In order to find the maximum-likelihood estimate of the $\mu$, we maximize the logarithm of
+equation \eqref{c2s1e4} subject to the constraint $\sum_{k=1}^K \mu_k = 1$. If $\lambda$ is
+the Lagrange's undermined multiplier then we consider the function
+\[
+f(\mu_k) = \sum_{k=1}^Lm_k\ln{\mu_k} + \lambda\left(\sum_{k=1}^K \mu_k - 1\right)
+\]
+and its derivative
+\[
+\frac{df}{d\mu_k} = \frac{m_k}{\mu_k} + \lambda.
+\]
+The maximum likelihood estimate of $\mu$ is thus,
+\begin{equation}\label{c2s1e6}
+\mu_{ML} = -\frac{1}{\lambda}(m_1, \ldots, m_K).
+\end{equation}
+The multiplier $\lambda$ can be found by substituting the previous equation in the equation
+of constraint. Thus,
+\[
+\sum_{k=1}^K \mu_k = -\sum_{k=1}^K \frac{m_k}{\lambda} = -\frac{1}{\lambda}\sum_{k=1}^K m_k = 1.
+\]
+From equation \eqref{c2s1e5} we have
+\[
+\lambda = -\frac{1}{N}.
+\]
+Therefore the maximum-likelihood estimate of \eqref{c2s1e6} becomes
+\begin{equation}\label{c2s1e7}
+\mu_{ML} = \left(\frac{m_1}{N}, \ldots, \frac{m_k}{N}\right).
+\end{equation}
+
 \section{Problems}\label{c2p}
 \begin{enumerate}
 \item The Bernoulli distribution is defined as $\mathrm{Bern}(x|\mu) = \mu^x(1 - \mu)^x$. The 
@@ -239,5 +328,61 @@ Now,
 \ev_y\phi(y) &=& \iint xp(x|y)p(y)dy = \ev(X)
 \end{eqnarray*}
 Using these in equation \eqref{c2pe7} we get the desired result.
+
+\item We use the following result,
+\begin{equation}\label{c2pe8}
+\int_0^a x^{m-1}(a - x)^{n-1}dx = a^{m+n-1}B(m, n).
+\end{equation}
+To obtain it, we write the integral as
+\[
+a^{m+n-2}\int_0^a \left(\frac{x}{a}\right)^{m-1}\left(1 - \frac{x}{a}\right)^{n-1}ad\left(\frac{x}{a}\right).
+\]
+A transformation $x/a \mapsto y$ yields the result. The Dirichlet distribution is proportional
+to 
+\[
+D = \prod_{k=1}^K\mu_k^{\alpha_k - 1}.
+\]
+subject to the constraint 
+\begin{equation}\label{c2pe9}
+\sum_{k=1}^K\mu_k = 1.
+\end{equation}
+Therefore, the distribution is proportional to
+\[
+D = \prod_{k=1}^{K-1}\mu_k^{\alpha_k - 1}(1 - \mu_1 - \cdots - \mu_{K-1})^{\alpha_K-1}
+\]
+The variables $\mu_k$ vary over $[0, 1]$. However, the constraint of equation \eqref{c2pe9} reduce the
+region of integration from a hypercube to a $K-1$ simplex formed by the first quandrant and the plane whose 
+equation is \eqref{c2pe9}. In order to find the normalization constant we must evaluate the integral
+\begin{equation}\label{c2pe10}
+I = \int_0^1\int_0^{1-\mu_1}\cdots\int_0^{1-\mu_1-\cdots-\mu_{K-2}}D(\mu_1, \ldots, \mu_{K-1})d\mu_1\cdots d\mu_{K-1}.
+\end{equation}
+The $\mu_{K-1}$ integral is
+\begin{eqnarray*}
+\int_0^{1-\mu_1-\cdots-\mu_{K-2}}\mu_{K-1}^{\alpha_K - 1}(1 - \mu_1 - \cdots - \mu_{K-1})^{\alpha_K-1}d\mu_{K-1} &=& \\
+ (1-\mu_1-\cdots-\mu_{K-2})^{\alpha_K+\alpha_{K-1}-1}B(\alpha_K, \alpha_{K-1}) & &
+\end{eqnarray*}
+The integrals over the other variables are evaluated similarly so that
+\[
+I = B(\alpha_{K-1},\alpha_K)B(\alpha_{K-2},\alpha_{K}+\alpha_{K-1})\cdots B(\alpha_1,\alpha_{K}+\cdots+\alpha_2).
+\]
+Using the relation,
+\[
+B(m, n) = \frac{\Gamma(m)\Gamma(n)}{\Gamma(m+n)},
+\]
+we get
+\begin{eqnarray*}
+I &=& \frac{\Gamma(\alpha_{K-1})\Gamma(\alpha_K)}{\Gamma(\alpha_{K}+\alpha_{K-1})} \\
+  & &  \frac{\Gamma(\alpha_{K-2})\Gamma(\alpha_K+\alpha_{K-1})}{\Gamma(\alpha_K+\alpha_{K-1}+\alpha_{K-2})}\cdots \\
+  & &  \frac{\Gamma(\alpha_1)\Gamma(\alpha_K+\alpha_{K-1}+\cdots+\alpha_2)}{\Gamma(\alpha_K+\alpha_{K-1}+\cdots+\alpha_{1})}
+\end{eqnarray*}
+Cancelling common terms,
+\[
+I = \frac{\Gamma(\alpha_K)\Gamma(\alpha_{K-1})\cdots\Gamma(\alpha_1)}{\Gamma(\alpha_K+\alpha_{K-1}+\cdots+\alpha_1)}
+\]
+If we write $\alpha_0 = \alpha_1 + \cdots + \alpha_K$ then the normalization constant for the
+Dirichlet distribution is
+\[
+\frac{\Gamma(\alpha_0)}{\Gamma(\alpha_1)\cdots\Gamma(\alpha_K)}.
+\]
 \end{enumerate}
 
