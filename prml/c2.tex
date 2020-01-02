@@ -384,5 +384,84 @@ Dirichlet distribution is
 \[
 \frac{\Gamma(\alpha_0)}{\Gamma(\alpha_1)\cdots\Gamma(\alpha_K)}.
 \]
+
+\item We start with the Dirichlet distribution
+\[
+\mathrm{Dir}(\mu|\alpha) = \frac{\Gamma(\alpha_0)}{\Gamma(\alpha_1)\cdots\Gamma(\alpha_K)}\prod_{k=1}^K\mu_k^{\alpha_k - 1},
+\]
+where $\mu, \alpha \in \sor^K$ and
+\begin{eqnarray*}
+\sum_{i=1}^K \mu_k &=& 1 \\
+\sum_{i=1}^K \alpha_k &=& \alpha_0
+\end{eqnarray*}
+The mean of the distribution is
+\begin{eqnarray*}
+\ev(\mu_j) &=& \int\frac{\Gamma(\alpha_0)}{\Gamma(\alpha_1)\cdots\Gamma(\alpha_K)}\prod_{k=1}^K\mu_k^{\alpha_k + \delta_{jk} - 1}d\mu \\
+ &=& \frac{\Gamma(\alpha_0)}{\Gamma(\alpha_1)\cdots\Gamma(\alpha_K)}\frac{\Gamma(\alpha_1)\cdots\Gamma(\alpha_j+1)\cdots\Gamma(\alpha_K)}{\Gamma(\alpha_0 + 1)} \\
+ &=& \frac{\alpha_j}{\alpha_0}
+\end{eqnarray*}
+In order to find the variance, we need
+\begin{eqnarray*}
+\ev(\mu_j^2) &=& \int\frac{\Gamma(\alpha_0)}{\Gamma(\alpha_1)\cdots\Gamma(\alpha_K)}\prod_{k=1}^K\mu_k^{\alpha_k + 2\delta_{jk} - 1}d\mu \\
+ &=& \frac{\Gamma(\alpha_0)}{\Gamma(\alpha_1)\cdots\Gamma(\alpha_K)}\frac{\Gamma(\alpha_1)\cdots\Gamma(\alpha_j+2)\cdots\Gamma(\alpha_K)}{\Gamma(\alpha_0 + 2)} \\
+ &=& \frac{\alpha_j(\alpha_j+1)}{\alpha_0(\alpha_0+1)}
+\end{eqnarray*}
+Therefore,
+\[
+\var(\alpha_j) = \frac{\alpha_j(\alpha_j+1)}{\alpha_0(\alpha_0+1)} - \frac{\alpha_j^2}{\alpha_0^2} = \frac{\alpha_j(\alpha_0 - \alpha_j)}{\alpha_0^2(\alpha_0+1)}.
+\]
+Note that the definition of $\alpha_0$ guarantees us that the variance is non-negative. In order
+to find the covariance, we need
+\begin{eqnarray*}
+\ev(\mu_i\mu_j) &=& \int\frac{\Gamma(\alpha_0)}{\Gamma(\alpha_1)\cdots\Gamma(\alpha_K)}\prod_{k=1}^K\mu_k^{\alpha_k + \delta_{ik} + \delta_{jk} - 1}d\mu \\
+ &=& \frac{\Gamma(\alpha_0)}{\Gamma(\alpha_1)\cdots\Gamma(\alpha_K)}\frac{\Gamma(\alpha_1)\cdots\Gamma(\alpha_i+1)\cdots\Gamma(\alpha_j+1)\cdots\Gamma(\alpha_K)}{\Gamma(\alpha_0 + 2)} \\
+ &=& \frac{\alpha_i\alpha_j}{\alpha_0(\alpha_0+1)}
+\end{eqnarray*}
+so that
+\[
+\cov(\mu_i\mu_j) = \frac{\alpha_i\alpha_j}{\alpha_0(\alpha_0+1)} - \frac{\alpha_i\alpha_j}{\alpha_0^2} = -\frac{\alpha_i\alpha_j}{\alpha_0^2(\alpha_0+1)}.
+\]
+
+\item Recall that the derivative of $a^x$ with respect to $x$ is $a^x\ln a$. Therefore,
+\[
+\frac{\partial}{\partial\alpha_j}\prod_{k=1}^K \mu_k^{\alpha_k-1} = \ln\mu_j\prod_{k=1}^K\mu_k^{\alpha_k-1}.
+\]
+Now,
+\begin{eqnarray*}
+\ev(\ln\mu_j) &=& \frac{\Gamma(\alpha_0)}{\Gamma(\alpha_1)\cdots\Gamma(\alpha_K)}\int\ln\mu_j\prod_{k=1}^K\mu_k^{\alpha_k-1}d\mu \\
+ &=& \frac{\Gamma(\alpha_0)}{\Gamma(\alpha_1)\cdots\Gamma(\alpha_K)}\int\frac{\partial}{\partial\alpha_j}\prod_{k=1}^K\mu_k^{\alpha_k-1}d\mu \\
+ &=& \frac{\Gamma(\alpha_0)}{\Gamma(\alpha_1)\cdots\Gamma(\alpha_K)}\frac{\partial}{\partial\alpha_j}\int\prod_{k=1}^K\mu_k^{\alpha_k-1}d\mu \\
+ &=& \frac{\Gamma(\alpha_0)}{\Gamma(\alpha_1)\cdots\Gamma(\alpha_K)}\frac{\partial}{\partial\alpha_j}\frac{\Gamma(\alpha_1)\cdots\Gamma(\alpha_K)}{\Gamma(\alpha_0)} \\
+ &=& \frac{\Gamma(\alpha_0)}{\Gamma(\alpha_j)}\frac{\partial}{\partial\alpha_j}\frac{\Gamma(\alpha_j)}{\Gamma(\alpha_0)} \\
+ &=& \frac{1}{\Gamma(\alpha_j)}\frac{\partial}{\partial\alpha_j}\Gamma(\alpha_j) - \frac{1}{\Gamma(\alpha_0)}\frac{\partial}{\partial\alpha_j}\Gamma(\alpha_0) \\
+ &=& \frac{\partial}{\partial\alpha_j}\ln\Gamma(\alpha_j) - \frac{\partial}{\partial\alpha_j}\ln\Gamma(\alpha_0) \\
+ &=& \psi(\alpha_j) - \psi(\alpha_0),
+\end{eqnarray*}
+where 
+\[
+\psi(\alpha) = \frac{d}{d\alpha}\ln\Gamma(\alpha)
+\]
+is the digamma function.
+
+\item The uniform distribution is defined by
+\[
+\mathrm{Unif}(x|a, b) = \frac{1}{b - a}, x \in [a, b].
+\]
+It is easy to confirm that it is normalized, for
+\[
+\int_a^b \mathrm{Unif}(x|a, b)dx = \frac{1}{b-a}\int_a^b dx = 1.
+\]
+The mean value of $x$ is
+\[
+\ev(x) = \int_a^b x\mathrm{Unif}(x|a, b)dx = \int_a^b \frac{x}{b-a}dx = \frac{1}{2(b-a)}(b^2 - a^2) = \frac{a+b}{2}.
+\]
+The mean value of $x^2$ is
+\[
+\ev(x^2) = \int_a^b\frac{x^2}{b-a}dx = \frac{1}{3(b-a)}(b^3-a^3) = \frac{a^2 + ab + b^2}{3}
+\]
+so that 
+\[
+\var(x) = \frac{a^2 + ab + b^2}{3} - \frac{(a+b)^2}{4} = \frac{(b - a)^2}{12}.
+\]
 \end{enumerate}
 
