@@ -463,5 +463,36 @@ so that
 \[
 \var(x) = \frac{a^2 + ab + b^2}{3} - \frac{(a+b)^2}{4} = \frac{(b - a)^2}{12}.
 \]
+
+\item Given that
+\begin{eqnarray*}
+p(x) &=& \mathcal{N}(x | \mu, \Sigma) \\
+q(x) &=& \mathcal{N}(x | m, L),
+\end{eqnarray*}
+where $x, \mu, m \in \sor^n$ and $\Sigma, L$ are covariance matrices.
+\[
+\ln\left(\frac{q(x)}{p(x)}\right) = \frac{1}{2}\ln\frac{\det L}{\det\Sigma} - \frac{(x - m)^TL^{-1}(x - m)}{2} + \frac{(x - \mu)^T\Sigma^{-1}(x - \mu)}{2}.
+\]
+The Kullback-Leibler divergence between $p$ and $q$ is the sum of three integrals,
+\begin{eqnarray*}
+I_1 &=& -\frac{1}{2}\ln\left|\frac{\det L}{\det\Sigma}\right|\int_{\sor^n}p(x)dx \\
+I_2 &=& \frac{1}{2}\int_{\sor^n}(x-m)^TL^{-1}(x-m)p(x)dx \\
+I_3 &=& -\frac{1}{2}\int_{\sor^n}(x-\mu)^T\Sigma^{-1}(x-\mu)p(x)dx.
+\end{eqnarray*}
+$I_1$ can be readily evaluated using the normalization of $p$. $I_2$ can be split as
+\[
+I_2 = I_{21} + I_{22} + I_{23},
+\]
+where
+\begin{eqnarray*}
+I_{21} &=& \frac{1}{2}\int_{\sor^n}(x - \mu)L^{-1}(x - \mu)p(x)dx \\
+I_{22} &=& \int_{\sor^n}(x - \mu)^T\frac{L^{-1}}{2}(\mu - m)p(x)dx + \int_{\sor^n}(\mu - m)^T\frac{L^{-1}}{2}(x - \mu)p(x)dx \\
+I_{23} &=& \frac{1}{2}\int_{\sor^n}(\mu - m)^TL^{-1}(\mu - m)p(x)dx.
+\end{eqnarray*}
+We got this split by writing $x - m = x - \mu + \mu + m$. It is easy to see that
+\[
+I_{23} = (\mu - m)^TL^{-1}(\mu - m)
+\]
+and $I_{22} = 0$.
 \end{enumerate}
 
