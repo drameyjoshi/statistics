@@ -479,20 +479,171 @@ I_1 &=& -\frac{1}{2}\ln\left|\frac{\det L}{\det\Sigma}\right|\int_{\sor^n}p(x)dx
 I_2 &=& \frac{1}{2}\int_{\sor^n}(x-m)^TL^{-1}(x-m)p(x)dx \\
 I_3 &=& -\frac{1}{2}\int_{\sor^n}(x-\mu)^T\Sigma^{-1}(x-\mu)p(x)dx.
 \end{eqnarray*}
-$I_1$ can be readily evaluated using the normalization of $p$. $I_2$ can be split as
+It is easy to evaluate $I_1$ using normalization property of $p$.
+\begin{equation}\label{c2pe11}
+I_1 = -\frac{1}{2}\ln\left|\frac{\det L}{\det\Sigma}\right|.
+\end{equation}
+Using the definitions of expectations, we conclude that
 \[
-I_2 = I_{21} + I_{22} + I_{23},
+I_2 = \ev[(x - m)^TL^{-1}(x-m)].
 \]
-where
+Using formula (380) of the matrix cookbook \cite{petersen2012matrix} we get
+\begin{equation}\label{c2pe12}
+I_2 = (m - \mu)^TL^{-1}(m - \mu) + \tr(L^{-1}\Sigma).
+\end{equation}
+In eaxctly the same manner, we conclude that
+\begin{equation}\label{c2pe13}
+I_3 = 0 + \tr(\Sigma^{-1}\Sigma) = n.
+\end{equation}
+Therefore,
+\[
+\kl(p||q) = -\frac{1}{2}\left(\ln\left|\frac{\det L}{\det\Sigma}\right| - (m - \mu)^T L^{-1}(m - \mu) + \tr(L^{-1}\Sigma) + d\right).
+\]
+
+\item Let $x, \mu \in \sor^n$ and $\Sigma$ be an $n \times n$ covariance matrix. The entropy of a 
+distribution is given by
+\[
+H = -\int p(x)\ln p(x)dx.
+\]
+We want to maximize $H$ subject to the constraints
+\begin{eqnarray}
+\int p(x)dx &=& 1 \label{c2pe14} \\
+\int xp(x)dx &=& \mu \label{c2pe15} \\
+\int (x - \mu)(x - \mu)^Tp(x)dx &=& \Sigma \label{c2pe16} .
+\end{eqnarray}
+If $\lambda_1, \ell, \lambda_3$ are the Lagrange multipliers for each of these constraints then
+we seek to maximize the functional
 \begin{eqnarray*}
-I_{21} &=& \frac{1}{2}\int_{\sor^n}(x - \mu)L^{-1}(x - \mu)p(x)dx \\
-I_{22} &=& \int_{\sor^n}(x - \mu)^T\frac{L^{-1}}{2}(\mu - m)p(x)dx + \int_{\sor^n}(\mu - m)^T\frac{L^{-1}}{2}(x - \mu)p(x)dx \\
-I_{23} &=& \frac{1}{2}\int_{\sor^n}(\mu - m)^TL^{-1}(\mu - m)p(x)dx.
+L[x] &=& H - \lambda_1\left(\int p(x)dx - 1\right) - \ell^T\left(\int xp(x)dx - \mu\right) - \\
+ & & \tr\left\{\Lambda\left(\int(x-\mu)^T(x-\mu)p(x)dx - \Sigma\right)\right\},
 \end{eqnarray*}
-We got this split by writing $x - m = x - \mu + \mu + m$. It is easy to see that
+where $\lambda_1 \in \sor, \ell \in \sor^n$ and $\Lambda$ is an $n \times n$ non-singular 
+symmetric matrix. We now take the functional derivative of the above equation with respect to $p$,
 \[
-I_{23} = (\mu - m)^TL^{-1}(\mu - m)
+\frac{\delta L}{\delta p} = -1 - \ln p(x) - \lambda_1 - \ell^T x - \tr(\Lambda (x - \mu)^T(x - \mu)).
 \]
-and $I_{22} = 0$.
+At an extremum of $L$, the functional derivative vanishes so that $\ln p(x) = -1 - \lambda_1 - \ell x
+- (x - \mu)^T\Lambda(x - \mu)$ or
+\begin{equation}\label{c2pe17}
+p(x) = \exp\left(-1 - \lambda_1 - \ell^T x - (x - \mu)^T\Lambda(x - \mu)\right).
+\end{equation}
+We now write 
+\begin{eqnarray*}
+\ell^T x &=& \ell^T \Lambda^{-1} \Lambda x + \mu^T\ell - \mu^T\ell \\
+ &=&  \ell^T \Lambda^{-1} \Lambda x + \mu^T\ell - \ell^T\mu \\
+ &=& \ell^T\Lambda^{-1}\Lambda(x - \mu) + \mu^T\ell.
+\end{eqnarray*}
+We used the fact that $\mu^T\ell = (\mu, \ell) = (\ell, \mu) = \ell^T\mu$ as all
+the vectors are real. Since $\Lambda$ is symmetric, so is its inverse and hence $\Lambda^{-1}
+= (\Lambda^{-1})^T$. Therefore,
+\begin{eqnarray*}
+\ell^T x &=& (\ell\Lambda^{-1})^T\Lambda(x - \mu) + \mu^T\ell \\
+ &=& \frac{(\ell\Lambda^{-1})^T\lambda_x(x - \mu)}{2} + \frac{(x - \mu)^T\Lambda^T\Lambda^{-1}\ell}{2} + \mu^T\ell
+\end{eqnarray*}
+and hence
+\begin{eqnarray*}
+\ell^Tx + (x-\mu)^T\Lambda(x-\mu) &=& \left(x-\mu+\frac{\Lambda^{-1}\ell}{2}\right)^T\Lambda\left(x-\mu+\frac{\Lambda^{-1}\ell}{2}\right) \\
+ & & \mu^T\ell - \frac{\ell^T\Lambda^{-1}\ell}{4}
+\end{eqnarray*}
+The density $p$ can now be written as
+\[
+p(x)=\exp\left[-1-\lambda_1 - \left(x-\mu+\frac{\Lambda^{-1}\ell}{2}\right)^T\Lambda\left(x-\mu+\frac{\Lambda^{-1}\ell}{2}\right)-\mu^T\ell+\frac{\ell^T\Lambda^{-1}\ell}{4}\right]
+\]
+Introduce a variable 
+\[
+y = x - \mu + \frac{\Lambda^{-1}\ell}{2}
+\]
+so that the density becomes
+\[
+p(y) = \exp\left[-1-\lambda_1-y^T\Lambda y - \mu^T\ell - \frac{\ell^T\Lambda^{-1}\ell}{4}\right].
+\]
+We use this form in the second constraint to get
+\[
+\int\left(y + \mu + \frac{\Lambda^{-1}\ell}{2}\right)p(y)dy = \mu.
+\]
+The integral of $yp(y)$ vanishes because it is an odd function. The rest of the term evaluates to
+\[
+\mu + \frac{\Lambda^{-1}\ell}{2} = \mu
+\]
+or $\Lambda^{-1}\ell = 0$. As $\Lambda$ is a non-singular symmetric matrix, this means that $\ell = 0$.
+The form of the density now simplifies to
+\[
+p(y) = \exp\left(-1 - \lambda_1 - y^T\Lambda y\right),
+\]
+where $y$ now is just $x - \mu$. We now use this form in the third constraint. We define 
+$y = x - \mu$ so that
+\begin{equation}\label{c2pe18}
+\int yy^Te^{-1 - \lambda_1 - y^T\Lambda y}dy = \Sigma \Rightarrow e^{-1-\lambda_1} \int yy^T e^{-y^T\Lambda y}dy = \Sigma.
+\end{equation}
+In order to evaluate this integral we use the eigenvalues of $\Lambda$. Let $\Lambda u_i = \alpha_i u_i$,
+where $u_i$ is an eigenvector corresponding to the eigenvalue $\alpha_i$. We can then write 
+\[
+y = \sum_{i=1}^n \beta_i u_i,
+\]
+where $\beta_i = u_i^T y = (u_i, y)$. The $n$ numbers $\beta_i$ form a vector $\beta$ and we can write
+\begin{equation}\label{c2pe19}
+\beta = Uy,
+\end{equation}
+where the matrix $U = [u_1 \ldots u_n]$ has the eigenvectors of $\Lambda$ as its columns. From \eqref{c2pe19}
+we readily get 
+\begin{equation}\label{c2pe20}
+d\beta = \abs{\det U}dy.
+\end{equation}
+If we choose the eigenvectors to be orthonormal then $\abs{\det U} = 1$ and 
+\begin{equation}\label{c2pe21}
+d\beta = dy.
+\end{equation}
+Therefore,
+\[
+y^T\Lambda y = \sum_{i,j=1}^n \beta_i u_i^T \Lambda \beta_j u_j = \sum_{i,j=1}^n \beta_i\beta_j\alpha_j u_i^T u_j,
+\]
+where $\alpha_j$ is the eigenvalue of $u_j$. As the eigenvectors $\{u_i\}$ can always be 
+assumed to be orthonormal, $(u_i, u_j) = \delta_{ij}$ and hence
+\[
+y^T\Lambda y = \sum_{i=1}^n \beta_j^2\alpha_i
+\]
+Recall that $\Lambda$ is a constant matrix. Therefore, its eigenvectors are also constant and hence
+\[
+y = \sum_{i=1}^n\beta_i u_i \Rightarrow dy = \sum_{i=1}^n u_i d\beta_i
+\]
+Equation \eqref{c2pe18} now becomes
+\begin{equation}\label{c2pe22}
+e^{-1+\lambda_1}\sum_{i,j=1}^nu_iu_j^T\int \exp\left(-\sum_{k=1}^n\beta_k^2\alpha_k\right)\beta_i\beta_j d\beta = \Sigma.
+\end{equation}
+The integral in the above equation is zero if $i \ne j$. When $i = j$, it becomes
+\[
+I = \int e^{-\beta_1^2\alpha_1}d\beta_1 \cdots \int \beta_i^2e^{-\beta_i^2\alpha_i}d\beta_i \cdots \int e^{-\beta_n^2\alpha_n}d\beta_n = \frac{\pi^{n/2}}{\sqrt{\alpha_1 \cdots \alpha_n}}\frac{1}{2\alpha_i}.
+\]
+Equation \eqref{c2pe22} then becomes
+\[
+e^{-1-\lambda_1}\sqrt{\frac{\pi^n}{\alpha_1\cdots\alpha_n}}\sum_{i=1}^n \frac{1}{2\alpha_i}u_iu_i^T = \Sigma.
+\]
+Since $\Lambda u_i = \alpha_i u_i$, the expression sum in the above equation is really $\Lambda^{-1}/2$.
+(Refer to equations (2.48) and (2.49) of the book.). Therefore,
+\[
+e^{-1 - \lambda_1}\sqrt{\frac{\pi^n}{\alpha_1\cdots\alpha_n}}\frac{1}{2}\Lambda^{-1} = \Sigma.
+\]
+The determinant of a matrix is a product of its eigen-values. Therefore,
+\[
+\frac{e^{-1 - \lambda_1}}{2}\frac{\pi^{n/2}}{\sqrt{\det\Lambda}}\Lambda^{-1} = \Sigma.
+\]
+We now choose $\Lambda^{-1} = 2\Sigma$ so that
+\begin{equation}\label{cpe23}
+\Lambda = \frac{1}{2}\Sigma^{-1}.
+\end{equation}
+and $\lambda_1$ such that 
+\[
+e^{-1 - \lambda_1}\frac{\pi^{n/2}}{\sqrt{\det\Lambda}} = 1 \Rightarrow e^{-1-\lambda_1} = \frac{\sqrt{\det\Lambda}}{\pi^{n/2}}.
+\]
+From equation \eqref{cpe23}, 
+\[
+\det\Lambda = \frac{1}{2^n}\det\Sigma^{-1} = \frac{1}{2^n}\frac{1}{\det\Sigma}
+\]
+so that
+\begin{equation}\label{cpe24}
+e^{-1 - \lambda_1} = \frac{1}{(2\pi)^{n/2}}\frac{1}{\sqrt{\det\Sigma}}.
+\end{equation}
+Equations \eqref{cpe23}, \eqref{cpe24} and the fact that $\ell = 0$ make the $p$ a multi-variate
+gaussian distribution.
 \end{enumerate}
 
