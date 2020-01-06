@@ -522,6 +522,10 @@ symmetric matrix. We now take the functional derivative of the above equation wi
 \[
 \frac{\delta L}{\delta p} = -1 - \ln p(x) - \lambda_1 - \ell^T x - \tr(\Lambda (x - \mu)^T(x - \mu)).
 \]
+As $\tr(AB) = \tr(BA)$, we can write the last expression on the right hand side as
+\[
+\frac{\delta L}{\delta p} = -1 - \ln p(x) - \lambda_1 - \ell^T x - \tr((x - \mu)^T\Lambda(x - \mu)).
+\]
 At an extremum of $L$, the functional derivative vanishes so that $\ln p(x) = -1 - \lambda_1 - \ell x
 - (x - \mu)^T\Lambda(x - \mu)$ or
 \begin{equation}\label{c2pe17}
@@ -645,5 +649,42 @@ e^{-1 - \lambda_1} = \frac{1}{(2\pi)^{n/2}}\frac{1}{\sqrt{\det\Sigma}}.
 \end{equation}
 Equations \eqref{cpe23}, \eqref{cpe24} and the fact that $\ell = 0$ make the $p$ a multi-variate
 gaussian distribution.
+
+\item The entropy of a distribution $p$ is
+\[
+H = -\int p(x)\ln p(x)dx.
+\]
+If $p$ is a multivariate gaussian distribution,
+\[
+p(x) = \frac{1}{(2\pi)^{n/2}}\frac{1}{\sqrt{\det\Sigma}}\exp\left(-\frac{(x - \mu)^T\Sigma^{-1}(x - \mu)}{2}\right)
+\]
+so that
+\[
+\ln p = -\frac{n}{2}\ln(2\pi) - \frac{1}{2}\ln\det\Sigma - \frac{(x - \mu)^T\Sigma^{-1}(x - \mu)}{2}
+\]
+Therefore,
+\[
+H = \frac{n}{2}\ln(2\pi) + \frac{1}{2}\ln\det\Sigma + \frac{1}{2}\int(x - \mu)^T\Sigma^{-1}(x - \mu)p(x)dx.
+\]
+The integral $I$ is best evaluated using the property of expectations. Clearly, $I = \ev((x-\mu)^T\Sigma^{-1}(x-\mu))$.
+As $(x-\mu)^T\Sigma^{-1}(x-\mu)$ is a number, we can as well write
+\begin{eqnarray*}
+I &=& \ev(\tr((x - \mu)^T\Sigma^{-1}(x - \mu))) \\
+  &=& \ev(\tr(\Sigma^{-1}(x - \mu)^T(x - \mu))) \\
+  &=& \ev(\tr(\Sigma^{-1})\tr((x - \mu)^T(x - \mu))) \\
+  &=& \tr(\Sigma^{-1})\ev(\tr((x - \mu)^T(x - \mu))) \\
+  &=& \tr(\Sigma^{-1})\tr(\ev(x - \mu)^T(x - \mu)) \\
+  &=& \tr(\Sigma^{-1})\tr(\Sigma) \\
+  &=& \tr(\Sigma^{-1}\Sigma) = n
+\end{eqnarray*}
+The entropy is thus,
+\[
+H = \frac{1}{2}\ln\det\Sigma + \frac{n}{2}\left(1 + \ln(2\pi)\right).
+\]
+
+\item Given that the random variable $X$ is a sum of two gaussian random variables $X_1$ and $X_2$.
+The probability that $X$ takes a value between $x$ and $x + dx$ is $p(x)dx$. This is equal to the
+probability that $X_2$ takes a value between $x_2$ and $dx_2$ and $X_1$ takes a value between $x - x_2$
+and $d(x - x_2)$.
 \end{enumerate}
 
