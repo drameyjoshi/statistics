@@ -515,10 +515,16 @@ If $\lambda_1, \ell, \lambda_3$ are the Lagrange multipliers for each of these c
 we seek to maximize the functional
 \begin{eqnarray*}
 L[x] &=& H - \lambda_1\left(\int p(x)dx - 1\right) - \ell^T\left(\int xp(x)dx - \mu\right) - \\
- & & \tr\left\{\Lambda\left(\int(x-\mu)^T(x-\mu)p(x)dx - \Sigma\right)\right\},
+ & & \Lambda\left(\int(x-\mu)^T(x-\mu)p(x)dx - \Sigma\right),
 \end{eqnarray*}
 where $\lambda_1 \in \sor, \ell \in \sor^n$ and $\Lambda$ is an $n \times n$ non-singular 
-symmetric matrix. We now take the functional derivative of the above equation with respect to $p$,
+symmetric matrix. Each term on the right hand side is a number. Therefore, it is equal to the
+trace of itself. We use this fact on the third term to get
+\begin{eqnarray*}
+L[x] &=& H - \lambda_1\left(\int p(x)dx - 1\right) - \ell^T\left(\int xp(x)dx - \mu\right) - \\
+ & & \tr\left\{\Lambda\left(\int(x-\mu)^T(x-\mu)p(x)dx - \Sigma\right)\right\},
+\end{eqnarray*}
+ We now take the functional derivative of the above equation with respect to $p$,
 \[
 \frac{\delta L}{\delta p} = -1 - \ln p(x) - \lambda_1 - \ell^T x - \tr(\Lambda (x - \mu)^T(x - \mu)).
 \]
@@ -685,6 +691,56 @@ H = \frac{1}{2}\ln\det\Sigma + \frac{n}{2}\left(1 + \ln(2\pi)\right).
 \item Given that the random variable $X$ is a sum of two gaussian random variables $X_1$ and $X_2$.
 The probability that $X$ takes a value between $x$ and $x + dx$ is $p(x)dx$. This is equal to the
 probability that $X_2$ takes a value between $x_2$ and $dx_2$ and $X_1$ takes a value between $x - x_2$
-and $d(x - x_2)$.
+and $d(x - x_2)$. Thus,
+\[
+p(x) = \int_\sor p(x - x_2)p(x_2)dx_2.
+\]
+The integral on the right is called a convolution of $p$ with itself. Given that
+\[
+p(x_2) = \sqrt{\frac{\tau_2}{2\pi}}e^{-(x_2 - \mu_2)^2\tau_2}
+\]
+and
+\[
+p(x - x_2) = \sqrt{\frac{\tau_1}{2\pi}}e^{-(x - x_2 - \mu_1)^2\tau_1}
+\]
+so that
+\[
+p(x) = \frac{\sqrt{\tau_1\tau_2}}{2\pi}\int_\sor e^{-[(x - x_2 - \mu_1)^2\tau_1 + (x_2 - \mu_2)^2\tau_2]}dx_2
+\]
+In order to proceed, we must simplify the argument of the exponent. It is
+\begin{eqnarray*}
+&=& (x - \mu_1)^2\tau_1 - 2(x - \mu_1)\tau_1x_2 + x_2^2\tau_1 + x_2^2\tau_2 - 2x_2\mu_2\tau_2 + \mu_2^2\tau_2 \\
+&=& (\tau_1 + \tau_2)x_2^2 -2[(x - \mu_1)\tau_1 + \mu_2\tau_2]x_2 + (x - \mu_1)^2\tau_1 + \mu_2^2\tau_2 \\
+&=& (\tau_1 + \tau_2)x_2^2 -2[(x - \mu_1)\tau_1 + \mu_2\tau_2]x_2 + \frac{[(x - \mu_1)\tau_1 + \mu_2\tau_2]^2}{\tau_1 + \tau_2} - \\
+& & \frac{[(x - \mu_1)\tau_1 + \mu_2\tau_2]^2}{\tau_1 + \tau_2} - (x - \mu_1)^2\tau_1 + \mu_2^2\tau_2 \\
+&=& \left(\sqrt{\tau_1 + \tau_2}x_2 - \frac{[(x - \mu_1)\tau_1 + \mu_2\tau_2]}{\sqrt{\tau_1 + \tau_2}}\right)^2 - \\
+& & \frac{[(x - \mu_1)\tau_1 + \mu_2\tau_2]^2}{\tau_1 + \tau_2} - (x - \mu_1)^2\tau_1 + \mu_2^2\tau_2 \\
+\end{eqnarray*}
+The expression for density is
+\[
+\begin{split}
+p(x) = & \frac{\sqrt{\tau_1\tau_2}}{2\pi}\exp\left(-\frac{[(x - \mu_1)\tau_1 + \mu_2\tau_2]^2}{\tau_1 + \tau_2} + (x - \mu_1)^2\tau_1 + \mu_2^2\tau_2\right) \\
+ & \int_\sor\exp\left(-\left(\sqrt{\tau_1 + \tau_2}x_2 - \frac{[(x - \mu_1)\tau_1 + \mu_2\tau_2]}{\sqrt{\tau_1 + \tau_2}}\right)^2\right)dx_2
+\end{split}
+\]
+In order to evaluate the integral, introduce the variable
+\[
+y = \sqrt{\tau_1 + \tau_2}x_2 - \frac{[(x - \mu_1)\tau_1 + \mu_2\tau_2]}{\sqrt{\tau_1 + \tau_2}}
+\]
+so that
+\[
+dx_2 = \frac{dy}{\sqrt{\tau_1 + \tau_2}}
+\]
+and hence
+\[
+\begin{split}
+p(x) = & \frac{\sqrt{\tau_1\tau_2}}{2\pi}\exp\left(-\frac{[(x - \mu_1)\tau_1 + \mu_2\tau_2]^2}{\tau_1 + \tau_2} + (x - \mu_1)^2\tau_1 + \mu_2^2\tau_2\right) \\
+ & \frac{1}{\sqrt{\tau_1+\tau_2}}\int_\sor e^{-y^2}dy.
+\end{split}
+\]
+Simplifying further,
+\[
+p(x) = \frac{1}{2\sqrt{\pi}}\sqrt{\frac{\tau_1\tau_2}{\tau_1 + \tau_2}}\exp\left(-\frac{[(x - \mu_1)\tau_1 + \mu_2\tau_2]^2}{\tau_1 + \tau_2} + (x - \mu_1)^2\tau_1 + \mu_2^2\tau_2\right) 
+\]
 \end{enumerate}
 
