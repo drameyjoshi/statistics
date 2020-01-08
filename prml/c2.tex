@@ -742,5 +742,109 @@ Simplifying further,
 \[
 p(x) = \frac{1}{2\sqrt{\pi}}\sqrt{\frac{\tau_1\tau_2}{\tau_1 + \tau_2}}\exp\left(-\frac{[(x - \mu_1)\tau_1 + \mu_2\tau_2]^2}{\tau_1 + \tau_2} + (x - \mu_1)^2\tau_1 + \mu_2^2\tau_2\right) 
 \]
+Let
+\begin{eqnarray*}
+\frac{1}{\tau} &=& \frac{1}{\tau_1} + \frac{1}{\tau_2} \\
+\mu &=& \mu_1 + \mu_2
+\end{eqnarray*}
+then
+\[
+p(x) = \frac{1}{2}\sqrt{\frac{\tau}{\pi}}\exp\left(-(x - \mu)^2\tau\right).
+\]
+This is a gaussian with mean $\mu$ and precision $\tau$. Therefore, its entropy is
+\[
+H(p) = \frac{1}{2}\left(1 + \ln\left(\frac{2\pi}{\tau}\right)\right).
+\]
+
+\item Consider the multivariate gaussian
+\[
+\mathcal{N}(x|\mu,\Sigma) = \frac{1}{(2\pi)^{n/2}}\frac{1}{\sqrt{\det\Sigma}}\exp\left(-\frac{(x - \mu)^T\Sigma^{-1}(\mu - \tau)}{2}\right).
+\]
+We can write any matrix as a sum of a symmetric and an anti-symmetric matrix. For,
+\[
+\Sigma^{-1} = \frac{\Sigma^{-1} + (\Sigma^{-1})^T}{2} + \frac{\Sigma^{-1} - (\Sigma^{-1})^T}{2}.
+\]
+Now the argument of the exponent can be written as
+\begin{eqnarray*}
+ &=& (x - \mu)^T(\Sigma^{-1} - (\Sigma^{-1})^T)(x - \mu) \\
+ &=& (x - \mu)^T\Sigma^{-1}(x - \mu) - (x - \mu)^T(\Sigma^{-1})^T(x - \mu) \\
+ &=& \sum_{i,j=1}^n(x - \mu)_i\Sigma^{-1}_{ij}(x - \mu)_j - \sum_{i,j=1}^n((x - \mu)_i((\Sigma^{-1}_{ji}(x - \mu)_j \\
+ &=& \sum_{i,j=1}^n(x - \mu)_i\Sigma^{-1}_{ij}(x - \mu)_j - \sum_{i,j=1}^n((x - \mu)_j((\Sigma^{-1}_{ji}(x - \mu)_i \\
+ &=& 0.
+\end{eqnarray*}
+Likewise, it is easy to show that
+\[
+(x - \mu)^T(\Sigma^{-1} + (\Sigma^{-1})^T)(x - \mu) = (x - \mu)^T\Sigma^{-1}(x - \mu)
+\]
+so that not only the symmetric part survives, it is also identical to the original term.
+
+\item Let $\Sigma u = \lambda u$. Take the hermitian adjoint of this equation, $\bar{u}^T\Sigma^\ast
+= \bar{u}^T\bar{\lambda}$. Since $\Sigma$ is real and symmetric, $\Sigma^\ast = \Sigma$ and hence
+$\bar{u}^T\Sigma = \bar{u}^T\bar{\lambda}$. From the original equation, we have $\bar{u}^T\Sigma u = 
+\lambda \bar{u}^T u$. From the latter equation we get $\bar{u}^T\Sigma u = \bar{\lambda}\bar{u}^T u$.
+The left hand sides of these equations are identical. Therefore, $\bar{\lambda} = \lambda$.
+
+Let $\Sigma u_1 = \lambda_1 u_1$ and $\Sigma u_2 = \lambda u_2$. Then,
+\begin{eqnarray*}
+u_2^T\Sigma u_1 &=& \lambda_1 u_2^T u_1 \\
+u_1^T\Sigma u_2 &=& \lambda_2 u_1^T u_1.
+\end{eqnarray*}
+Take the transpose of the second equation. Since $\Sigma$ is symmetric
+\[
+u_2^T\Sigma u_1 = \lambda_2 u_2^T u_1.
+\]
+Subtract this equation from the first one to get $0 = (\lambda_1 - \lambda_2)(u_2, u_1)$. Since the 
+two eigenvalues are distinct, $(u_2, u_1) = 0$. This conclusion is valid even if one of the eigenvalues
+is zero.
+
+\item Let $u_1, \ldots, u_n$ be the eigenvectors of $\Sigma$ and $\lambda_1, \ldots, \lambda_n$ be
+the corresponding eigenvalues. Form the $n \times n$ matrix $U = [u_1 \ldots u_n]$. We also assume
+that $u_i$'s are orthonormal. Let $M = U\Lambda U^T$, where $\Lambda = \diag(\lambda_1, \ldots,
+\lambda_n)$. Then, $U^TM U = U^TU \Lambda U^TU = \Lambda$.
+
+Since $\Sigma u_i = \lambda_i u_i$, we also have $U^T\Sigma U = \Lambda$. Therefore, $U^T M U = U^T \Lambda U
+\Rightarrow UU^T M UU^T = UU^T \Lambda UU^T \Rightarrow M = U$.
+
+Now consider 
+\[
+\sum_{i=1}^n \lambda_i u_i u_i^T\sum_{j=1}^n\frac{1}{\lambda_j}u_j u_j^T =
+\sum_{i,j=1}^n\frac{\lambda_i}{\lambda_j}u_i u_i^T u_j u_j^T =
+\sum_{i,j=1}^n \frac{\lambda_i}{\lambda_j}u_i\delta_{ij}u_j^T = \sum_{i=1}^n u_iu_i^T = I.
+\]
+The last equality follows from the completeness property of vector spaces. Therefore, the
+matrix
+\[
+\sum_{i=1}^n\frac{1}{\lambda_i}u_i u_i^T
+\]
+is the inverse of $\Sigma$.
+
+\item Let $u_1, \dots, u_n$ be eigenvectors of $\Sigma$ with eigenvalues $\lambda_1, \ldots,
+\lambda_n$. The eigenvectors also form the basis of $\sor^n$ so that any vector $a$ can be
+expressed as
+\[
+a = \sum_{i=1}^n \mu_i u_i.
+\]
+Therefore, 
+\[
+a^T\Sigma a = \sum_{i,j=1}^n \mu_i \mu_j u_i^T \Sigma u_j = \sum_{i,j=1}^n \mu_i\mu_j\lambda_j u_i^T u_j = \sum_{i,j=1}^n\mu_i\mu_j\lambda_j\delta_{ij},
+\]
+or
+\[
+a^T\Sigma a = \sum_{i=1}^n \mu_i^1\lambda_i.
+\]
+From this equation it is clear that if $\lambda_i \ge 0$ for all $i$ then $a^T\Sigma a \ge 0$.
+
+Now assume that $a^T\Sigma a \ge 0$ for all $a$. Therefore, in particular, $u_i^T\Sigma u_i \ge 0
+\Rightarrow \lambda_i u_i^T u_i \ge 0$. Since $(u_i, u_i) > 0$, this just means $\lambda_i \ge 0$.
+
+\item There are $D$ diagonal elements and $0 + 1 + \cdots + (D - 1)$ lower diagonal elements. The
+latter sum is $(D - 1)D/2$. Therefore, the total number of independent elements is
+\[
+D + \frac{1}{2}D(D - 1) = \frac{1}{2}D(D + 1).
+\]
+
+\item Let $A$ be a symmetric matrix. Therefore, $A = A^T$. We know that $A^{-1}A = I$ so that
+$A^T(A^{-1})^T = I \Rightarrow A (A^{-1})^T = I$, which means that $(A^{-1})^T$ is also an inverse
+of $A$. But the inverse of a matrix is unique. Therefore, $A^{-1} = (A^{-1})^T$.
 \end{enumerate}
 
