@@ -88,6 +88,58 @@ Therefore the maximum-likelihood estimate of \eqref{c2s1e6} becomes
 \mu_{ML} = \left(\frac{m_1}{N}, \ldots, \frac{m_k}{N}\right).
 \end{equation}
 
+\section{Conditional gaussian distributions}\label{c2s2}
+Let $x \in \sor^D$, $x_a \in \sor^M$, where $M < D$ and $x_b \in \sor^{D-M}$. Then we can consider 
+the probability distribution over $x$ as a joint distribution over $x_a$ and $x_b$. Let us partition
+the mean $\mu \in \sor^D$ and the covariance matrix $\Sigma$, a $D \times D$ matrix as
+\begin{eqnarray}
+\mu &=& \begin{pmatrix} \mu_a \\ \mu_b \end{pmatrix} \label{c2s2e1} \\
+\Sigma &=& \begin{pmatrix} \Sigma_{aa} & \Sigma_{ab} \\ \Sigma_{ba} & \Sigma_{bb} \end{pmatrix} \label{c2s2e2}
+\end{eqnarray}
+The symmetry of $\Sigma$ guarantees that $\Sigma_{aa}$ and $\Sigma_{bb}$ are symmetric and 
+$\Sigma_{ab} = \Sigma_{ba}^T$. Let the corresponding precision matrix be 
+\begin{equation}\label{c2s2e3}
+\Lambda = \Sigma^{-1} = \begin{pmatrix} \Lambda_{aa} & \Lambda_{ab} \\ \Lambda_{ba} & \Lambda_{bb} \end{pmatrix} 
+\end{equation}
+The precision matrix is also symmetric because of the symmetry of $\Sigma$. Therefore $\Lambda_{aa}$
+and $\Lambda_{bb}$ are symmetric while $\Lambda_{ab} = \Lambda_{ba}^T$. 
+
+We are interested in finding out $p(x_a|x_b)$. By definition, 
+\[
+p(x_a|x_b) = p(x_a, x_b)p(x_b),
+\]
+where $x_b$ takes a given value in $\sor^{D-M}$. One can always simplify the right hand side to get
+the expression for $p(x_a|x_b)$. However, it is easier to first find out the mean and the variance
+and then compute the normalization constant. We will demonstrate it here.
+
+The argument of the exponent in the gaussian can be written as
+\begin{eqnarray*}
+-\frac{1}{2}(x-\mu)\Sigma^{-1}(x - \mu) &=& -\frac{1}{2}x^T\Sigma^{-1}x + \frac{1}{2}x^T\Sigma^{-1}\mu \\
+ & & + \frac{1}{2}\mu^T\Sigma^{-1}x + \frac{1}{2}\mu^T\Sigma^{-1}\mu.
+\end{eqnarray*}
+Since $\Sigma^{-1}$ is a symmetric matrix,
+\[
+\mu^T\Sigma^{-1}x = \left(\mu^T\Sigma^{-1}x\right)^T = x^T\Sigma^{-1}\mu
+\]
+so that
+\begin{eqnarray*}
+-\frac{1}{2}(x-\mu)^T\Sigma^{-1}(x-\mu) &=& -\frac{1}{2}x^T\Sigma^{-1}x + x^T\Sigma^{-1}\mu - \\
+ & & \frac{1}{2}\mu^T\Sigma^{-1}\mu
+\end{eqnarray*}
+Thus, the argument of the exponent is written as a sum of a term quadratic in $x$, linear in $x$
+and a constant. Therefore, given any quadratic form, the term quadratic in $x$ gives the
+covariance matrix. Knowing the covariance matrix, the linear term gives the mean.
+
+In the case of $p(x_a|x_b)$, after expressing the argument of the exponent in $p(x_a, x_b)$ in
+terms of the precision matrix, we get
+\begin{equation}\label{c2s2e4}
+\Sigma_{a|b} = \Lambda_{aa}^{-1}.
+\end{equation}
+The linear term in the exponent is $x^T(\Lambda_{aa}\mu_a - \Lambda_{ab}(x_b - \mu)b)$ so that
+\begin{equation}\label{c2s2e5}
+\mu_{a|b} = \Lambda_{aa}^{-1}(\Lambda_{aa}\mu_a - \Lambda_{ab}(x_b - \mu_b)) = \mu_a - \Lambda_{aa}^{-1}\Lambda_{ab}(x_b - \mu_b).
+\end{equation}
+
 \section{Problems}\label{c2p}
 \begin{enumerate}
 \item The Bernoulli distribution is defined as $\mathrm{Bern}(x|\mu) = \mu^x(1 - \mu)^x$. The 
