@@ -898,5 +898,57 @@ D + \frac{1}{2}D(D - 1) = \frac{1}{2}D(D + 1).
 \item Let $A$ be a symmetric matrix. Therefore, $A = A^T$. We know that $A^{-1}A = I$ so that
 $A^T(A^{-1})^T = I \Rightarrow A (A^{-1})^T = I$, which means that $(A^{-1})^T$ is also an inverse
 of $A$. But the inverse of a matrix is unique. Therefore, $A^{-1} = (A^{-1})^T$.
+
+\item Consider the product
+\[
+\begin{pmatrix} A & B \\ C & D\end{pmatrix}\begin{pmatrix} M & -MBD^{-1} \\ -D^{-1}CM & D^{-1}+D^{-1}CMBD^{-1}\end{pmatrix}
+\]
+It is
+\[
+\begin{pmatrix}
+AM - BD^{-1}CM & -AMBD^{-1} + BD^{-1} + BD^{-1}CMBD^{-1} \\ 
+CM -CM & -CMBD^{-1} + I + CMBD^{-1}
+\end{pmatrix}
+\]
+or
+\[
+\begin{pmatrix}
+(A - BD^{-1}C)M & BD^{-1} + (-A+BD^{-1}C)MBD^{-1} \\
+0 & I
+\end{pmatrix}
+\]
+Using the fact that $A - BD^{-1}C = M^{-1}$, we see that the product is
+\[
+\begin{pmatrix}I & BD^{-1} - BD^{-1} \\ 0 & I \end{pmatrix} = \begin{pmatrix}I&0\\0&I\end{pmatrix}.
+\]
+
+\item From problem (19) of chapter 1, the volume of a hypersphere of radius $\Delta$ is
+\[
+V = \frac{2}{D}\frac{\pi^{D/2}}{\Gamma(D/2)}\Delta^D.
+\]
+If $\Delta$ is the Mahalanobis distance between $x$ and $\mu$ then
+\[
+\Delta^2 = (x - \mu)^T\Sigma^{-1}(x - \mu) \Rightarrow 1 = (x - \mu)^T\left(\frac{\Sigma^{-1/2}}{\Delta}\right)^2(x - \mu).
+\]
+Let $y = \Sigma^{-1/2}(x - \mu)/\Delta$ then $y^Ty = 1$, which is also the equation of a
+unit hypersphere with origin as its centre. Then the inverse transformation $x = \mu + \Delta\Sigma^{1/2}y$
+transforms the unit sphere to a hyperellipsoid. The Jacobian of this transformation is $\Delta^D\det\Sigma^{1/2}$.
+Therefore the volume of unit sphere becomes $V_D\Delta^D(\det\Sigma)^{1/2}$. 
+
+Note that the transformation $y \mapsto \mu + \Delta\Sigma^{1/2}y$ stretches and deforms a
+unit sphere.
+
+\item Consider the product
+\begin{eqnarray*}
+(A + BCD)(A^{-1} - A^{-1}B(C^{-1} + DA^{-1}B)^{-1}DA^{-1}) &=& \\
+I - B(C^{-1} + DA^{-1}B)^{-1}DA^{-1} + BCDA^{-1} - BCDA^{-1}B(C^{-1} + DA^{-1}B)^{-1}DA^{-1} &=& \\
+I + BCDA^{-1} - B(C^{-1} + DA^{-1}B)^{-1}DA^{-1} - BCDA^{-1}B(C^{-1} + DA^{-1}B)^{-1}DA^{-1} &=& \\
+I + BCDA^{-1} - \left[(B + BCDA^{-1}B)(C^{-1} + DA^{-1}B)^{-1}DA^{-1}\right] &=& \\
+I + BCDA^{-1} - \left[BC(C^{-1} + DA^{-1}B)(C^{-1} + DA^{-1}B)^{-1}DA^{-1}\right] &=& \\
+I + BCDA^{-1} - BCDA^{-1} &=& \\
+I
+\end{eqnarray*}
+
+
 \end{enumerate}
 
