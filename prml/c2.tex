@@ -899,6 +899,22 @@ D + \frac{1}{2}D(D - 1) = \frac{1}{2}D(D + 1).
 $A^T(A^{-1})^T = I \Rightarrow A (A^{-1})^T = I$, which means that $(A^{-1})^T$ is also an inverse
 of $A$. But the inverse of a matrix is unique. Therefore, $A^{-1} = (A^{-1})^T$.
 
+\item From problem (19) of chapter 1, the volume of a hypersphere of radius $\Delta$ is
+\[
+V = \frac{2}{D}\frac{\pi^{D/2}}{\Gamma(D/2)}\Delta^D.
+\]
+If $\Delta$ is the Mahalanobis distance between $x$ and $\mu$ then
+\[
+\Delta^2 = (x - \mu)^T\Sigma^{-1}(x - \mu) \Rightarrow 1 = (x - \mu)^T\left(\frac{\Sigma^{-1/2}}{\Delta}\right)^2(x - \mu).
+\]
+Let $y = \Sigma^{-1/2}(x - \mu)/\Delta$ then $y^Ty = 1$, which is also the equation of a
+unit hypersphere with origin as its centre. Then the inverse transformation $x = \mu + \Delta\Sigma^{1/2}y$
+transforms the unit sphere to a hyperellipsoid. The Jacobian of this transformation is $\Delta^D\det\Sigma^{1/2}$.
+Therefore the volume of unit sphere becomes $V_D\Delta^D(\det\Sigma)^{1/2}$. 
+
+Note that the transformation $y \mapsto \mu + \Delta\Sigma^{1/2}y$ stretches and deforms a
+unit sphere.
+
 \item Consider the product
 \[
 \begin{pmatrix} A & B \\ C & D\end{pmatrix}\begin{pmatrix} M & -MBD^{-1} \\ -D^{-1}CM & D^{-1}+D^{-1}CMBD^{-1}\end{pmatrix}
@@ -922,21 +938,25 @@ Using the fact that $A - BD^{-1}C = M^{-1}$, we see that the product is
 \begin{pmatrix}I & BD^{-1} - BD^{-1} \\ 0 & I \end{pmatrix} = \begin{pmatrix}I&0\\0&I\end{pmatrix}.
 \]
 
-\item From problem (19) of chapter 1, the volume of a hypersphere of radius $\Delta$ is
+\item Given that $x = (x_a, x_b, x_c)^T$ is a gaussian with mean $\mu = (\mu_a, \mu_b, \mu_c)^T$ and
 \[
-V = \frac{2}{D}\frac{\pi^{D/2}}{\Gamma(D/2)}\Delta^D.
+\Sigma = \begin{pmatrix}\Sigma_{aa} & \Sigma_{ab} & \Sigma_{ac} \\
+\Sigma_{ba} & \Sigma_{bb} & \Sigma_{bc} \\
+\Sigma_{ca} & \Sigma_{cb} & \Sigma_{cc}
+\end{pmatrix}
 \]
-If $\Delta$ is the Mahalanobis distance between $x$ and $\mu$ then
+Let us first marginalize $p(x_a, x_b, x_c)$ on $x_c$. The resulting distribution, from equation (2.98)
+of the book is
 \[
-\Delta^2 = (x - \mu)^T\Sigma^{-1}(x - \mu) \Rightarrow 1 = (x - \mu)^T\left(\frac{\Sigma^{-1/2}}{\Delta}\right)^2(x - \mu).
+p(x_a, x_b) = \mathcal{N}(\mu^\prime, \Sigma^\prime)
 \]
-Let $y = \Sigma^{-1/2}(x - \mu)/\Delta$ then $y^Ty = 1$, which is also the equation of a
-unit hypersphere with origin as its centre. Then the inverse transformation $x = \mu + \Delta\Sigma^{1/2}y$
-transforms the unit sphere to a hyperellipsoid. The Jacobian of this transformation is $\Delta^D\det\Sigma^{1/2}$.
-Therefore the volume of unit sphere becomes $V_D\Delta^D(\det\Sigma)^{1/2}$. 
-
-Note that the transformation $y \mapsto \mu + \Delta\Sigma^{1/2}y$ stretches and deforms a
-unit sphere.
+where $\mu^\prime = (\mu_a, \mu_b)^T$ and 
+\[
+\Sigma^\prime = \begin{pmatrix} \Sigma_{aa} & \Sigma_{ab} \\
+\Sigma_{ba} & \Sigma_{bb}
+\end{pmatrix}
+\]
+The conditional distribution $p(x_a | x_b)$ is given by equations (2.96) and (2.97) of the book.
 
 \item Consider the product
 \begin{eqnarray*}
@@ -949,6 +969,96 @@ I + BCDA^{-1} - BCDA^{-1} &=& \\
 I
 \end{eqnarray*}
 
+\item Given that $Y = X + Z$ where $X, Y, Z \in \sor^n$ and that $p(x, z) = p(x)p(z)$. Now,
+\begin{eqnarray*}
+\ev(Y) &=& \int yp(y)dy \\
+ &=& \int (x + z)p(x, z)dxdz \\
+ &=& \int xp(x)dx\int p(y)dy + \int p(x)dx\int yp(y)dy \\
+ &=& \ev(X) + \ev(Z).
+\end{eqnarray*}
+The covariance matrix of $Y$ is 
+\begin{eqnarray*}
+\cov(Y) &=& \ev((Y - \ev(Y))(Y - \ev(Y))^T) \\
+ &=& \ev[(X + Z - \ev(X) - \ev(Z))(X + Z - \ev(X) - \ev(Z))^T] \\
+ &=& \ev[(X - \ev(X))(X - \ev(X))^T] + \ev[(X - \ev(X))(Z - \ev(Z))^T] + \\
+ & & \ev[(Z - \ev(Z))(X -\ev(X))^T] + \ev[(Z - \ev(Z))(Z - \ev(Z))^T] \\
+ &=& \cov(X) + 0 + 0 + \cov(Z)
+\end{eqnarray*}
+Consider 
+\begin{eqnarray*}
+\ev[(X - \ev(X))(Z - \ev(Z))^T] &=& \int (x - \ev(X))(y - \ev(Y))^Tp(x, z)dxdz \\
+ &=& \int (x - \ev(X))p(x)dx \int (y - \ev(Y))^Tdy.
+\end{eqnarray*}
+Since the expectations of deviations vanish, the above term also vanishes.
 
+\item Given that the joint distribution of $Z = (X, Y)^T$, where $x \in \sor^m$ and $y \in \sor^d$, has mean
+$\ev(z) = \begin{pmatrix} \mu \\ A\mu + b \end{pmatrix}$ and covariance
+\[
+\cov(Z) = \begin{pmatrix} \Lambda^{-1} & \Lambda^{-1}A^T \\
+A\Lambda^{-1} & L^{-1} + A\Lambda^{-1}A^T \end{pmatrix}
+\]
+Using equations (2.92) and (2.93) of the book, the marginal distribution $p(x)$ is a gaussian with mean
+$\mu$ and covariance $\Lambda^{-1}$ and is therefore given by equation (2.99) of the book. The conditional
+distribution $p(y|x)$ is a gaussian with mean $A\mu + b + A\Lambda^{-1}\Lambda(x_a - \mu) = b + Ax_a$. This
+follows from (2.81) modified so that $\mu_{b|a} = \mu_b + \Sigma_{ba}\Sigma_{aa}^{-1}(x_a - \mu_a)$. Similarly,
+the covariance matrix is $L^{-1} + A\Lambda^{-1}A^T - A\Lambda^{1}\Lambda\Lambda^{-1}A^T = L^{-1}$.
+
+\item Given that 
+\[
+R = \begin{pmatrix} \Lambda + A^T L A & -A^T L \\
+-LA & L \end{pmatrix}
+\]
+The Schur complement of this matrix is 
+\[
+M = (\Lambda + A^TLA - (-A^TL)L^{-1}(-LA))^{-1} = (\Lambda + A^TLA - A^TLA)^{-1} = \Lambda^{-1}.
+\]
+Using equation (2.76), the inverse of $R$ is
+\[
+\begin{pmatrix}
+\Lambda^{-1} & -\Lambda^{-1}(-A^TL)L^{-1} \\
+-L^{-1}(-LA)\Lambda^{-1} & L^{-1}(I + (-LA)\Lambda^{-1}(-A^TL)L^{-1})\end{pmatrix}
+\]
+Simplifying it further,
+\[
+R^{-1} = \begin{pmatrix} \Lambda^{-1} & \Lambda^{-1}A^T \\
+A\Lambda^{-1} & L^{-1} + A\Lambda^{-1}A^T\end{pmatrix}.
+\]
+
+\item This exercise is a simple matrix multiplication
+\[
+R^{-1}\begin{pmatrix}\Lambda\mu - A^TLb \\ Lb\end{pmatrix} = \begin{pmatrix}\mu \\ A\mu + b\end{pmatrix}.
+\]
+
+\item We are given two multivariate gaussian random vectors $X$ and $Z$. Let $Y = X + Z$. We want to
+find $p_Y(y)$. It is a product of $p(y|x)p(x)$. For a given $x$, $Y = x + Z$ and hence $p(y|x) = 
+\mathcal{N}(y| x + \mu_z, \Sigma_z)$. Therefore,
+\[
+p_Y(y) = \mathcal{N}(y | x + \mu_z, \Sigma_z)\mathcal{N}(x | \mu_x, \Sigma_x).
+\]
+Comparing this equation with equations (2.99) and (2.100) if the book we get the correspondence $\mu \mapsto \mu_x$,
+$\Lambda_1^{-1} \mapsto \Sigma_x, A \to I, b \to \mu_z, L^{-1} \to \Sigma_z$. Using equation (2.108)of the
+book, the mean value of $(x, x + z)^T$ is $(\mu_x, \mu_x + \mu_z)^T$. Thus, the mean of $y$ is
+\[
+\ev(Y) = \mu_x + \mu_z.
+\]
+The covariance matrix of $x(x, x + z)^T$ is
+\[
+\begin{pmatrix}\Sigma_x & \Sigma_x \\ \Sigma_x & \Sigma_z + \Sigma_x\end{pmatrix}.
+\]
+Therefore, the covariance matrix of $Y = X + Z$ is the lower right corner of the above matrix. That is,
+\[
+\cov(Y) = \Sigma_x + \Sigma_z
+\]
+
+\item $p(x, y) = p(x)p(y|x)$ so that $\ln p(x, y) = \ln p(x) + \ln p(y|x)$ or
+\[
+\ln p(x, y) = -\frac{1}{2}(x - \mu)^T\Lambda(x - \mu) - \frac{1}{2}(y - Ax - b)^T L (y - Ax - b)
+\]
+We are going to integrate this expression with respect to $x$. We can do that if we simplify
+the right hand side as
+\begin{eqnarray*}
+\ln p(x,y) &=& -\frac{1}{2}x^T\Lambda x + \frac{x^T\Lambda\mu + \mu^T\Lambda x}{2} - \frac{1}{2}x^TA^T L A x + \\
+ & & \frac{x^TA^TL(y-b)+(y-b)^TLAx}{2} + \mathrm{const.} \\
+ &=& -\frac{1}{2}x^T(\Lambda + A^TL)x + x^T(\Lambda\mu + A^TL(y - b)) + \mathrm{const.}
+\end{eqnarray*}
 \end{enumerate}
-
