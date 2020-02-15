@@ -79,3 +79,5 @@ R.squared <- ESS/SS
 
 # Recall that adjusted R^2 is calculated as
 adj.R.sq <- 1 - (1 - R.squared) * (nrow(Y) - 1)/(nrow(Y) - 1 - 1)
+
+ 
