@@ -31,7 +31,36 @@ so that
 \begin{equation}\label{e2}
 \sum_{i=1}^n e_i = 0.
 \end{equation}
-\item I cannot prove this yet.
+\item We can write our linear model as $Y = X\beta + \epsilon$ where $Y$ is the vector
+$(y_1, \ldots, y_N)$, $\beta = (\beta_0, \beta_1)$ and $X$ is an $N \times 2$ matrix
+\[\begin{pmatrix}1 & x_1 \\ \vdots & \vdots \\ 1 & x_N\end{pmatrix}\]. The hat matrix
+is $H = X(X^T X)^{-1}X^T$. The fitted values are $\hat{Y} = HY$. The residuals are
+$e = Y - \hat{Y}$. We want to find out
+\[
+    \sum_{i=1}^N(\hat{y}_i - \bar{y})e_i = (\hat{Y} - \bar{Y}, e),
+\]
+where $(\cdot, \cdot)$ denotes the inner product. We also note that 
+\[
+    e = Y - \hat{Y} = Y - HY = (I - H)Y
+\]
+so that 
+\begin{eqnarray*}
+(\hat{Y} - \bar{Y}, e) &=& (\hat{Y} - \bar{Y}, Y - HY) \\
+	&=& (Y - HY, \hat{Y} - \bar{Y}) \\
+	&=& (Y^T - Y^TH^T)(\hat{Y} - \bar{Y}) \\
+	&=& Y^T\hat{Y} - Y^T\bar{Y} - Y^TH^T\hat{Y} + Y^TH^T\bar{Y} \\
+	&=& Y^THY - Y^T\bar{Y} - Y^TH^THY + Y^TH^T\bar{Y}
+\end{eqnarray*}	
+As $H$ is symmetric $H^T = H$. It is also idempotent so that $H^TH = HH =H$. Therefore,
+\begin{eqnarray*}
+(\hat{Y} - \bar{Y}, e) &=& Y^THY - Y^T\bar{Y} - Y^THY + Y^TH^T\bar{Y} \\
+	&=& Y^TH\bar{Y} - Y^T\bar{Y} \\
+	&=& Y^T(H - I)\bar{Y}.
+\end{eqnarray*}
+Recall that the vector $\bar{Y} = \bar{y}(1, \ldots, 1)$. If we denote the vector of
+all ones as $o$ then $(\hat{Y} - \bar{Y}, e) = \bar{y}Y^T(H - I)o$. As our model has
+an intercept, $o$ is in the linear span of the column space of $X$ because of which
+$(H - I)o = 0$.
 \item We know from the theory of regression that
 \begin{equation}\label{e3}
 b_1 = \frac{\sum_{j=1}^N(x_j - \bar{x})(y_j - \bar{y})}{\sum_{j=1}^N(x_j - \bar{x})^2}
