@@ -112,7 +112,7 @@ cat(paste(
 ))
 ```
 
-A high $p$-value indicates that we cannot reject the null hypothesis that the 
+A low $p$-value indicates that we can reject the null hypothesis that the 
 two means of the groups are not statistically different from each other. We can
 confirm our conclusion by looking at the box plot of the Wing data.
 ```{r}
