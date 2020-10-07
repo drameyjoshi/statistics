@@ -1,0 +1,14 @@
+PatientId: unique patient ID
+AppointmentID: unique appointment ID
+Gender: patient’s gender
+ScheduledDay: when the appointment was scheduled
+AppointmentDay: date of the appointment
+Age: patient’s age
+Neighbourhood: patient’s neighbourhood (in Brazil)
+Scholarship: whether the patient benefited from social welfare to pay for the appointment
+Hipertension: whether the patient has hypertension
+Diabetes: whether the patient has diabetes
+Alcoholism: whether the patient is an alcoholic
+Handcap: whether the patient is handicapped
+SMS_received: whether the patient received a reminder by text message
+No-show: whether they actually showed up to the appointment
