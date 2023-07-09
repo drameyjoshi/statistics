@@ -1,0 +1,654 @@
+---
+title: "Assignment - 2 (R Programming for Biologists)"
+author: "Aum Sarang Prabhune (BSBG21036)"
+date: "2023-07-05"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Question - 1
+
+```{r, cache = TRUE, warning = FALSE}
+
+```
+
+
+### Question - 2
+
+Following is the solution to Part (b) of Question 2.
+
+The solution to Part (a) will be submitted as a separate PDF file, as well as a TEX file.
+
+```{r, cache = TRUE, warning = FALSE}
+
+# Question - 2, Part (b)
+
+parameters <- c(a = 10, b = 2.5)
+state <- c(x = 1, y = 1)
+
+# The function that represents the ODE.
+oscillator <- function(tau, state, parameters) {
+  with (as.list(c(state, parameters)), {
+    dx <- a - x - 4 * x * y / (1 + x ^ 2)
+    dy <- b * (x - x * y / (1 + x ^ 2))
+    
+    list(c(dx, dy))
+  })
+  
+}
+
+# We solve to ODE for time tau = 0 to tau = 100. Note that in the non-dimensional
+# form the variable tau has no unit.
+times <- seq(0, 100, by = 0.01)
+library(deSolve)
+out <-
+  ode(
+    y = state,
+    times = times,
+    func = oscillator,
+    parms = parameters
+  )
+
+ylim = c(0, max(out[, "x"], out[, "y"]))
+plot(x=times, y=out[, "y"], type="l", col="blue", xlab="t", ylab="x or y", ylim=ylim)
+lines(x=times, y=out[, "x"], col="green")
+plot(out[, "x"], out[, "y"], pch=".", xlab="x", ylab="y")
+
+# Choosing parameters a and b
+# Fixing "a" and finding various values of "b".
+
+a <- 10
+critical_b <- 3*a/5 - 25/a
+cat(paste("critical b", critical_b))
+
+# We have already considered a value of "b" lower than critical "b". 
+
+# Now considering a higher value, say "b" = 4.5
+
+parameters <- c(a = 10, b = 4.5)
+
+out <-
+  ode(
+    y = state,
+    times = times,
+    func = oscillator,
+    parms = parameters
+  )
+
+ylim = c(0, max(out[, "x"], out[, "y"]))
+plot(x=times, y=out[, "y"], type="l", col="blue", xlab="t", ylab="x or y", ylim=ylim)
+lines(x=times, y=out[, "x"], col="green")
+plot(out[, "x"], out[, "y"], pch=".", xlab="x", ylab="y")
+
+```
+
+
+### Question - 3
+
+```{r, cache = TRUE, warning = FALSE}
+
+library(ggplot2)
+library(reshape2) # To convert the data from wide to long format.
+library(easyPubMed) # This package is used to retrieve PubMed records
+library(sqldf) # Aggregation is easy (and fast) with SQL.
+
+# Part A
+
+get_data <- function(query) {
+  ids <- get_pubmed_ids(query)
+  abstracts <- fetch_pubmed_data(ids, format = "xml")
+  years <- custom_grep(abstracts, "Year")
+  df1 <- data.frame(years = unlist(years))
+  df <- sqldf("select years, count(years) as npubs from df1 group by 1")
+  df$id <- query
+  df
+}
+
+get_publication_count <- function(query_vec, years, output_fname) {
+  df_list <- lapply(query_vec, get_data)
+  combined_df <- do.call(rbind, df_list)
+  desired_years <- data.frame(years=years)
+  final_df <- sqldf("select a.* from 
+                    combined_df a inner join desired_years b on b.years = a.years")
+  write.csv(final_df, file=output_fname, row.names = FALSE)
+}
+
+query_vec <- c("Damiano Fantini[AU]", "Kenealy W[AU]")
+get_publication_count(query_vec, c("2018", "2019", "2020", "2021", "2022", "2023"), "data.csv")
+
+# Part B
+
+data <- read.csv("publications.csv")
+data_long <- melt(data, id.vars = c("Year"))
+ggplot(data_long, aes(x = Year, y = value)) + geom_line() + 
+  facet_wrap(~variable)
+
+
+```
+
+
+### Question - 4
+
+```{r, cache = TRUE, warning = FALSE}
+
+
+```
+
+### Question - 5 
+
+```{r, cache = TRUE, warning = FALSE}
+
+# The Lincoln - Peterson, and the Chapman estimators of 'N' are mentioned in the 
+# question.
+
+library(ggplot2)
+
+# The ggplot2 package allows for variables to be plotted in a unique style.
+
+library(reshape2)
+
+# The reshape2 package allows for wide, and long-data types to be formatted
+# into their contrasting types using functions 'melt' and 'cast'.
+
+N <- 1000
+
+# Assuming that the true value of N = 1000
+
+capture_prob <- seq(from = 0.01, to = 0.25, by = 0.02)
+
+# Creating a sequence of probabilities between the given values
+# Each interval is 0.02
+
+n_tries <- 100
+
+# For a given balue of p, this function does n_tries number of simulations.
+simulate <- function(p, N, n_tries) {
+  # This function represents a single simulation.
+  simulation <- function(p, N) {
+    # We want to simulate the situation in which each animal is chosen with a
+    # probability p. If there are N animals in a population and n of them are 
+    # captured then 
+    # p = C(N - 1, n - 1)/C(N, n) = n/N => n = pN.
+    # where C(N, n) is the number of ways in which n animals are chosen from
+    # N.
+    capture <- function(p, N) {
+      n <- p * N
+      result <- sample.int(n = N,
+                           size = n,
+                           replace = FALSE)
+      result
+    }
+    
+    # Capture and mark,
+    first_capture <- capture(p, N)
+    n <- length(first_capture)
+    # Second capture.
+    second_capture <- capture(p, N)
+    K <- length(second_capture)
+    # Which ones were recaptured?
+    recapture <- intersect(second_capture, first_capture)
+    k <- length(recapture) # Number of recaptured animals.
+    
+    lpe <- ifelse(k == 0, K * n, K * n / k)
+    che <- floor((K + 1) * (n + 1) / (k + 1)) - 1
+    
+    lpe_error = (lpe - N) / N * 100
+    che_error = (che - N) / N * 100
+    
+    list("lpe_error" = lpe_error, "che_error" = che_error)
+  }
+  
+  # Total error rates in all simulations.
+  lpe_error <- 0
+  che_error <- 0
+  
+  for (i in 1:n_tries) {
+    rv <- simulation(p, N)
+    lpe_error <- lpe_error + rv[[1]]
+    che_error <- che_error + rv[[2]]
+  }
+  
+  # Return the average error rate.
+  c(lpe_error/n_tries, che_error/n_tries)
+}
+
+# Error rates for each value of p, the capture probability.
+che <- list()
+lpe <- list()
+
+for (p in capture_prob) {
+  rv <- simulate(p, N, n_tries)
+  lpe[[length(lpe) + 1]] <- rv[1]
+  che[[length(che) + 1]] <- rv[2]
+}
+
+results <- data.frame("capture_prob"=capture_prob, 
+                      "ch_error"=unlist(che), 
+                      "lp_error"=unlist(lpe))
+
+ggplot(data = melt(results, id.vars=c("capture_prob")), 
+       aes(x=capture_prob, y=value, group=variable)) + 
+  geom_line(aes(color=variable)) +
+  xlab("Capture probability") +
+  ylab("Error") +
+  ggtitle("Error probability")
+
+```
+
+### Question - 6 
+
+```{r, cache = TRUE, warning = FALSE}
+
+library(utils)
+filename <- "origin_of_species.txt"
+# The file "head.txt" was created using the command
+# head -n 100 origin_of_species.txt > head.txt
+# It allowed me to test the code on a smaller file.
+#filename <- "head.txt" 
+
+cnxn <- file(filename, open = "r")
+count <- 0
+
+# A map with entries <word>: <freq of occurrence>. As we read words in the
+# file, we check if the word is in the map. If it is, then we increment the 
+# frequency, otherwise we add it with a frequency 1.
+words <- hashtab()
+
+while (TRUE) {
+  line <- readLines(cnxn, n = 1L)
+  if (length(line) > 0) {
+    words_in_line <- strsplit(line, " |-|'")[[1]] # Split a line at space, -, ',.
+    for (w in words_in_line) {
+      w1 <-
+        sub("[^[:alpha:]]+$", "", tolower(w)) # Remove trailing comma or fullstop.
+      if (is.null(gethash(words, w1))) {
+        sethash(words, w1, 1) # A new word, assign it a frequency of occurrence of 1.
+      } else {
+        sethash(words, w1, gethash(words, w1) + 1)
+      }
+    }
+    count <- count + 1
+  } else {
+    close(cnxn)
+    break
+  }
+}
+
+# The functions in each of these parts follow the documentation of the function
+# maphash. We follow the example:
+# hashkeys <- function(h) {
+# val <- vector("list", numhash(h))
+#  idx <- 0
+#  maphash(h, function(k, v) { idx <<- idx + 1
+#                              val[idx] <<- list(k) })
+#  val
+#}
+
+# Note the <<- assignment. It is an assignment to a variable that it just
+# outside of the scope of the maphash function.
+
+# Part A.
+words_with_N_or_more_chars <- function(words, N) {
+  result <- list()
+  i <- 1
+  maphash(words, function(k, v) {
+    if (nchar(k) >= N) {
+      result[[i]] <<- k
+      i <<- i + 1
+    }
+  })
+  
+  result
+}
+
+result_1 <- words_with_N_or_more_chars(words, 4)
+
+words_starting_and_ending_with_same_letter <- function(words) {
+  result <- list()
+  i <- 1
+  maphash(words, function(k, v) {
+    if (substr(k, 1, 1) == substr(k, nchar(k), nchar(k))) {
+      result[[i]] <<- k
+      i <<- i + 1
+    }
+  })
+  
+  result
+}
+
+result_2 <- words_starting_and_ending_with_same_letter(words)
+
+words_2nd_letter_same_as_2nd_last <- function(words) {
+  result <- list()
+  i <- 1
+  maphash(words, function(k, v) {
+    if (substr(k, 2, 2) == substr(k, nchar(k) - 1, nchar(k) - 1)) {
+      result[[i]] <<- k
+      i <<- i + 1
+    }
+  })
+  
+  result
+}
+
+result_3 <- words_2nd_letter_same_as_2nd_last(words)
+
+words_with_freq_gt_N <- function(words, N) {
+  result <- list()
+  i <- 1
+  maphash(words, function(k, v) {
+    if (v > N) {
+      result[[i]] <<- k
+      i <<- i + 1
+    }
+  })
+  
+  result
+}
+
+result_4 <- words_with_freq_gt_N(words, 20)
+
+# Part B.
+result_5 <- words_with_N_or_more_chars(words, 7)
+
+is_vowel <-
+  function(c) {
+    result <- FALSE
+    if (c == 'a' ||
+        c == 'e' || c == 'i' || c == 'o' || c == 'u') {
+      result <- TRUE
+    }
+    
+    result
+  }
+
+vowels_at_odd_positions <- function(words) {
+  result <- list()
+  i <- 1
+  maphash(words, function(k, v) {
+    odd_positions <- rep(c(TRUE, FALSE), ceiling(nchar(k) / 2))
+    chars_at_odd_positions <- strsplit(k, "")[[1]][odd_positions]
+    if (sum(unlist(lapply(chars_at_odd_positions, is_vowel))) == length(chars_at_odd_positions)) {
+      result[[i]] <<- k
+      i <<- i + 1
+    }
+  })
+  
+  result
+}
+
+result_6 <- vowels_at_odd_positions(words)
+
+is_consonant <-
+  function(c) {
+    if (is.na(c)) {
+      FALSE
+    } else {
+      !is_vowel(c)
+    }
+  }
+
+consonants_at_even_positions <- function(words) {
+  result <- list()
+  i <- 1
+  maphash(words, function(k, v) {
+    even_positions <- rep(c(FALSE, TRUE), ceiling(nchar(k) / 2))
+    chars_at_even_positions <- strsplit(k, "")[[1]][even_positions]
+    
+    if (sum(unlist(lapply(
+      chars_at_even_positions, is_consonant
+    ))) == length(chars_at_even_positions)) {
+      result[[i]] <<- k
+      i <<- i + 1
+    }
+  })
+  
+  result
+}
+
+result_7 <- consonants_at_even_positions(words)
+
+# Part C.
+result_8 <- words_with_N_or_more_chars(words, 6)
+
+
+in_natural_order <- function(char_vector) {
+  start <- 60 # This is one less than charToRaw("a")
+  result <- TRUE
+  
+  for (i in seq_along(char_vector)) {
+    c = char_vector[[i]]
+    if (is_vowel(c)) {
+      if (charToRaw(c) > start) {
+        start <- charToRaw(c)
+      } else {
+        result <- FALSE
+        break
+      }
+    }
+  }
+  
+  result
+}
+
+vowels_in_natural_order <- function(words) {
+  result <- list()
+  i <- 1
+  maphash(words, function(k, v) {
+    if (in_natural_order(strsplit(k, "")[[1]])) {
+      result[[i]] <<- k
+      i <<- i + 1
+    }
+  })
+  
+  result
+}
+
+result_9 <- vowels_in_natural_order(words)
+
+result_10 <- words_with_freq_gt_N(words, 125)
+
+```
+
+### Question - 7
+
+```{r, cache = TRUE, warning = FALSE}
+
+library(sqldf)
+
+# The package 'sqldf' is used for running SQL statements, optimised for R
+# It is used to extract data from databases, in this case, the .csv file
+# https://www.rdocumentation.org/packages/sqldf/versions/0.4-11
+
+library(chron)
+
+# "Provides chronological objects which can handle date and time."
+# https://cran.r-project.org/package=chron
+
+library(ggplot2)
+
+# Used for plotting
+
+trains <- read.csv("train_schedules.csv")
+
+# Part A
+
+query_a1 <-
+  "select station_code, train_number from trains where arrival != 'None' and departure != 'None'"
+ta <- sqldf(query_a1)
+result_a <-
+  sqldf(
+    "select station_code, count(train_number) as ntrains from ta group by station_code order by 2 desc"
+  )
+
+stn_code_with_max_trains <- result_a[1, "station_code"]
+stn_name_with_max_trains <-
+  trains[trains$station_code == stn_code_with_max_trains, c("station_name")][1]
+
+cat(paste("Station with most trains is", stn_name_with_max_trains))
+
+# Part B
+# All trains departing from SBC
+tb1 <-
+  sqldf(
+    "select a.train_number, a.station_code, a.arrival, a.day, a.departure
+     from trains a inner join (
+      select train_number
+      from trains
+      where departure != 'None'
+      and station_code = 'SBC'
+    ) b on b.train_number = a.train_number"
+  )
+
+# Some time values will not be converted because they are set to "None". Trains
+# start from those stations.
+tb1$arrival_time = chron(times = tb1$arrival)
+tb1$departure_time = chron(times = tb1$departure)
+
+tb2 <-
+  sqldf("select train_number, day, departure_time from tb1 where station_code = 'SBC'")
+
+tb3 <- sqldf(
+  "select a.train_number,
+             a.station_code,
+             a.day as arrival_day,
+             a.arrival_time,
+             b.day as departure_day,
+             b.departure_time
+             from tb1 a inner join tb2 b on a.train_number = b.train_number
+             where a.day >= b.day or a.arrival_time >= b.departure_time
+             order by a.train_number, b.day, b.departure_time, a.day, a.arrival_time"
+)
+
+tb4 <- sqldf(
+  "select
+             train_number,
+             station_code,
+             arrival_day,
+             arrival_time,
+             departure_day,
+             departure_time,
+             case when duration > diff_time then duration
+             else diff_time end as duration
+             from
+             (
+                select
+                 train_number,
+                 station_code,
+                 arrival_day,
+                 arrival_time,
+                 departure_day,
+                 departure_time,
+                 arrival_time - departure_time as diff_time,
+                 arrival_day - departure_day as diff_day,
+                 arrival_time + (arrival_day - departure_day) as duration
+                 from tb3
+             )"
+)
+
+tb5 <- sqldf(
+  "select
+             train_number,
+             station_code,
+             duration,
+             rank() over(order by duration desc) as seq
+             from tb4
+             group by
+             train_number,
+             station_code"
+)
+longest_train_number <- tb5[tb5$seq == 1, ]$train_number
+longest_stn_code <- tb5[tb5$seq == 1, ]$station_code
+longest_train_name <-
+  unique(trains[trains$train_number == longest_train_number, "train_name"])
+longest_stn_name <-
+  unique(trains[trains$station_code == longest_stn_code, "station_name"])
+
+cat(
+  paste(
+    "Longest journey is to",
+    longest_stn_name,
+    "by",
+    longest_train_name,
+    "number",
+    longest_train_number
+  )
+)
+
+# Part C
+all_trains <- unique(trains$train_number)
+train_classifier <- data.frame(train_number = all_trains)
+
+classify <- function(train_number) {
+  digit_vec <- strsplit(train_number, "")[[1]]
+  result <- FALSE
+  if (digit_vec[1] == "0" ||
+      digit_vec[1] == "1" || digit_vec[1] == "2") {
+    if (digit_vec[2] != "2") {
+      result <- TRUE
+    }
+  }
+  
+  result
+}
+
+train_classifier$is_long_distance <-
+  apply(train_classifier, MARGIN = 1, FUN = classify)
+tb6 <- sqldf(
+  "select a.*, c.is_long_distance
+             from trains a inner join train_classifier c on
+             c.train_number = a.train_number"
+)
+tb7 <-
+  sqldf(
+    "select distinct station_name, station_code, train_number
+             from tb6
+             where is_long_distance = true
+             and (arrival = 'None' or departure = 'None')"
+  )
+tb8 <-
+  sqldf(
+    "select station_name, station_code, count(train_number) as n_trains
+             from tb7
+             group by 1, 2
+             order by 3 desc"
+  )
+top20_stn <- sqldf("select * from tb8 limit 20")
+
+final <- sqldf(
+  "select
+               tb7.station_name,
+               tb7.station_code,
+               tb7.train_number
+               from tb7 inner join top20_stn t20 on t20.station_code = tb7.station_code"
+)
+
+extract_2nd_digit <- function(row) {
+  digit_vec <- strsplit(row[3], "")[[1]]
+  digit_vec[2]
+}
+
+final$second_digit <-
+  apply(final, MARGIN = 1, FUN = extract_2nd_digit)
+
+for_plotting <- sqldf(
+  "select
+                      station_code,
+                      station_name,
+                      second_digit,
+                      count(train_number) as n_trains
+                      from final
+                      group by 1, 2, 3"
+)
+
+ggplot(for_plotting[, c("station_name", "second_digit", "n_trains")], aes(x =
+                                                                            n_trains)) + geom_histogram() + facet_wrap( ~ station_name)
+
+
+```
