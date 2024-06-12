@@ -70,3 +70,12 @@ xyplot(data = X.long[X.long$Run %in% sample.sims, ],
        xlab='Year',
        ylab='Yearly returns',
        main='Simulation of yearly returns')
+
+exp.yret <- rowMeans(X)
+exp.total.ret <- cumprod(1 + exp.yret)
+plot(x=1:length(exp.total.ret), 
+     y=exp.total.ret, 
+     type='l',
+     xlab='Year', 
+     ylab='Cumulative return', 
+     main='Cumulative return over 20 years')
