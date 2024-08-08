@@ -1,0 +1,65 @@
+---
+title: "Examples of Multiple Regression"
+format:
+  html:
+    code-fold: true
+jupyter: python3
+---
+```{python}
+import os
+
+import pandas as pd
+import numpy as np
+import statsmodels.api as sm
+import statsmodels.formula.api as sa
+```
+
+# Example 1
+We use the Swiss Fertility data available on R and exported as a CSV file for our
+analysis.
+
+```{python}
+filename = 'swiss.csv'
+pathname = os.path.join('.', 'datasets', filename)
+
+if os.path.isfile(pathname):
+    swiss = pd.read_csv(pathname)
+else:
+    assert False
+
+swiss.head()
+swiss.rename(columns={'Infant.Mortality': 'Infant_Mortality'},
+             inplace=True)
+swiss.head()            
+```
+
+`Fertility` is an endogenous variable that depends on five other exogenous variables. Before proceceeding, let is look at how they correlate with each other.
+```{python}
+_ = pd.plotting.scatter_matrix(frame=swiss)
+```
+
+A quick linear model looks like
+```{python}
+Xs = swiss.columns[1:]
+model_swiss = sa.ols(data=swiss,
+                     formula='Fertility ~ Agriculture + Examination + Education + Catholic + Infant_Mortality')
+result_swiss = model_swiss.fit()
+result_swiss.summary()
+```
+
+`Agriculture`, `Examination` and `Education` have negative slopes. One would expect the corresponding scatter plots to show negative correlation as well. Let us find out how they look like.
+```{python}
+for c in ['Agriculture', 'Examination', 'Education']:
+    _ = swiss.plot(x=c, y='Fertility', kind='scatter')
+```
+
+`Agriculture` seems to be positively correlated with `Fertility` with a correlation coefficient
+```{python}
+swiss[['Agriculture', 'Fertility']].corr()
+```
+
+_Simpson's paradox_ seems to be at play here. Strangely, even though `Examination` seems to be well-correlated with `Fertility` the p-value of its coefficient is quite high. To confirm, the correlation is
+```{python}
+swiss[['Examination', 'Fertility']].corr()
+```
+This is respectably strong, negative correlation.
