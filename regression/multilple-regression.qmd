@@ -139,7 +139,63 @@ insect_result = insect_model.fit()
 insect_result.summary()
 ```
 
-The estimated coefficients in this model are the group means.
+## Interpretation of coefficients
+### When one of the levels is the intercept
+
+- The intercept is an estimate of the mean of the reference level.
+- The other coefficients are tested with respect to the reference level. We will check this observation with a t-test. The t-statistic for Spray B is 0.520. We will compute it afresh.
+
+The standard error is computed from the residuals as follows:
+```{python}
+# Fit the linear model.
+insect_model = sa.ols(data=insect, formula ='count ~ spray')
+insect_result = insect_model.fit()
+
+# Compute the standard error of residuals.
+n_groups = len(insect['spray'].unique())
+n_obs = len(insect)
+se_resid = np.sqrt(np.sum(insect_result.resid**2)/(n_obs - n_groups))
+
+# Standard error for difference in two groups is
+counts = insect.groupby('spray').count()
+
+n_A = counts.loc['A', 'count']
+n_B = counts.loc['B', 'count']
+se_B = se_resid * np.sqrt(1/n_A + 1/n_B)
+print(f'Std. error of coeff of spray B is {np.round(se_B, 3)}.')
+
+means = insect.groupby('spray').mean()
+mean_A = means.loc['A', 'count']
+mean_B = means.loc['B', 'count']
+diff_means = mean_B - mean_A
+t_stat = diff_means/se_B
+print(f't-statistic for coeff of spray B is {np.round(t_stat, 3)}.')
+```
+
+These numbers indeed matches the number given in the summary table. I am still not able to compute the standard error for the intercept but I think it will be done in the next section.
+
+## When there is no intercept.
+
+- The coefficients are now the group means.
+- The t-values test if the mean of each group differs from zero.
+```{python}
+insect_model_ni = sa.ols(data=insect, formula ='count ~ spray')
+insect_result_ni = insect_model_ni.fit()
+se_resid_ni = np.sqrt(np.sum(insect_result_ni.resid**2)/(n_obs - n_groups))
+
+if np.abs(se_resid_ni - se_resid) < 1e-8:
+    print('The residual standard error is the same in the two models.')
+else:
+    print('The residual standard error is the different in the two models.')
+
+counts = insect.groupby('spray').count()
+n_A = counts.loc['A', 'count']
+se_A = se_resid_ni/np.sqrt(n_A)
+print(f'Std. error for A is {np.round(se_A, 3)}.')
+```
+
+This number matches that in the summary. Further, it also matches the standard error of the coefficient of spray 'A' in the previous model. We also confirm that the coefficients of the second model are the grouped means of counts.
 ```{python}
 insect.groupby('spray').mean()
 ```
+
