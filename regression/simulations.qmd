@@ -1,0 +1,93 @@
+---
+title: "Simulations"
+author: "Amey Joshi"
+format: html
+editor: visual
+---
+
+## Subtleties in analysis
+
+The relationship between the dependent variable $Y$ and the independent variables $X_i$ is often influenced by other variables not included in $\{X_i\}$. Often times, these omitted variables are categorical. We will consider examples of such data by simulating it.
+
+## A categorical variable multiple groups with different fits
+
+We simulate the data as:
+
+```{r}
+n <- 100 # number of observations.
+t <- rep(c(0, 1), c(n/2, n/2)) # A categorical variable.
+x <- c(runif(n/2), runif(n/2)) 
+beta0 <- 0
+beta1 <- 2
+tau <- 1
+sigma <- 0.2
+
+y <- beta0 + beta1 * x + tau * t + rnorm(n, 0, sigma)
+```
+
+The data looks like
+
+```{r}
+plot(x, y, col = ifelse(t == 1, 'red', 'blue'), pch = 16)
+abline(a = beta0, b = beta1, col = 'black', lwd = 3)
+abline(a = beta0 + tau, b = beta1, col = 'black', lwd = 3)
+title('Grouped data')
+legend(x = 'topleft',
+       legend = c('Treatment', 'No treatment'),
+       pch = c(16, 16),
+       col = c('red', 'blue'),
+       bty = 'n',
+       cex = 1)
+
+```
+
+### Model with treatment variable ignored
+
+Supposing we ignore the presence of the treatment variable `G` and fit a linear model.
+
+```{r}
+res.1 <- lm(y ~ x)
+agg.res <- aggregate(y ~ t, FUN = mean)
+summary(res.1)
+
+plot(x, y, col = ifelse(t == 1, 'red', 'blue'), pch = 16)
+abline(res.1$coefficients, col = 'black', lty = 2)
+abline(h = agg.res[agg.res$t == 0, 'y'], col = 'blue')
+abline(h = agg.res[agg.res$t == 1, 'y'], col = 'red')
+legend(x = 'topleft',
+       legend = c('Treatment', 'No treatment'),
+       pch = c(16, 16),
+       col= c('red', 'blue'),
+       bty = 'n',
+       cex = 1)
+title('Grouped data')
+```
+
+The model certainly fits well, but it is clearly visible that there is a categorical variable that neatly divides the population in two groups. A few more observations:
+
+1.  The outcome $y$ is depends on the predictor $x$ but the relationship is determined by the group variable $t$.
+2.  The outcome $y$ is influenced by $t$ but the predictor $x$ is not.
+3.  The dashed line will be the regression line with $t$ ignored.
+
+We will now fit separate model for each group.
+
+```{r}
+res.grp.1 <- lm(y ~ x, data = df.1, subset = (df.1$t == 1))
+res.grp.0 <- lm(y ~ x, data = df.1, subset = (df.1$t == 0))
+
+plot(x, y, col = ifelse(t == 1, 'red', 'blue'), pch = 16)
+abline(res.1$coefficients, col = 'black', lty = 2)
+abline(res.grp.1$coefficients, col = 'red', lty = 2)
+abline(res.grp.0$coefficients, col = 'blue', lty = 2)
+abline(h = agg.res[agg.res$t == 0, 'y'], col = 'blue')
+abline(h = agg.res[agg.res$t == 1, 'y'], col = 'red')
+legend(x = 'topleft',
+       legend = c('Treatment', 'No treatment'),
+       pch = c(16, 16),
+       col= c('red', 'blue'),
+       bty = 'n',
+       cex = 1)
+title('Grouped data')
+```
+
+If ignore $x$, our prediction of $y$ will be the group means. By including $x$, we make them more accurate by reading off the two regression lines. The difference between the regression lines and the corresponding intercepts is surprisingly small. This is because the $x$ variable is evenly distributed across the groups. In such situations, when knowing $x$ does not drastically change our estimate of $y$ the remaining variable $x$ is called a *nuisance variable*.
