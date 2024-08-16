@@ -2,6 +2,7 @@
 title: "Dummy Variables"
 author: "Amey Joshi"
 format: html
+  df-print: kable
 editor: visual
 ---
 
@@ -47,11 +48,19 @@ aggregate(Fertility ~ Catholic.Bin, data=swiss, length)
 We will check the variation of `Fertility` with `Agriculture` depending on whether the Catholics have a majority in the canton.
 
 ```{r}
-library(ggplot2)
-g <- ggplot(swiss, aes(x=Agriculture, y=Fertility, colour=factor(Catholic.Bin)))
-g <- g + geom_point(size=6, colour='black') + geom_point(size=4)
-g <- g + xlab('Agriculture') + ylab('Fertility')
-g
+plot(swiss$Agriculture,
+     swiss$Fertility,
+     col = ifelse(swiss$Catholic.Bin == 1, 'blue', 'red'),
+     pch = 16,
+     xlab = 'Agriculture',
+     ylab = 'Fertility',
+     main = 'Swiss fertility by Catholic population')
+legend(x = 'bottomright',
+       legend = c('Majority', 'Minority'),
+       pch = c(16, 16),
+       col = c('blue', 'red'),
+       bty = 'n',
+       cex = 1)
 ```
 
 The Catholic majority cantons have higher percentage of males practising agriculture and a high fertility as well.
@@ -91,13 +100,22 @@ summary(res.2)
 ```
 
 Let us ignore the $p$-values of the coefficients once again. The intercept increases by an amount equal to the coefficient of `Catholic.Bin` when `Catholic.Bin = 1`. Simultaneously, the slope increases by an amount equal to the coefficient of `Agriculture:Catholic.Bin`.
+
 ```{r}
 coeffs <- res.2$coefficients
-
-g <- ggplot(swiss, aes(x=Agriculture, y=Fertility, colour=factor(Catholic.Bin)))
-g <- g + geom_point(size=6, colour='black') + geom_point(size=4)
-g <- g + xlab('Agriculture') + ylab('Fertility')
-g <- g + geom_abline(slope=coeffs[2], intercept = coeffs[1], colour='red')
-g <- g + geom_abline(slope=coeffs[2] + coeffs[4], intercept = coeffs[1] + coeffs[3], colour='blue')
-g
+with(swiss,
+     plot(Agriculture,
+          Fertility,
+          col = ifelse(Catholic.Bin == 1, 'blue', 'red'),
+          xlab = 'Agriculture',
+          ylab = 'Fertility',
+          main = 'Swiss fertility by Catholic population'))
+abline(coeffs[1], coeffs[2], col = 'red')
+abline(coeffs[1] + coeffs[3], coeffs[2] + coeffs[4], col='blue')
+legend(x = 'bottomright',
+       legend = c('Majority', 'Minority'),
+       pch = c(16, 16),
+       col = c('blue', 'red'),
+       bty = 'n',
+       cex = 1)
 ```
