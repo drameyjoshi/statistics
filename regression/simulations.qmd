@@ -9,7 +9,7 @@ editor: visual
 
 The relationship between the dependent variable $Y$ and the independent variables $X_i$ is often influenced by other variables not included in $\{X_i\}$. Often times, these omitted variables are categorical. We will consider examples of such data by simulating it.
 
-## A categorical variable multiple groups with different fits
+## Simulation 1
 
 We simulate the data as:
 
@@ -91,3 +91,102 @@ title('Grouped data')
 ```
 
 If ignore $x$, our prediction of $y$ will be the group means. By including $x$, we make them more accurate by reading off the two regression lines. The difference between the regression lines and the corresponding intercepts is surprisingly small. This is because the $x$ variable is evenly distributed across the groups. In such situations, when knowing $x$ does not drastically change our estimate of $y$ the remaining variable $x$ is called a *nuisance variable*.
+
+# Simulation 2
+
+In the previous simulation, the categorical variable resulted in two groups having same slope but different intercepts. Now we consider a situation when both the slope and the intercept are the same but the range of predictor and response variables are different for the two groups.
+
+```{r}
+n.sim <- 100
+t <- c(rep(0, n.sim/2), rep(1, n.sim/2))
+x <- c(runif(n.sim/2), 1.5 + runif(n.sim/2))
+beta0 <- 0
+beta1 <- 2
+tau <- 0
+sigma <- 0.2
+
+y = beta0 + beta1 * x + tau * t + rnorm(n.sim, sd = sigma)
+plot(x, y, col = ifelse(t == 1, 'blue', 'red'), pch = 16)
+legend(x = 'bottomright',
+       legend = c('Treatment', 'No treatment'),
+       pch = c(16, 16),
+       col = c('blue', 'red'),
+       bty = 'n',
+       cex = 1)
+title(main = 'Simulation 2')
+
+full.res <- lm(y ~ x)
+trt.res  <- lm(y[1:n.sim/2] ~ x[1:n.sim/2])
+ntrt.res <- lm(y[n.sim/2 + 1: n.sim] ~ x[n.sim/2 + 1: n.sim])
+
+abline(full.res$coefficients, col = 'black', lty = 5)
+abline(trt.res$coefficients, col = 'red', lty = 5)
+abline(ntrt.res$coefficients, col = 'blue', lty = 5)
+```
+
+The long-dashed red line fits only the 'No treatment' group, the long-dashed blue line only the 'treatment' group and the long-dashed black line the entire data set. We first compare this data set with the previous one.
+
+1.  In 'simulation 1', $x$ did not depend on $t$, it does in this case.
+    1.  If you know $x$ in 'simulation 2', you can very accurately tell the value of $t$, but not *vice versa*.
+2.  In both cases, knowing $t$ gives a reasonable estimate of $y$. It is the group mean in both cases.
+3.  In 'simulation 1',i ncluding $x$ in the model only improves the accuracy. In this case, including $x$ and $t$ erases, confounds, hides the influence of $t$.
+
+## Simulation 3
+
+The categorical variable $t$ separates the $x$ for the two groups as in the previous case but does not get fully confounded by $x$.
+
+```{r}
+n.sim <- 100
+t <- c(rep(0, n.sim/2), rep(1, n.sim/2))
+x <- c(runif(n.sim/2), 0.9 + runif(n.sim/2))
+beta0 <- 0
+beta1 <- 2
+tau <- -1
+sigma <- 0.2
+
+grp.means <- aggregate(y ~ t, FUN = mean)
+
+y = beta0 + beta1 * x + tau * t + rnorm(n.sim, sd = sigma)
+plot(x, y, col = ifelse(t == 1, 'blue', 'red'), pch = 16)
+legend(x = 'bottomright',
+       legend = c('Treatment', 'No treatment'),
+       pch = c(16, 16),
+       col = c('blue', 'red'),
+       bty = 'n',
+       cex = 1)
+title(main = 'Simulation 3')
+
+full.res <- lm(y ~ x + t)
+trt.res  <- lm(y[1:n.sim/2] ~ x[1:n.sim/2])
+ntrt.res <- lm(y[n.sim/2 + 1: n.sim] ~ x[n.sim/2 + 1: n.sim])
+
+#abline(full.res$coefficients, col = 'black', lty = 5)
+abline(trt.res$coefficients, col = 'red', lty = 5)
+abline(ntrt.res$coefficients, col = 'blue', lty = 5)
+abline(h = grp.means[grp.means$t == 0, 'y'], lty = 3, col = 'red')
+abline(h = grp.means[grp.means$t == 1, 'y'], lty = 3, col = 'blue')
+```
+
+The chart has the following lines:
+
+1.  The long-dashed, black line is the fit of the combined data.
+2.  The long-dashed red and blue lines are fits of grouped data.
+3.  The dotted red and blue lines are the grouped means of $y$. They are our estimates of $y$ if we ignore $x$.
+
+Let us now compare the results of the two models.
+
+### Ignore $x$
+
+```{r}
+summary(lm(y ~ t))
+```
+
+Here $y$ is positively correlated with $t$. The treatment group has higher estimate than the control group.
+
+### Use both variables
+
+```{r}
+summary(lm(y ~ t + x))
+```
+
+Here the coefficient of $t$ is negative! The treatment appears to have an effect contrary to the previous model.
