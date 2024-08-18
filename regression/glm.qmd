@@ -5,6 +5,8 @@ format: html
 editor: visual
 ---
 
+# Logistic Regression
+
 ## Ravens Data
 
 ```{r}
@@ -46,4 +48,67 @@ plot(
 )
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+# Poisson regression
+
+## Counts data
+
+```{r}
+pathname <- './datasets/gadata.csv'
+ga <- read.csv(pathname)
+head(ga)
+```
+
+We are interested in estimating the number of visits on a day. As usual, we first plot the data.
+
+```{r}
+with(ga,
+     plot(
+       julian,
+       visits,
+       pch = 16,
+       xlab = 'Julian date',
+       ylab = '# visits'
+     ))
+```
+
+We will first fit a linear model.
+
+```{r}
+lm.res <- lm(visits ~ julian, data = ga)
+summary(lm.res)
+plot(ga$julian,
+     ga$visits,
+     pch = 16,
+     xlab = 'Julian date',
+     ylab = '# visits',
+     cex = 0.5)
+
+abline(lm.res$coefficients, col = 'red')
+```
+
+The fit is not bad but the model has at least two deficiencies:
+
+1.  The errors are Gaussian. This may not be true when the counts are small and the Poisson distribution is not like the normal.
+2.  The response must be non-negative but the model does not enforce it.
+
+We try to address them by using a generalised linear model with `poisson` family.
+
+```{r}
+glm.res <- glm(visits ~ julian, family = 'poisson', data = ga)
+plot(ga$julian,
+     ga$visits,
+     pch = 16,
+     xlab = 'Julian date',
+     ylab = '# visits',
+     main = 'Visits to a website',
+     cex = 0.5,
+     col = 'salmon')
+
+abline(lm.res$coefficients, col = 'black', lwd = 2)
+lines(ga$julian, glm.res$fitted, col = 'blue', lwd = 2)
+legend(x = 'topleft',
+       legend = c('linear', 'poisson'),
+       col = c('black', 'blue'),
+       lwd = c(2, 2),
+       bty = 'n')
+```
