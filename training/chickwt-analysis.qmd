@@ -2,7 +2,8 @@
 title: "Analysis of chicken weight"
 author: "Amey Joshi"
 date: "20/11/2019"
-output: html_document
+format: html
+editor: visual
 ---
 
 ```{r setup, include=FALSE}

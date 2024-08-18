@@ -2,22 +2,18 @@
 title: "F distribution"
 author: "Amey Joshi"
 date: "16/11/2019"
-output: html_document
+format: html
+editor: visual
 ---
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-library(MASS)
-set.seed(18081932)
-```
 
 ## Comparison of variances
 
-Consider a standard normally distributed population of size $1000$. Suppose we
-draw two samples from it, one of size $n_1$ and another of size $n_2$. We compute
-the sample variances and their ratio $r = s_1^2/s_2^2$. The quantity $r$ is $F$-
-distributed with parameters $\nu_1 = n_1 - 1$ and $\nu_2 = n_2 - 2$.
+Consider a standard normally distributed population of size $1000$. Suppose we draw two samples from it, one of size $n_1$ and another of size $n_2$. We compute the sample variances and their ratio $r = s_1^2/s_2^2$. The quantity $r$ is $F$- distributed with parameters $\nu_1 = n_1 - 1$ and $\nu_2 = n_2 - 1$.
+
 ```{r}
+library(MASS)
+set.seed(18081932)
+
 N <- 1000
 population <- rnorm(N)
 
@@ -46,19 +42,12 @@ title.txt <- paste(sep = "", "F(", n1 - 1, ", ", n2 - 1, ") distribution")
 title(title.txt)
 ```
 
-An alternative interpreation of the $F$-statistic is that it is the ratio of
-two appropriately scaled $\chi^2$ random variables. Recall that $\chi^2$ random
-variable is the sum of squares of normal random variables so that its ratio with
-its degrees of freedom is the variance of the random variables. Thus, if $U_1$ and
-$U_2$ are two $\chi^2$ distributed random variables with $d_1$ and $d_2$ degrees
-of freedom then $U_1/d_1$ and $U_2/d_2$ are the respective variances.
+An alternative interpreation of the $F$-statistic is that it is the ratio of two appropriately scaled $\chi^2$ random variables. Recall that $\chi^2$ random variable is the sum of squares of normal random variables so that its ratio with its degrees of freedom is the variance of the random variables. Thus, if $U_1$ and $U_2$ are two $\chi^2$ distributed random variables with $d_1$ and $d_2$ degrees of freedom then $U_1/d_1$ and $U_2/d_2$ are the respective variances.
 
 ## A test of equality of variances
-Let us draw two samples from our population of size $n_1$ and $n_2$ and compute 
-the ratio of their variances. We know that we have drawn them from the same 
-population and therefore we should not by surprised if their variances are 
-close enough. Yet, for the moment, let us pretend that we did not know how the
-samples came about.
+
+Let us draw two samples from our population of size $n_1$ and $n_2$ and compute the ratio of their variances. We know that we have drawn them from the same population and therefore we should not by surprised if their variances are close enough. Yet, for the moment, let us pretend that we did not know how the samples came about.
+
 ```{r}
 s1 <- rnorm(n1)
 s2 <- rnorm(n2)
@@ -69,39 +58,40 @@ F_s <- v1/v2
 cat(paste(sep = "", "The ratio of variances is ", F_s, ".\n"))
 ```
 
-If this ratio is less than $1$, the probability of getting an even lesser ratio
-will be the value of the distribution function at this ratio. If it is greater
-than $1$, the probability of getting a more extreme value is the area under the
-$F$-density curve beyond the ratio. If we call it $p_1$.
+If this ratio is less than $1$, the probability of getting an even lesser ratio will be the value of the distribution function at this ratio. If it is greater than $1$, the probability of getting a more extreme value is the area under the $F$-density curve beyond the ratio. If we call it $p_1$.
+
 ```{r}
 p_1 <- ifelse(F_s < 1, pf(F_s, n1 - 1, n2 - 1), 1 - pf(F_s, n1 - 1, n2 - 1))
 ```
 
-If we had swapped the names of the sample, the probability of getting a more
-extreme value (on either sides) would have been,
+If we had swapped the names of the sample, the probability of getting a more extreme value (on either sides) would have been,
+
 ```{r}
 p_2 <- ifelse(F_s < 1, 1 - pf(1/F_s, n2 - 1, n1 - 1), pf(1/F_s, n2 - 1, n1 - 1))
 ```
 
-As these two possibilities are mutually exclusive, the probability of getting 
-ratios more extreme than those produced by these samples is
+As these two possibilities are mutually exclusive, the probability of getting ratios more extreme than those produced by these samples is
+
 ```{r}
 p <- p_1 + p_2
 ```
+
 In other words,
+
 ```{r}
 cat(paste(sep = "","The p-value of our test is ", round(p, 5), ".\n"))
 ```
 
 R provides a test for comparing variances of samples.
+
 ```{r}
 var.test(s1, s2)
 ```
 
-Our $p$-value matches with that of the test. Since it is so large, we fail to 
-reject the null hypothesis.
+Our $p$-value matches with that of the test. Since it is so large, we fail to reject the null hypothesis.
 
 Let us repeat the exercise with samples whose variances are expected to be unequal.
+
 ```{r}
 s3 <- rnorm(n1)
 s4 <- rnorm(n2, sd = 2)
@@ -117,6 +107,7 @@ cat(paste(sep = "","The p-value of our test is ", round(p, 5), ".\n"))
 ```
 
 On the other hand, the variance test of R gives
+
 ```{r}
 var.test(s3, s4)
 ```

@@ -2,12 +2,9 @@
 title: "Ordinary Least Square Regression"
 author: "Amey Joshi"
 date: "22/11/2019"
-output: pdf_document
+format: html
+editor: visual
 ---
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
 \newcommand{\ev}{\operatorname{E}}
 \newcommand{\var}{\operatorname{var}}
