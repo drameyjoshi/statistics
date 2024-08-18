@@ -72,6 +72,7 @@ The model certainly fits well, but it is clearly visible that there is a categor
 We will now fit separate model for each group.
 
 ```{r}
+df.1 <- data.frame('x' = x, 't' = t, 'y' = y)
 res.grp.1 <- lm(y ~ x, data = df.1, subset = (df.1$t == 1))
 res.grp.0 <- lm(y ~ x, data = df.1, subset = (df.1$t == 0))
 
