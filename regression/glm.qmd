@@ -67,7 +67,8 @@ with(ga,
        visits,
        pch = 16,
        xlab = 'Julian date',
-       ylab = '# visits'
+       ylab = '# visits',
+       cex = 0.5
      ))
 ```
 
