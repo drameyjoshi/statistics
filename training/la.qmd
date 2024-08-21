@@ -16,11 +16,13 @@ $$
 
 ## Linear algebra
 
-An $n \times p$ matrix $T$ defines a linear transformation from $\mathbb{R}^p \mapsto \mathbb{R}^n$. Thus, if $x \in \mathbb{R}^p$, $Tx \in \mathbb{R}^n$. The column rank of $T$ is the dimension of the vector space spanned by the columns of $T$. Each column of $T$ is a member of $\mathbb{R}^n$. Therefore, the maximum column rank of $T$ is $n$. The row rank of $T$ is the dimension of the vector space spanned by the rows of $T$ and it can have a value at most $p$. It can be shown that the row rank and the column rank are the same and the common value is called the rank of the matrix, denoted by $\rank\;T$. Clearly, $\rank T \le \min\{n, p\}$.
+An $n \times p$ matrix $T$ defines a linear transformation from $\mathbb{R}^p
+\mapsto \mathbb{R}^n$. Thus, if $x \in \mathbb{R}^p$, $Tx \in \mathbb{R}^n$. The column rank of $T$ is the dimension of the vector space spanned by the columns of $T$. Each column of $T$ is a member of $\mathbb{R}^n$. Therefore, the maximum column rank of $T$ is $n$. The row rank of $T$ is the dimension of the vector space spanned by the rows of $T$ and it can have a value at most $p$. It can be shown that the row rank and the column rank are the same and the common value is called the rank of the matrix, denoted by $\rank\;T$. Clearly, $\rank T \le
+\min\{n, p\}$.
 
 If $\rank T = p$ then the matrix $T$ is said to have a full column rank. If $\rank T = n$ then $T$ is said to have a full row rank. If $T$ maps a vector space $V$ to a vector space $W$, then
 
-$$
+$$\tag{1}
 \rank T + \nullity T = \dim V,
 $$
 
@@ -28,8 +30,8 @@ where $\nullity T$ is the dimension of the kernel of $T$. The kernel of $T$ is t
 
 $$
 \begin{eqnarray}
-\rank{T} &=& \dim\img T \\
-\nullity{T} &=& \dim\ker T
+\rank{T} &=& \dim\img T \tag{2} \\
+\nullity{T} &=& \dim\ker T \tag{3} 
 \end{eqnarray}
 $$
 
@@ -39,7 +41,7 @@ Let $f: \mathbb{R}^p \mapsto \mathbb{R}$ be a linear function. It can be express
 
 If $A$ is a $p \times p$ matrix then a function of the form $f(x) = x^t A x$ is called a quadratic form. Note that $f$ maps $\mathbb{R}^p$ to $\mathbb{R}$. Writing the rhs of the defining equation in terms of coordinates,
 
-$$
+$$\tag{4}
 f(x) = \sum_{i=1}^p\sum_{j=1}^p x_iA_{ij}x_j.
 $$
 
@@ -55,29 +57,31 @@ $$
 \begin{eqnarray}
 \pdt{f}{x_k} &=& \sum_{i=1}^p\sum_{j=1}^p\delta_{ik}A_{ij}x_j + \sum_{i=1}^p\sum_{j=1}^p x_iA_{ij}\delta_{jk} \\
  &=& \sum_{j=1}^pA_{kj}x_j + \sum_{i=1}^p x_iA_{ik} \\
- &=& \sum_{j=1}^pA_{kj}x_j + \sum_{i=1}^p A_{ik} x_i
+ &=& \sum_{j=1}^pA_{kj}x_j + \sum_{i=1}^p A_{ik} x_i \tag{5}
 \end{eqnarray}
 $$
 
 Thus, $\nabla f = Ax + A^tx = (A + A^t)x$. The second derivative of $f$, its Hessian, is $A + A^t$.
 
-## Multiple linear regression  
+## Multiple linear regression
 
-A multiple linear regression model is of the form $\hat{y}_i = \beta_0 + \sum_{i=1}^p \beta_i x_i$ for $i = 1, \ldots, n$. We can write it in matrix form as $\hat{y} = X\beta$, where $\hat{y} = (\hat{y}_1, \ldots, \hat{y}_n)^t \in \mathbb{R}^n$, $\beta = (\beta_0, \ldots \beta_p)^t \in \mathbb{R}^{p+1}$ and $X$ is an $n \times (p + 1)$ matrix with columns $1_p, x_1, \ldots, x_p$, each column being a member of $\mathbb{R}^n$. The linear regression problems seeks to find $\beta$ such that $||y - \hat{y}||$, or equivalently $||y - \hat{y}||^2$ is minimum. Now, $||y - \hat{y}||^2$ is a quadratic form $(y - \hat{y})^tI_n(y - \hat{y})$. where $I_n$ is an identity matrix. Since $I$ is symmetric, $\nabla ||y - \hat{y}||^2 = 2I(y - \hat{y}) = 2(y - \hat{y})$. Therefore, the condition for the extremum of this function is $y = X\hat{\beta}$. Now $X$ is an $n \times (p + 1)$ matrix. Therefore, it does not have a unique inverse. We can write this equation as $X^ty = X^tX\hat{\beta}$. The matrix $X^tX$ is a $(p + 1) \times (p + 1)$ matrix. If we also assume that $X$ has a full row rank then $X^tX$ has an inverse. Therefore,
+A multiple linear regression model is of the form $\hat{y}_i = \beta_0 +
+\sum_{i=1}^p \beta_i x_i$ for $i = 1, \ldots, n$. We can write it in matrix form as $\hat{y} = X\beta$, where $\hat{y} = (\hat{y}_1, \ldots, \hat{y}_n)^t
+\in \mathbb{R}^n$, $\beta = (\beta_0, \ldots \beta_p)^t \in \mathbb{R}^{p+1}$ and $X$ is an $n \times (p + 1)$ matrix with columns $1_p, x_1, \ldots, x_p$, each column being a member of $\mathbb{R}^n$. The linear regression problems seeks to find $\beta$ such that $||y - \hat{y}||$, or equivalently $||y - \hat{y}||^2$ is minimum. Now, $||y - \hat{y}||^2$ is a quadratic form $(y - \hat{y})^tI_n(y - \hat{y})$. where $I_n$ is an identity matrix. Since $I$ is symmetric, $\nabla ||y - \hat{y}||^2 = 2I(y - \hat{y}) = 2(y - \hat{y})$. Therefore, the condition for the extremum of this function is $y = X\hat{\beta}$. Now $X$ is an $n \times (p + 1)$ matrix. Therefore, it does not have a unique inverse. We can write this equation as $X^ty = X^tX\hat{\beta}$. The matrix $X^tX$ is a $(p + 1) \times (p + 1)$ matrix. If we also assume that $X$ has a full row rank then $X^tX$ has an inverse. Therefore,
 
-$$
+$$\tag{6}
 \hat{\beta} = (X^tX)^{-1}X^ty
 $$
 
 is the solution of the problem. Since the Hessian of the quadratic form is $2I_n$, a positive definite matrix, the extremum is indeed a minimum. Since $\hat{y} = X\hat{\beta}$,
 
-$$
+$$\tag{7}
 \hat{y} = X(X^tX)^{-1}X^ty = Py,
 $$
 
 where
 
-$$
+$$\tag{8}
 P = X(X^tX)^{-1}X^t,
 $$
 
@@ -94,3 +98,25 @@ y.hat <- P %*% y
 res <- lm(mpg ~ wt + hp, data = mtcars)
 cat(max(res$fitted.values - y.hat))
 ```
+
+## Averages
+
+The average of a vector $y \in \mathbb{R}^n$ is defined as
+
+$$\tag{9}
+\bar{y} = \frac{1}{n}\sum_{i=1}^n y_i = \frac{1}{n} y^t 1_n = \frac{1}{n}1_n^t y.
+$$
+
+We also note that $n = 1_n^t 1_n$ so that
+
+$$\tag{10}
+\bar{y} = (1_n^t 1_n)^{-1}1_n^t y.
+$$
+
+This equation is very similar to (6), especially on the right hand side, if we identify $X$ with $1_n$. The coefficient $\hat{\beta}$ is just the scalar $\bar{y}$ and the estimated value of $y$ is
+
+$$\tag{11}
+\hat{y} = X\hat{\beta} = 1_n \bar{y},
+$$
+
+so that $y_i = \bar{y}$ for all $i = 1, \ldots, n$.
