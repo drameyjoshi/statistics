@@ -1,0 +1,112 @@
+\documentclass{article}
+\usepackage{amsmath, amsfonts, amssymb}
+\newcommand{\son}{\mathbb{N}}
+
+\begin{document}
+\begin{enumerate}
+\item[Problem 3] Given that $\Omega$ is a sample space and $A_1, A_2, \ldots$ are
+events. Let
+\begin{eqnarray*}
+B_n &=& \bigcup_{k=n}^\infty A_k \\
+C_n &=& \bigcap_{k=n}^\infty A_k
+\end{eqnarray*}
+
+Clearly, $B_{n+1} \cup A_{n} = B_{n}$ so that $B_n \supseteq B_{n+1}$ for all $n
+\ge 1$, or $B_1 \supseteq B_2 \supseteq \ldots$. Likewise $C_{n+1} \cap A_{n} = 
+C_n$ so that $C_{n+1} \supseteq C_n$ or that $C_1 \subseteq C_2 \subseteq \ldots$.
+
+Now,
+\[
+\omega \in \cap_{k=1}^\infty B_k \Rightarrow \omega \in B_k \forall k \in \son
+\Rightarrow \omega \in \bigcup_{j=k}^\infty A_j \forall k \in \son \Rightarrow
+\omega \in A_j \forall j \in \son
+\]
+Conversely, suppose that $\omega \in A_k$, for all $k \in \son$. Then $\omega \in
+B_n$ for all $n$ and hence $\omega \in \cap_{n=1}^\infty B_n$.
+
+On the other hand
+\[
+\omega \in \cup_{k=1}^\infty C_k \Rightarrow \exists k \in \son, \omega \in C_k
+\Rightarrow \omega \in \cap_{j=k}^n A_j \Rightarrow \omega \in A_j \forall j
+\ge k.
+\]
+Conversely, if $\omega \in A_k$ for all $k \ge N$ then $\omega \in C_k$ for all
+$k \ge N$ and hence $\omega \in \cup_{k=1}^\infty C_k$.
+
+\item[Problem 4] Let $I$ be an arbitrary index set and let
+\[
+x \in \left(\bigcup_{i \in I}A_i\right)^c \Rightarrow x \notin \bigcup_{i \in I}A_i
+\Rightarrow x \notin A_i \forall i \Rightarrow x \in A_i^c \forall i \Rightarrow 
+x \in \bigcap_{i\in I}A_i^c,
+\]
+so that
+\begin{equation}\label{e1}
+\left(\bigcup_{i \in I}A_i\right)^c \subset \bigcap_{i\in I}A_i^c.
+\end{equation}
+If,
+\[
+x \in \cap_{i\in I}A_i^c \Rightarrow x \in A_i^c \forall i \Rightarrow
+x \notin A_i \forall i \Rightarrow x \notin \bigcup_{i \in I}A_i
+\Rightarrow x \in \left(\bigcup_{i \in I}A_i\right)^c,
+\]
+so that
+\begin{equation}\label{e2}
+\bigcap_{i\in I}A_i^c \subseteq \left(\bigcup_{i \in I}A_i\right)^c.
+\end{equation}
+From \eqref{e1} and \eqref{e2},
+\[
+\bigcap_{i\in I}A_i^c = \left(\bigcup_{i \in I}A_i\right)^c.
+\]
+
+If we make the substitution $A_i \rightarrow A_i^c$ in the above equation, we 
+get
+\[
+\bigcap_{i\in I}A_i = \left(\bigcup_{i \in I}A_i^c\right)^c \Rightarrow
+\left(\bigcap_{i \in I}A_i\right)^c = \bigcup_{i \in I}A_i^c
+\]
+
+\item[Problem 5] $\Omega = \{T^i H T^j H\;|\; i \ge 0, j \ge 0\}$.
+
+\item[Problem 6] Let $\Omega = \{0, 1, \ldots\}$. Let, if possible, there be a 
+uniform probability distribution on it. That is, if $A, B$ are finite subsets of
+$\Omega$ then $P(A) = P(B)$ if $|A| = |B|$. If $A$ and $B$ are singleton sets 
+and if $P(A) = k$ then $P(\Omega) = \infty$. 
+
+\item[Problem 7] Let $A_1, A_2, \ldots$ be events. We will use induction on $n$.
+Let us start with the base case of $n = 2$. Then,
+\[
+P(\cup_{i=1}^2 A_i) = P(A_1) + P(A_2) - P(A_1 \cap A_2) \ge \sum_{i=1}^2 P(A_i).
+\]
+Assume that the hypothesis is true for all $n \le k$ and consider.
+\[
+P(\cup_{i=1}^{k+1} A_i) = P(A_{k+1} + \cup_{i=1}^k A_i) \ge P(A_{k+1}) + 
+\sum_{i=1}^k P(A_i)
+\]
+by induction hypothesis. Therefore,
+\[
+P(\cup_{i=1}^{k+1} A_i) \ge \sum_{i=1}^{k+1} P(A_i)
+\]
+so that the hypothesis is true for all $k \in \son$.
+
+\item[Problem 8] Let $P(B) > 0$ for a certain event $B$. Then $P(\varnothing|B)
+= P(\varnothing \cap B)/P(B) = 0$; 
+\[
+P(A^c|B) = \frac{P(A^c \cap B}{P(B)}
+\]
+Since $B$ is a disjoint union of $A \cap B$ and $A^c \cap B$, $P(B) = P(A \cap B)
++ P(A^c \cap B)$ so that
+\[
+P(A^c|B) = 1 - \frac{P(A \cap B)}{P(B)} = 1 - P(A|B).
+\]
+If $A_1, A_2, \ldots$ are pairwise disjoint sets then,
+\[
+P(\cup_{k \ge 1}A_k | B) = \frac{P((\cup_{k\ge 1} A_k) \cap B)}{P(B)}
+= \frac{P(\cup_{k\ge 1} (A_k \cap B))}{P(B)}
+\]
+Since the sets $A_k \cap B$ are also pairwise disjoint,
+\[
+P(\cup_{k \ge 1}A_k | B) = \sum_{k \ge 1}\frac{P(A_k \cap B)}{P(B)} = 
+\sum_{k \ge 1}P(A_k | B).
+\]
+\end{enumerate}
+\end{document}
