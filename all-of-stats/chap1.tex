@@ -3,8 +3,11 @@
 \newcommand{\son}{\mathbb{N}}
 
 \begin{document}
-Solutions to selected problems.
 \begin{enumerate}
+\item[1.] Solved in the Python notebook for this chapter.
+
+\item[2.] Quite straightforward.
+
 \item[3.] Given that $\Omega$ is a sample space and $A_1, A_2, \ldots$ are
 events. Let
 \begin{eqnarray*}
@@ -161,8 +164,8 @@ being blue eyed,
 \]
 so that the required probability is $10/64$.
 
-\item[15.] Let $B_{\ge 2}$ be the event that at least two children have blue eyes and
-$Y$ denote the event that the youngest child is blue-eyed. Then $P(Y) = 1/4$.
+\item[15.] Let $B_{\ge 2}$ be the event that at least two children have blue eyes 
+and $Y$ denote the event that the youngest child is blue-eyed. Then $P(Y) = 1/4$.
 Further, $P(B_{\ge 2} \cap Y) = P(BBB) + P(\bar{B}BB) + P(B\bar{B}B) = 1/4^3 +
 (3/4)(1/4)(1/4) + (1/4)(3/4)(1/4) = 7/64$. Therefore,
 \[
@@ -178,5 +181,53 @@ Since $A_1, \ldots, A_k$ partition $\Omega$,
 \]
 This violates the axioms of probability for the measure $P(\cdot|B)$.
 \end{enumerate}
+
+\item[19.] Given that $P(M) = 0.3, P(W) = 0.5, P(L) = 0.2$ and that $P(V|M) =
+0.65, P(V|W) = 0.82, P(V|L) = 0.5$. Note that $P(V|M) + P(V|W) + P(V|L) \ne 1$
+and that is ok. We are asked to find $P(W|V)$. Using Bayes' theorem,
+\[
+P(W|V) = \frac{P(V|W)P(W)}{P(V|M)P(M) + P(V|W)P(W) + P(V|L)P(L)} = 0.5816
+\]
+
+\item[20.] Given that $P(H|C_1) = 0, P(H|C_2) = 0.25, P(H|C_3) = 0.5, P(H|C_4)
+= 0.75, P(H|C5) = 1$.
+\begin{enumerate}
+\item $P(C_i|H) = P(C_i \cap H)/P(H) = P(H|C_i)P(C_i)/P(H)$. The denominator is
+$P(H) = P(H|C_1)P(C_1) + P(H|C_2)P(C_2) + P(H|C_3)P(C_3) + P(H|C_4)P(C_4) +
+P(H|C_5)P(C_5) = 2.5/5 = 0.5$. Therefore, $P(C_1|H) = 0, P(C_2|H) = 
+(0.25 \times 0.2) /0.5 = 0.1, P(C_3|H) = (0.5 \times 0.2)/0.5 = 0.2, P(C_4|H) =
+(0.75 \times 0.2)/0.5 = 0.3, P(C_5|H) = (1 \times 0.2)/0.5 = 0.4$. We check that 
+\[
+\sum_{k=1}^5 P(C_k|H) = 0 + 0.1 + 0.2 + 0.3 + 0.4 = 1.
+\]
+
+\item $P(H_2|H_1) = P(H_2 \cap H_1)/P(H_1)$. $P(H_1)$ is indeed $P(H)$ in the
+previous step. It is $0.5$. The two coin tosses are independent, therefore, 
+$P(H_2) = P(H_1)$.
+
+\item $P(C_i|B_4) = P(B_4|C_i)P(C_i)/P(B_4)$, where
+\[
+P(B_4) = \sum_{j=1}^5 P(B_4|C_j)P(C_j).
+\]
+Now, $P(B_4|C_1) = 0, P(B_4|C_2) = 27/64, P(B_4|C_3) = 1/16, P(B_4|C_4) = 3/64,
+P(B_4|C_5) = 0$ so that $P(B_4) = (34/64)(1/5)$. Therefore,
+\[
+P(C_i|B_4) = \frac{P(B_4|C_i)P(C_i)}{(34/64)(1/5)},
+\]
+as $P(C_i) = 1/5$,
+\[
+P(C_i|B_4) = \frac{64}{34}P(B_4|C_i).
+\]
+so that $P(C_1|B_4) = 0, P(C_2|B_4) = (64/34)(27/64), P(C_3|B_4) = (64/34)(1/16),
+P(C_4|B_4) = (64/34)(3/64), P(C_5|B_4) = 0$. We confirm that,
+\[
+\sum_{i=1}^5 P(C_i|B_4) = 1.
+\]
+\end{enumerate}
+\item[21.] Solved in the Python notebook for this chapter.
+
+\item[22.] Solved in the Python notebook for this chapter.
+
+\item[23.] Solved in the Python notebook for this chapter.
 \end{enumerate}
 \end{document}
