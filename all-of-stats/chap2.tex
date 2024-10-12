@@ -214,7 +214,7 @@ that $P(X \in (a, b)) = P(X \in (a, b])$. Other relations can be similarly
 proved.
 \end{proof}
 
-\begin{defn}\label{c2d8}
+\begin{defn}\label{c2d9}
 Let $X$ be a random variable with cdf $F$. Then its quantile function $Q$ is 
 defined as $Q(p) = \inf\{x \;|\; F(x) \ge p\}$, for $p \in [0, 1]$.
 \end{defn}
@@ -223,9 +223,100 @@ The right continuity of $F$ makes $\inf\{x \;|\; F(x) \ge p\} =
 \inf\{x \;|\; F(x) > p\}$.
 \end{rem}
 
-\begin{defn}\label{c2d9}
+\begin{defn}\label{c2d10}
 Random variables $X$ and $Y$ are said to be equal in distribution if $F_X(x) = 
 F_Y(x)$ for all $x \in \sor$. Equality in distribution is written as $X
 \stackrel{d}{=} Y$.
 \end{defn}
+We will illustrate this tricky concept with an example. Consider a game between
+two players which involves tossing a coin. Player `A' wins £1 if a coin lands
+head and loses £1 if it lands tail. His opponent `B' loses £1 if the coin lands
+head and wins £1 otherwise. The sample space is $\{H, T\}$. Let $X$ and $Y$ be 
+the pay-off functions of the two players. Then $X(H) = 1, X(T) = -1, Y(H) = -1$
+and $Y(T) = 1$. If the coin is fair, $F_X(-1) = 1/2, F_X(1) = 1, F_Y(-1) = 1/2,
+F_Y(1) = 1/2$ although $Y = -X$. If the coin was unfair then we would not have
+had this situation. For in that case, $F_X(-1) = 1 - p, F_X(1) = p, F_Y(-1) = p,
+F_Y(1) = 1 - p$.
+
+Examples of random variables.
+\begin{enumerate}
+\item $X \sim \delta_a$ if $P(X=a) = 1$ and $P(x) = 0$ for $x \ne 1$. Its cdf is
+\begin{equation}\label{c2e1}
+F(x) = \begin{cases}
+0 & \text{ if } x < a \\
+1 & \text{ if } x \ge a.
+\end{cases}
+\end{equation}
+This  reminds of `integral of Dirac delta function' being the `Heaviside step
+function'.
+
+\item Let $k > 1$ be an integer and let 
+\begin{equation}\label{c2e2}
+P(X=x) = f(x) = \begin{cases}
+\frac{1}{k} & \text{ if } x = 1, 2, \ldots, k \\
+0 & \text{ otherwise.}
+\end{cases}
+\end{equation}
+the $X$ is called a uniform discrete distribution. All points $1, 2, \ldots, k$
+have a uniform probability of $1/k$. Its cdf is
+\begin{equation}
+F(x) = \begin{cases}
+0 \text{ if } x \le 0 \\
+\frac{x}{k} \text{ if } x = 1, 2, \ldots, k \\
+1 \text{ if } x > k.
+\end{cases}
+\end{equation}
+
+\item $X \sim \dBer(p)$ if $X(0) = p, X(1) = 1 - p$. Its cdf if
+\begin{equation}\label{c2e3}
+F(x) = \begin{cases}
+0 & \text{ if } x < 0 \\
+p & \text{ if } x \in [0, 1) \\
+1 & \text{ if } x \ge 1.
+\end{cases}
+\end{equation}
+
+\item $X \sim dBin(n, p)$ is $X$ is the number of times a coin lands heads if
+it is tossed $n$ times and if the probability of landing head is $p$. Its pmf
+is 
+\begin{equation}\label{c2e4}
+P(X=x) = \binom{n}{x}p^x(1 - p)^{n-x}.
+\end{equation}
+Its cdf is
+\begin{equation}\label{c2e5}
+F(x) = \begin{cases}
+0 & \text{ if } x < 0 \\
+ & \text{ if } \sum_{k=0}^x\binom{n}{k}p^k(1 - p)^{n-k} \\
+ & 1 \text{ if } x \ge n.
+\end{cases}
+\end{equation}
+\end{enumerate}
+
+We prove a few propositions about the random variables introduced so far.
+\begin{prop}\label{c2p3}
+Let $X_1 \sim \dBin(n_1, p), X_2 \sim \dBin(n_2, p)$ then $X_1 + X_1 \sim
+\dBin(n_1 + n_2, p)$.
+\end{prop}
+\begin{proof}
+Let $Y = X_1 + X_2$. Then $Y = y, X_1 = x_1, X_2 = x_2$ iff $y = x_1 + x_2$ and
+hence $P(Y = y) = P(X_1 = x_1, X_2 = y - x_1) = P(X_1 = x_1)P(X_2 = y - x_1)$
+as $X_1$ and $X_2$ are independent. Thus,
+\begin{eqnarray*}
+f_Y(y) &=& \sum_{k=0}^y\binom{n_1}{k}p^{k}(1 - p)^{n_1 - k}\binom{n_2}{y - k}
+p^{y - k}(1 - p)^{n_2 - y + k} \\
+ &=& p^y(1 - p)^{n_1 + n_2 - y}
+ \sum_{k=0}^y\binom{n_1}{k}\binom{n_2}{y - k}
+\end{eqnarray*}
+The number of ways to choose $y$ objects from a pool of $n_1 + n_2$ objects is
+to choose $k$ objects from among $n_1$ and $y - k$ from among $n_2$ for each
+$k = 0, \ldots y$. Therefore, by this combinatorial argument,
+\[
+\sum_{k=0}^y\binom{n_1}{k}\binom{n_2}{y - k} = \binom{n_1+n_2}{y},
+\]
+so that
+\[
+f_Y(y) = \binom{n_1+n_2}{y}p^y(1 - p)^{n_1 + n_2 - y}.
+\]
+Thus, $Y \sim \dBin(n_1 + n_2, p)$.
+\end{proof}
 \end{document}
