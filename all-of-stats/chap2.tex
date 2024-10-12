@@ -81,6 +81,7 @@ X(\omega) = \begin{cases}
 \]
 where $\omega$ is the point where the dart lands and its coordinates are 
 $(x, y)$, then $P(X = 0) = 1/2$ and $P(X = 1) = 1/2$.
+\end{enumerate}
 
 \begin{defn}\label{c2d6}
 Let $X$ be a random variable on a probability space $(\Omega, \mathcal{F}, P)$.
@@ -142,7 +143,8 @@ the probability is zero.
 
 To prove right continuity at $x$, consider a monotonically decreasing sequence 
 $\{y_n\}$ such that $y_n \rightarrow x$. If $A_n = (-\infty, y_n]$ then $A_1
-\supseteq A_2 \supseteq \ldots$ and $\cap_{n \ge 1}A_n = A$. Therefore,
+\supseteq A_2 \supseteq \ldots$ and $\cap_{n \ge 1}A_n = A$; $A$ is a subset of
+all $A_n$. Therefore,
 \[
 \lim_{n \rightarrow \infty}P(A_n) = P(A)
 \]
@@ -152,5 +154,78 @@ that is,
 \]
 so that $F$ is right continuous.
 \end{proof}
+\begin{rem}
+The same reasoning does not work from the left side. Suppose the sequence $\{y_n\}$
+is monotonically increasing with limit $x$ and we consider the sets $A_n = (-\infty,
+y_n]$. Then the union of these sets is $(-\infty, x)$ and not $(-\infty, x]$.
+\end{rem}
+
+\begin{defn}\label{c2d7}
+A random variable whose range is a countable set is called a discrete random 
+variable. If $X$ is a discrete random variable, its probability mass function,
+also called pmf, is $f_X(x) = P(X = x)$.
+\end{defn}
+
+In terms of $f$, $F(x) = \sum_{x^\op \le x}P(x^\op)$.
+
+\begin{defn}\label{c2d8}
+A random variable whose range is uncountable is called a continuous random
+variable. If $X$ is a continuous random variable, its density function $f$ is
+defined as
+\[
+\int_a^b f(x)dx = P(a \le X \le b),
+\]
+where $F$ is its cdf.
+\end{defn}
+
+In terms of $f$,
+\[
+F(x) = \int_{-\infty}^x f(x)dx.
+\]
+
+\begin{prop}\label{c2p2}
+Let $F$ be the cdf of a random variable $X$. Then:
+\begin{enumerate}
+\item $P(X=x) = F(x) - F(x^-)$, where $F(x^-) = \lim_{y \uparrow x}F(y)$.
+\item $P(x < X \le y) = F(y) - F(x)$.
+\item $P(X > x) = 1 - F(x)$.
+\item If $X$ is continuous then $F(b) - F(a) = P(a < x < b) = P(a \le x < b) =
+P(a < x \le b) = P(a \le x \le b)$.
 \end{enumerate}
+\end{prop}
+\begin{proof}
+Let $\{y_n\}$ be a monotone increasing sequence of numbers with limit $x$. Then
+$P(X \le y_n) = P(A_n)$, where $A_n = (-\infty, y_n]$. The sets $\{A_n\}$ are 
+also monotone increasing with union $A = (-\infty, x)$. Therefore,
+\[
+\lim_{n \rightarrow \infty}P(X \le y_n) = P(A).
+\]
+Since $(-\infty, x] = (-\infty, x) + \{x\}$, $P(X=x) = F(x) - F(x^-)$.
+
+The set $A = \{x < X \le y\}$ can be written as $(-\infty, x] \cup A = 
+(-\infty, y]$. Therefore, $P(A) = F(y) - F(x)$.
+
+Since the set $X > x$ is a complement of the set $X \ge x$ or equivalently,
+$x \le X$, $P(X > x) = 1 - P(x \le X) = 1 - F(x)$.
+
+If $F$ is continuous then $F(x^-) = F(x) = F(x^+)$ so that $P(X=x) = 0$. Since
+$(a, b) \cup {b} = (a, b]$, $P(X \in (a, b)) + P(X = b) = P(X \in (a, b])$ so 
+that $P(X \in (a, b)) = P(X \in (a, b])$. Other relations can be similarly 
+proved.
+\end{proof}
+
+\begin{defn}\label{c2d8}
+Let $X$ be a random variable with cdf $F$. Then its quantile function $Q$ is 
+defined as $Q(p) = \inf\{x \;|\; F(x) \ge p\}$, for $p \in [0, 1]$.
+\end{defn}
+\begin{rem}
+The right continuity of $F$ makes $\inf\{x \;|\; F(x) \ge p\} = 
+\inf\{x \;|\; F(x) > p\}$.
+\end{rem}
+
+\begin{defn}\label{c2d9}
+Random variables $X$ and $Y$ are said to be equal in distribution if $F_X(x) = 
+F_Y(x)$ for all $x \in \sor$. Equality in distribution is written as $X
+\stackrel{d}{=} Y$.
+\end{defn}
 \end{document}
