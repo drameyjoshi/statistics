@@ -276,7 +276,7 @@ p & \text{ if } x \in [0, 1) \\
 \end{cases}
 \end{equation}
 
-\item $X \sim dBin(n, p)$ is $X$ is the number of times a coin lands heads if
+\item $X \sim \dBin(n, p)$ is $X$ is the number of times a coin lands heads if
 it is tossed $n$ times and if the probability of landing head is $p$. Its pmf
 is 
 \begin{equation}\label{c2e4}
@@ -308,6 +308,87 @@ F(x) &=& \sum_{k=1}^x (1-p)^{k-1}p \nonumber \\
 \item A Poisson random variable with parameter $\lambda$ is defined as 
 \begin{equation}\label{c2e8}
 f(x) = e^{-\lambda}\frac{\lambda^x}{x!}.
+\end{equation}
+
+\item We can also have a uniform, continuous random variable. Its density is
+\begin{equation}\label{c2e9}
+f(x) = \begin{cases}
+=\frac{1}{b - a} & \text{ if } if x \in [a, b] \\
+= 0 & \text{otherwise}.
+\end{cases}
+\end{equation}
+Its cdf is
+\begin{equation}\label{c2e10}
+F(x) = \begin{cases}
+0 & \text{ if } x < a \\
+\frac{x - a}{b - a} & \text{ if } x \in [a, b] \\
+1 & \text{ if } x > b.
+\end{cases}
+\end{equation}
+
+\item $X \sim \dNor(\mu, \sigma^2)$ has a normal or gaussian random variable with 
+parameters $\mu$ and $\sigma$ if its density is,
+\begin{equation}\label{c2e10}
+f(x) = \frac{1}{\sigma\sqrt{2\pi}}\exp\left(-\frac{(x - \mu)^2}{\sigma^2}\right).
+\end{equation}
+Here $x \in \sor$. Its cdf is the error function,
+\begin{equation}\label{c2e11}
+F(x) = \frac{1}{2}\left(1 + \erf\left(\frac{x - \mu}{\sigma\sqrt{2}}\right)\right),
+\end{equation}
+where the error function is defined as 
+\begin{equation}\label{c2e12}
+\erf(x) = \frac{2}{\sqrt{\pi}}\int_0^x e^{-t^2}dt.
+\end{equation}
+A standard normal distribution has parameters $\mu = 0, \sigma = 1$. The density 
+and cdf of a standard normal distribution are denoted by $\varphi$ and $\Phi$ 
+respectively. A standard normal random variable is denoted by $Z$. Properties of
+the normal random variable will be proved in later chapters after we introduce the
+mean and the variance.
+
+\item $X \sim \dExp(\beta)$ has an exponential density given by
+\begin{equation}\label{c2e13}
+f(x) = \frac{1}{\beta}\exp\left(-\frac{x}{\beta}\right), 
+\end{equation}
+if $x > 0$. Its cdf is 
+\begin{equation}\label{c2e14}
+F(x) = 1 - \exp\left(\frac{x}{\beta}\right).
+\end{equation}
+
+\item For $\alpha, \beta > 0$, $X \sim \dGam(\alpha, \beta)$ if
+\begin{equation}\label{c2e15}
+f(x) = \frac{1}{\beta^\alpha\Gamma(\alpha)}x^{\alpha - 1}
+\exp\left(-\frac{x}{\beta}\right),
+\end{equation}
+where
+\begin{equation}\label{c2e16}
+\Gamma(\alpha) = \int_0^\infty x^{\alpha - 1}e^{-x}dx.
+\end{equation}
+Clearly,
+\begin{equation}\label{c2e17}
+\dExp(\beta) = \dGam(1, \beta).
+\end{equation}
+
+\item For $\alpha, \beta > 0$, $X \sim \dBet(\alpha, \beta)$ if
+\begin{equation}\label{c2e18}
+f(x) = \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha, \beta)}
+       x^{\alpha - 1}(1 - x)^{\beta - 1}
+\end{equation}
+
+\item $X \sim t(\nu)$ if
+\begin{equation}\label{c2e19}
+f(x) = \frac{1}{\sqrt{\pi\nu}}\frac{\Gamma(\frac{\nu+1}{2})}{\Gamma(\nu/2)}
+	   \frac{1}{\left(1 + \frac{x^2}{\nu}\right)^{(\nu+1)/2}},
+\end{equation}
+for $x \in \sor$. As $\Gamma(1/2) = \sqrt{\pi}$, the density of $X \sim t(1)$ is
+\begin{equation}\label{c2e20}
+f(x) = \frac{1}{\pi}\frac{1}{1 + x^2}.
+\end{equation}
+This is called the Cauchy density. In proposition \ref{c2p5} we show that as 
+$\nu \infty$ the $t$ distribution becomes the standard normal distribution.
+
+\item $X \sim \chi^2(\nu)$ if $x > 0$ and
+\begin{equation}\label{c2e21}
+f(x) = \frac{1}{\Gamma(\nu/2) 2^{\nu/2}}x^{\nu/2 - 1}e^{-x/2}.
 \end{equation}
 \end{enumerate}
 
@@ -358,4 +439,43 @@ f_Y(x) = P(Y = x) &=& \sum_{k=0}^xP(X_1 = k, X_2 = y - k) \\
 \end{eqnarray*} 
 Thus, $Y \sim \dPoi(\lambda_1 + \lambda_2)$.
 \end{proof}
+
+\begin{prop}\label{c2p4}
+If $X \sim t(\nu)$ then as $\nu \rightarrow \infty$, $X \sim \dNor(0, 1)$.
+\end{prop}
+\begin{proof}
+We will use Striling approximation for $\Gamma$ function,
+\begin{equation}\label{c2e22}
+\Gamma(z) = \sqrt{\frac{2\pi}{z}}\left(\frac{z}{e}\right)^z
+			\left(1 + O\left(\frac{1}{z}\right)\right)
+\end{equation}
+For large $z$, it becomes
+\[
+\Gamma(z) = \sqrt{\frac{2\pi}{z}}\left(\frac{z}{e}\right)^z
+\]
+The $t$ density is
+\[
+f(x) = \frac{1}{\sqrt{\pi\nu}}\frac{\Gamma(\frac{\nu+1}{2})}{\Gamma(\nu/2)}
+	\left(1 + \frac{x^2}{\nu}\right)^{-\nu/2}\left(1 + \frac{x^2}{\nu}\right)^{-1/2}
+\]
+so that
+\begin{eqnarray*}
+\lim_{\nu\rightarrow\infty}\left(1 + \frac{x^2}{\nu}\right)^{1/2} &=& 1 \\
+\lim_{\nu\rightarrow\infty}\left(1 + \frac{x^2}{\nu}\right)^{\nu/2} &=& e^{-x^2/2}
+\end{eqnarray*}
+and
+\begin{eqnarray*}
+\lim_{\nu\rightarrow\infty}\frac{1}{\sqrt{\pi\nu}}
+\frac{\Gamma(\frac{\nu+1}{2})}{\Gamma(\nu/2)} &=& \frac{1}{\sqrt{2e}}
+\sqrt{\frac{\nu}{\nu+1}}\left(1 + \frac{1}{\nu}\right)^{\nu/2}\sqrt{\nu+1} \\
+ &=& \frac{\sqrt{\nu}}{\sqrt{2e}}\sqrt{e} \\
+ &=& \frac{1}{\sqrt{2}}
+\end{eqnarray*}
+so that
+\[
+\lim_{\nu\rightarrow\infty}f(x) = \frac{1}{\sqrt{2}}e^{-x^2},
+\]
+which is the standard normal density.
+\end{proof}
+
 \end{document}
