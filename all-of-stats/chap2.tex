@@ -478,4 +478,225 @@ so that
 which is the standard normal density.
 \end{proof}
 
+A few more propositions about univariate distributions can be proved easily after
+introducing moments and generating functions.
+
+\begin{defn}\label{c2d11}
+Let $X$ and $Y$ be discrete random variables. The joint pmf of $X$ and $Y$ 
+measures the probability of the event $X = x$ and $Y = y$. Thus,
+$f(x, y) = P(X = x, Y = y)$.
+\end{defn}
+
+\begin{defn}\label{c2d12}
+Let $X$ and $Y$ be continuous random variables. The joint density function of
+$X$ and $Y$, $f: \sor^2 \rightarrow [0, \infty)$ his a function for which
+\[
+\iint_{\sor^2} f(x, y)dxdy = 1
+\]
+and if If $A \subset \sor^2$ then
+\[
+P((x, y) \in A) = \iint_A f(x, y)dxdy.
+\]
+\end{defn}
+
+In either case, the cdf is defined as $F_{X, Y}(x, y) = P(X \le x, Y \le y)$.
+
+\begin{defn}\label{c2d13}
+If $f(x, y)$ is the joint probability function of discrete random variables then
+the marginal pmf of $X$ is
+\[
+f_X(x) = \sum_y f(x, y)
+\]
+and the marginal pmf of $Y$ is
+\[
+f_Y(y) = \sum_x f(x, y).
+\]
+\end{defn}
+
+\begin{defn}\label{c2d14}
+If $f(x, y)$ is the joint probability function of continuous random variables then
+the marginal density function of $X$ is
+\[
+f_X(x) = \int_{-\infty}^\infty f(x, y) dy
+\]
+and the marginal pmf of $Y$ is
+\[
+f_Y(y) = \int_{-\infty}^\infty f(x, y) dx.
+\]
+\end{defn}
+
+\begin{defn}\label{c2d15}
+If $X$ and $Y$ are discrete random variables with joint pmf $f(x, y)$ then the
+conditional pmf of $X$ given $Y = y$ is
+\[
+f_{X|Y=y} = \frac{f(x, y)}{f_Y(y)},
+\]
+provided $f_Y(y) \ne 0$. The conditional pmf of $Y$ given $X = x$ is defined 
+similarly.
+\end{defn}
+
+\begin{defn}\label{c2d16}
+If $X$ and $Y$ are continuous random variables with joint density $f(x, y)$ then
+the conditional density of $X$ given $Y = y_0$ is
+\[
+f_{X|Y = y_0}(x) = \frac{f(x, y_0)}{f_Y(y_0)},
+\]
+provided $f_Y(y) \ne 0$ and
+\[
+P(X \in A|Y = y_0) = \int_A f_{X|Y=y_0}dx.
+\]
+\end{defn}
+Note that for a particular value of $y = y_0$, $f_{X|y=y_0}$ is a function of $x$
+alone.
+
+\begin{defn}\label{c2d17}
+If $X$ and $Y$ are discrete random variables with joint pmf $f(x, y)$ then they
+are independent if for all $A, B \in \mathcal{F}$, $P(X \in A, Y \in B) = 
+P(X \in A)P(X \in B)$. Likewise, if $X$ and $Y$ are continuous random variables 
+with joint density $f(x, y)$ then they are independent if $f(x, y) = f_X(x)f_Y(y)$ 
+for all $x, y$.
+\end{defn}
+
+\begin{prop}\label{c2p6}
+If $X$ and $Y$ are discrete random variables then they are independent iff
+$f(x, y) = f_X(x)f_Y(y)$ for all $x, y$.
+\end{prop}
+\begin{proof}
+Let $A = \{x\}$ and $B = \{y\}$, where $x, y$ are arbitrary values of $X$ and
+$Y$. Then by definition \ref{c2d17}, $P(X=x, Y=y) = P(X=x)P(Y=y) \Rightarrow
+f(x, y) = f_X(x)f_Y(y)$.
+
+Since $X$ and $Y$ are discrete random variables, the sets $A$ and $B$ of their
+values are countable. Therefore,
+\begin{eqnarray*}
+P(X \in A, Y \in B) &=& \sum_{x \in A, y \in B}P(X = x, Y = y) \\
+ &=& \sum_{x \in A, y \in B}f(x, y) \\
+ &=& \sum_{x\in A, y \in B}f_X(x)f_Y(y) \\
+ &=& \sum_{x \in A}f_X(x)\sum_{y \in B}f_Y(y) \\
+ &=& P(X \in A)P(Y \in B).
+\end{eqnarray*}
+\end{proof}
+
+The definitions of joint, marginal and conditional distributions for a pair of
+random variables can be generalised to a finite number $n$ of random variables.
+In particular,
+\begin{defn}\label{c2d18}
+If $X_1, \ldots, X_n$ are independent, that is the joint pmf or density $f$ 
+factorises as
+\[
+f_{\vec{X}}(x_1, \ldots, x_n) = f(x_1)\cdots f(x_n)
+\]
+then we say that $X_1, \ldots, X_n$ are independent and identically distributed
+, also called iid, and write $X_1, \ldots, X_n \sim f$ or $X_1, \ldots, X_n \sim
+F$, if $F$ is the cdf of $f$. We also call $x_1, \ldots, x_n$ to be a random 
+sample of size $n$ from $f$ (or $F$).
+\end{defn}
+
+\begin{defn}\label{c2d19}
+A vector $\vec{X} = (X_1, \ldots, X_n)$, where $X_i$ are non-negative integers,
+is said to have a multinomial distribution with parameters $n$ and $\vec{p}$,
+denoted as $\vec{X} \sim \dMul(n, \vec{p})$, if $p_1 + \cdots + p_n = 1$ and 
+\begin{equation}\label{c2e25}
+f(\vec{x}) = \binom{n}{x_1 \ldots x_n}p_1^{x_1}\cdots p_n^{x_n}.
+\end{equation}
+\end{defn}
+
+\begin{defn}\label{c2d20}
+A vector $\vec{X}$ has a multivariate normal distribution, denoted as $\vec{X}
+\sim \dNor(\vec{\mu}, \Sigma)$ if it has a density
+\begin{equation}\label{c2e26}
+f(\vec{x}; \vec{\mu}, \Sigma) = \frac{1}{(2\pi)^{n/2}|\Sigma|^{1/2}}
+\exp\left(-\frac{1}{2}(\vec{x} - \vec{\mu})^T\Sigma(\vec{x} - \vec{\mu})\right).
+\end{equation}
+The positive-definite matrix $\Sigma$ is called the covariance matrix and 
+$|\Sigma|$ is its determinant.
+\end{defn}
+
+\section{Solutions to problems}
+\begin{enumerate}
+\item[1.] $F(x) = P(X \le x)$ so that $F(x^\pm) = P(X \le x^\pm)$. Now we have
+the set relation $\{X \le x^-\} \cup \{X = x\} = \{x \le x^+\}$ and the union
+is of two disjoint sets. Therefore, $P(\{X \le x^-\})+P(X = x)=P(\{X \le x^+\})$
+so that $P(X=x) = F(x^+) - F(x^-)$.
+
+\item[2.] We first check that $P(2) + P(3) + P(5) = 1$ so that we have a valid
+pmf. The cdf is $F(x) = 0$ for $x < 1$, $F(2) = 0.1, F(3) = 0.2, F(5) = 1$ and 
+$F(x) = 1$ for $x > 1$. Figure \ref{c2f1} shows the plot.
+\begin{figure}
+\includegraphics[scale=0.6]{c2p2}
+\caption{Problem 2}\label{c2f1}
+\end{figure}
+
+\item[3.] Refer to proposition \ref{c2p2}.
+
+\item[4.] Give that
+\[
+f(x) = \begin{cases}
+0.25 & \text{ if } x \in (0, 1) \\
+0.375 & \text{ if } x \in (3, 5) \\
+0 & \text{ otherwise.}
+\end{cases}
+\]
+Clearly, 
+\[
+\int_{-\infty}^\infty f(x)dx = 0.25 \times (1 - 0) + 0.375 \times (5 - 3) = 1
+\]
+so that $f$ is a valid density. The cdf $F$ is calculated as follows: 
+\[
+F(x) = \begin{cases}
+0 & \text{ if } x \le 0 \\
+\frac{x}{4} & \text{ if } x \in (0, 1) \\
+\frac{1}{4} & \text{ if } x \in [1, 3] \\
+\frac{1}{4} + \frac{3}{8}x & \text{ if } x \in (3, 5) \\
+1 & \text{ if } x \ge 5
+\end{cases}
+\]
+
+Let $Y = 1/X$. $0 < y \le 1/5 \Rightarrow x \ge 5$ so that
+\[
+F_Y(1/5) = \int_5^\infty f(x) dx = 0.
+\]
+$1/5 < y < 1/3 \Rightarrow x \in (3, 5)$ so that
+\[
+F_Y(1/3) = F_Y(1/5) + \int_3^5 f(x)dx = \int_3^5\frac{3}{8}dx = \frac{3}{4}.
+\]
+$1/3 \le y \le 1 \Rightarrow x \in [1, 3]$ so that
+\[
+F_Y(1) = F_Y(1/3) + \int_1^3 f(x)dx = \frac{3}{4} + 0 = \frac{3}{4}.
+\]
+$y > 1 \Rightarrow x \in (1, 1/y)$ so that
+\[
+F_Y(y) = F_Y(1) + \int_{1/y}^1 f(x)dx 
+= \frac{3}{4} + \frac{1}{4}\left(1 - \frac{1}{y}\right).
+\]
+Thus,
+\[
+F_Y(y) = \begin{cases}
+0 & \text{ if } y <= 1/5 \\
+\frac{3}{4} & \text{ if } y \in (1/5, 1/3) \\
+\frac{3}{4} & \text{ if } y \in [1/3, 1] \\
+\frac{3}{4} + \frac{1}{4}\left(1 - \frac{1}{y}\right) & \text{ if } y > 1
+\end{cases}
+\]
+
+\item Refer to proposition \ref{c2p6}.
+
+\item $Y$ is a Bernoulli random variable. $Y(x) = 1$ iff $x \in A$, $Y(x) = 0$
+otherwise. Now,
+\[
+P(Y = 1) = \int_A f_X(x)dx = f_Y(1)
+\]
+and
+\[
+P(Y = 0) = \int_{A^c}f(x) dx = f_Y(0).
+\]
+Clearly, $P(Y=0) + P(Y=1) = 1$ so that 
+\[
+F_Y(y) = \begin{cases}
+0 & \text{ if } y < 0 \\
+\int_A f_X(x)dx & \text{ if } y \in [0, 1) \\
+1 & \text{ if } y \ge 1.
+\end{cases}
+\]
+\end{enumerate}
 \end{document}
