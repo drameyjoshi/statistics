@@ -679,9 +679,9 @@ F_Y(y) = \begin{cases}
 \end{cases}
 \]
 
-\item Refer to proposition \ref{c2p6}.
+\item[5.]Refer to proposition \ref{c2p6}.
 
-\item $Y$ is a Bernoulli random variable. $Y(x) = 1$ iff $x \in A$, $Y(x) = 0$
+\item[6.]$Y$ is a Bernoulli random variable. $Y(x) = 1$ iff $x \in A$, $Y(x) = 0$
 otherwise. Now,
 \[
 P(Y = 1) = \int_A f_X(x)dx = f_Y(1)
@@ -698,5 +698,81 @@ F_Y(y) = \begin{cases}
 1 & \text{ if } y \ge 1.
 \end{cases}
 \]
+
+\item[7.] Given that $X \sim \dUni(0, 1)$ and $Y \sim \dUni(0, 1)$ are independent.
+Let $Z = \min(X, Y)$. Therefore, $P(Z > z) = P(\min(X, Y) > z) = P(X > z
+\cup Y > z) = P(X > z) + P(Y > z) - P(X > z \cap Y > z) = P(X > z) + 
+P(Y > z) - P(X > z)P(Y > z)$, as $X$ and $Y$ are independent. Now, $P(X > z) =
+1 - P(X \le z) = 1 - F_X(z)$ and similarly for $P(Y > z)$. Therefore, $P(Z > z)
+= (1 - F_X(z)) + (1 - F_Y(z)) - (1 - F_X(z))(1 - F_Y(z))$. The cdf for uniform
+distribution is $F_X(z) = z$ so that
+\[
+P(Z > z) = 2(1 - z) - (1 - z)^2
+\]
+so that $F_Z(z) = P(Z \le z) = 1 - P(Z > z) = 1 - 2(1 - z) + (1 - z)^2 = z^2$
+so that $f_Z(z) = 2z$ is the required density.
+
+\item[8.] If $X^+ = \max(X, 0)$ then $X^+$ will never have negative values. 
+Therefore, if $G$ is its cdf then $G(y) = 0$ if $y < 0$. For $X \ge 0$, $X^+=X$
+so that $P(G \le y)$ for $y > 0$ is $P(X \le y) = F_X(y)$. Thus,
+\[
+G(y) = \begin{cases}
+0 & \text{ if } y < 0 \\
+F_X(y) & \text{ if } y \ge 0.
+\end{cases}
+\]
+
+\item[9.] From equation \eqref{c2e16},
+\[
+F(x) = 1 - \exp\left(\frac{x}{\beta}\right).
+\]
+If $F(x) = q$ then $e^{x/\beta} = 1 - q$ so that $x = \beta\ln(1 - q)$, that is
+\begin{equation}\label{c2e27}
+F^{-1}(q) = \beta\ln(1 - q).
+\end{equation}
+
+\item[10.] Let $U = g(X), V = h(Y)$ be random variables which are functions of 
+$X$ and $Y$. Therefore, $g^{-1}(a)$ is a subset of $\sor$ whose values are image
+of a subset of the sample space under $X$. Similarly for $h^{-1}(b)$. Since $X$
+and $Y$ are independent, $P(X \in g^{-1}(a), Y \in h^{-1}(b)) = P(X \in g^{-1}(a))
+P(Y \in h^{-1}(b)) \Rightarrow P(g(X) = a, h(Y) = b) = P(g(X)=a)P(h(Y)=b) 
+\Rightarrow P(U=a, V=b) = P(U=a)P(V=b)$. This proof is applicable to discrete, 
+$X, Y$.
+
+If $X$ and $Y$ are continuous, 
+\[
+f(x=g^{-1}(a), y=g^{-1}(b)) = f_X(x=g^{-1}(a))f_Y(y=h^{-1}(b)) 
+\]
+so that $f(g(x)=a, h(y)=b) = f_X(g(x)=a)f_Y(h(y)=b) 
+\Rightarrow f^\ast(u=a, v=b) = f_X^\ast(u=a)f_Y^\ast(v=b)$, where $f_X^\ast(u)
+= f_X(g(x))$ and analogously for other functions.
+
+\item[11.] Suppose we toss the coin $n$ times. If $h, t \le n$ are the number of 
+heads and tails, then $P(h = x, t = y)$ will be zero whenever $x + y \ne n$, yet
+$P(h = x)$ and $P(t = y)$ are not zero. Therefore, the two random variables are 
+not independent.
+
+Let $H$ be the random variable measuring the number of heads, $T$ measuring tails
+and $N$ the number of tosses. Then $P(H = h, T = t, N = n) = P(H=h, T=t|N=n)
+P(N=n) = P(H=h, T=n-h)P(N=n)$. Now,
+\[
+P(H=h, T=n-h) = \binom{n}{h}p^{h}(1 - p)^{n-h}
+\]
+and
+\[
+P(N=n) = e^{-\lambda}\frac{\lambda^n}{n!}
+\]
+so that
+\begin{eqnarray*}
+P(H = h, T = t, N = n) &=& 
+	\frac{n!}{h!(n-h)!}p^h(1-p)^{n-h}e^{-\lambda}\frac{\lambda^n}{n!} \\
+ &=& \frac{p^h}{h!}\frac{(1-p)^{n-h}}{(n-h)!} e^{-\lambda}\lambda^h \lambda^{n-h} \\
+ &=& \frac{(p\lambda)^h}{h!}\frac{((1-p)\lambda)^{n-h}}{(n-h)!}e^{-(p + (1 - p))\lambda} \\
+ &=& e^{-p\lambda}\frac{(p\lambda)^h}{h!} e^{-q\lambda}\frac{(q\lambda)^{n-h}}{(n-h)!},
+\end{eqnarray*}
+where we used $q = 1 - p$ for notational simplicity. The right hand side is a 
+product of two Poisson random variables with parameters $p\lambda$ and $q\lambda$
+and values $h$ and $n - h$. Thus, $P(H=h, T=t, N=n)$ factorises as a product of
+two random variables whose sum is always $n$.
 \end{enumerate}
 \end{document}
