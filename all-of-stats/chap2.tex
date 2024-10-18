@@ -259,7 +259,7 @@ P(X=x) = f(x) = \begin{cases}
 \end{equation}
 the $X$ is called a uniform discrete distribution. All points $1, 2, \ldots, k$
 have a uniform probability of $1/k$. Its cdf is
-\begin{equation}
+\begin{equation}\label{c2e3}
 F(x) = \begin{cases}
 0 \text{ if } x \le 0 \\
 \frac{x}{k} \text{ if } x = 1, 2, \ldots, k \\
@@ -268,7 +268,7 @@ F(x) = \begin{cases}
 \end{equation}
 
 \item $X \sim \dBer(p)$ if $X(0) = p, X(1) = 1 - p$. Its cdf if
-\begin{equation}\label{c2e3}
+\begin{equation}\label{c2e4}
 F(x) = \begin{cases}
 0 & \text{ if } x < 0 \\
 p & \text{ if } x \in [0, 1) \\
@@ -279,11 +279,11 @@ p & \text{ if } x \in [0, 1) \\
 \item $X \sim \dBin(n, p)$ is $X$ is the number of times a coin lands heads if
 it is tossed $n$ times and if the probability of landing head is $p$. Its pmf
 is 
-\begin{equation}\label{c2e4}
+\begin{equation}\label{c2e5}
 P(X=x) = \binom{n}{x}p^x(1 - p)^{n-x}.
 \end{equation}
 Its cdf is
-\begin{equation}\label{c2e5}
+\begin{equation}\label{c2e6}
 F(x) = \begin{cases}
 0 & \text{ if } x < 0 \\
  & \text{ if } \sum_{k=0}^x\binom{n}{k}p^k(1 - p)^{n-k} \\
@@ -294,7 +294,7 @@ F(x) = \begin{cases}
 \item The random variable that counts the number of coin tosses before the first
 head is called the geometric random variable. If the coin has a probability $p$
 of landing head then $Y \sim \dGeo(p)$ and
-\begin{equation}\label{c2e6}
+\begin{equation}\label{c2e7}
 f(X=x) = P(X=x) = (1 - p)^{x-1}p.
 \end{equation}
 Its cdf is
@@ -302,23 +302,23 @@ Its cdf is
 F(x) &=& \sum_{k=1}^x (1-p)^{k-1}p \nonumber \\
  &=& p\sum_{k=0}^{x-1}(1 - p)^k \nonumber \\
  &=& p\frac{(1 - (1 - p)^x)}{1 - 1 + p} \nonumber \\
- &=& (1 - (1 - p)^x) \label{c2e7}
+ &=& (1 - (1 - p)^x) \label{c2e8}
 \end{eqnarray}
 
 \item A Poisson random variable with parameter $\lambda$ is defined as 
-\begin{equation}\label{c2e8}
+\begin{equation}\label{c2e9}
 f(x) = e^{-\lambda}\frac{\lambda^x}{x!}.
 \end{equation}
 
 \item We can also have a uniform, continuous random variable. Its density is
-\begin{equation}\label{c2e9}
+\begin{equation}\label{c2e10}
 f(x) = \begin{cases}
 =\frac{1}{b - a} & \text{ if } if x \in [a, b] \\
 = 0 & \text{otherwise}.
 \end{cases}
 \end{equation}
 Its cdf is
-\begin{equation}\label{c2e10}
+\begin{equation}\label{c2e11}
 F(x) = \begin{cases}
 0 & \text{ if } x < a \\
 \frac{x - a}{b - a} & \text{ if } x \in [a, b] \\
@@ -328,15 +328,15 @@ F(x) = \begin{cases}
 
 \item $X \sim \dNor(\mu, \sigma^2)$ has a normal or gaussian random variable with 
 parameters $\mu$ and $\sigma$ if its density is,
-\begin{equation}\label{c2e10}
+\begin{equation}\label{c2e12}
 f(x) = \frac{1}{\sigma\sqrt{2\pi}}\exp\left(-\frac{(x - \mu)^2}{\sigma^2}\right).
 \end{equation}
 Here $x \in \sor$. Its cdf is the error function,
-\begin{equation}\label{c2e11}
+\begin{equation}\label{c2e13}
 F(x) = \frac{1}{2}\left(1 + \erf\left(\frac{x - \mu}{\sigma\sqrt{2}}\right)\right),
 \end{equation}
 where the error function is defined as 
-\begin{equation}\label{c2e12}
+\begin{equation}\label{c2e14}
 \erf(x) = \frac{2}{\sqrt{\pi}}\int_0^x e^{-t^2}dt.
 \end{equation}
 A standard normal distribution has parameters $\mu = 0, \sigma = 1$. The density 
@@ -346,48 +346,48 @@ the normal random variable will be proved in later chapters after we introduce t
 mean and the variance.
 
 \item $X \sim \dExp(\beta)$ has an exponential density given by
-\begin{equation}\label{c2e13}
+\begin{equation}\label{c2e15}
 f(x) = \frac{1}{\beta}\exp\left(-\frac{x}{\beta}\right), 
 \end{equation}
 if $x > 0$. Its cdf is 
-\begin{equation}\label{c2e14}
-F(x) = 1 - \exp\left(\frac{x}{\beta}\right).
+\begin{equation}\label{c2e16}
+F(x) = 1 - \exp\left(-\frac{x}{\beta}\right).
 \end{equation}
 
 \item For $\alpha, \beta > 0$, $X \sim \dGam(\alpha, \beta)$ if
-\begin{equation}\label{c2e15}
+\begin{equation}\label{c2e17}
 f(x) = \frac{1}{\beta^\alpha\Gamma(\alpha)}x^{\alpha - 1}
 \exp\left(-\frac{x}{\beta}\right),
 \end{equation}
 where
-\begin{equation}\label{c2e16}
+\begin{equation}\label{c2e18}
 \Gamma(\alpha) = \int_0^\infty x^{\alpha - 1}e^{-x}dx.
 \end{equation}
 Clearly,
-\begin{equation}\label{c2e17}
+\begin{equation}\label{c2e19}
 \dExp(\beta) = \dGam(1, \beta).
 \end{equation}
 
 \item For $\alpha, \beta > 0$, $X \sim \dBet(\alpha, \beta)$ if
-\begin{equation}\label{c2e18}
+\begin{equation}\label{c2e20}
 f(x) = \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha, \beta)}
        x^{\alpha - 1}(1 - x)^{\beta - 1}
 \end{equation}
 
 \item $X \sim t(\nu)$ if
-\begin{equation}\label{c2e19}
+\begin{equation}\label{c2e21}
 f(x) = \frac{1}{\sqrt{\pi\nu}}\frac{\Gamma(\frac{\nu+1}{2})}{\Gamma(\nu/2)}
 	   \frac{1}{\left(1 + \frac{x^2}{\nu}\right)^{(\nu+1)/2}},
 \end{equation}
 for $x \in \sor$. As $\Gamma(1/2) = \sqrt{\pi}$, the density of $X \sim t(1)$ is
-\begin{equation}\label{c2e20}
+\begin{equation}\label{c2e22}
 f(x) = \frac{1}{\pi}\frac{1}{1 + x^2}.
 \end{equation}
 This is called the Cauchy density. In proposition \ref{c2p5} we show that as 
 $\nu \infty$ the $t$ distribution becomes the standard normal distribution.
 
 \item $X \sim \chi^2(\nu)$ if $x > 0$ and
-\begin{equation}\label{c2e21}
+\begin{equation}\label{c2e23}
 f(x) = \frac{1}{\Gamma(\nu/2) 2^{\nu/2}}x^{\nu/2 - 1}e^{-x/2}.
 \end{equation}
 \end{enumerate}
@@ -440,12 +440,12 @@ f_Y(x) = P(Y = x) &=& \sum_{k=0}^xP(X_1 = k, X_2 = y - k) \\
 Thus, $Y \sim \dPoi(\lambda_1 + \lambda_2)$.
 \end{proof}
 
-\begin{prop}\label{c2p4}
+\begin{prop}\label{c2p5}
 If $X \sim t(\nu)$ then as $\nu \rightarrow \infty$, $X \sim \dNor(0, 1)$.
 \end{prop}
 \begin{proof}
 We will use Striling approximation for $\Gamma$ function,
-\begin{equation}\label{c2e22}
+\begin{equation}\label{c2e24}
 \Gamma(z) = \sqrt{\frac{2\pi}{z}}\left(\frac{z}{e}\right)^z
 			\left(1 + O\left(\frac{1}{z}\right)\right)
 \end{equation}
@@ -601,6 +601,24 @@ f_X(x_0)f_Y(y_0) &=&
 \end{eqnarray*}
 The points $x_0, y_0$ were chosen arbitrarily. Therefore, this relation is true
 for all $x, y \in \sor$ making $X$ and $Y$ independent.
+\end{proof}
+
+\begin{prop}\label{c2p8}
+Let $r$ be a strictly monotone function, $X$ be a random variable and $Y=r(X)$.
+Then
+\[
+f_Y(y) = f_X(s(y))\left|\td{s}{y}\right|,
+\]
+where $s = r^{-1}$.
+\end{prop}
+\begin{proof}
+$F_Y(y) = P(Y \le y) = P(r(X) \le y)$. Since $r$ is monotone, $r^{-1}$ exists so
+that $F_Y(y) = P(X \le r^{-1}(y)) = F_X(s(y))$ and hence
+\[
+f_Y(y) = \td{F_Y}{y} = f_X(s(y))\td{s}{y}.
+\]
+Since $f_Y$ must be non-negative, we choose the modulus of the derivative of 
+$s$.
 \end{proof}
 
 The definitions of joint, marginal and conditional distributions for a pair of
@@ -942,6 +960,75 @@ for $x \in [0, 1], y \in [0, 1]$ and zero everywhere else. Therefore,
 \[
 P(X < 1/2|y = 1/2) = \int_0^{1/2}\frac{3}{2}\left((x^2 + \frac{1}{4}\right)dx = 
 \frac{1}{4}.
+\]
+
+\item[18.] Solved in the Python notebook.
+
+\item[19.] Refer to proposition \ref{c2p8}.
+
+\item[20.] Given that $X, Y \sim \dUni(0, 1)$. Let $Z = X - Y$. The range of $Z$
+is $(-1, 1)$. Therefore, we expect $f_Z$ to be non-zero on $(-1, 1)$. Let 
+$z < 0$. For a given $x$, $y$ ranges from $-z$ to $1$. Therefore,
+\[
+f_Z(z) = \int_0^1f_X(x)dx\int_{-z}^1f_Y(y)dy = (1 + z).
+\]
+If $z > 0$, then for a given $x$, $y$ ranges from $0$ to $1 - z$ so that
+\[
+f_Z(z) = \int_0^1f_X(x)dx\int_0^{1 - z}f_Y(y)dy = 1 - z.
+\]
+Thus,
+\begin{equation}
+f_Z(z) = \begin{cases}
+1 + z & \forall z \in (1, 0) \\
+1 - z & \forall z \in (0, 1)
+\end{cases}
+\end{equation}
+
+Now let $Z = X/Y$. We will first find the cdf. 
+\begin{eqnarray*}
+F_Z(z) &=& P(Z \le z) = P(X \le Yz) \\
+ &=& \int_0^1\int_0^{\min(1, yz)}f_X(x)f_Y(y)dxdy \\
+ &=& \int_0^1\int_0^{\min(1, yz)}dxdy \\
+ &=& \int_0^{\min(1, yz)}dy \\
+ &=& \int_0^1 \min(1, yz)dy,
+\end{eqnarray*}
+where the last step follows from the fact that $\int_0^a dy = \int_0^1 ady$.
+If $z < 1$ then $y$ can range over $(0, 1)$ and yet keep $yz$ less than $1$ 
+so that
+\[
+\int_0^1 \min(1, yz)dy = \int_0^1 yz dy = \frac{z}{2}.
+\]
+If $z >= 1$ then $\min(1, yz) = yz$ for $y \in (0, 1/z)$ or $\min(1, yz) = 1$
+for $y \in (1/z, 1)$. The sum of these terms is
+\[
+\int_0^{1/z}yzdy + \int_{1/z}^1 dy = \frac{1}{2z} + 1 - \frac{1}{z} = 
+1 - \frac{1}{2z}
+\]
+so that
+\[
+F_Z(z) = \begin{cases}
+\frac{z}{2} & \forall z \in (0, 1) \\
+1 - \frac{1}{2z} & \forall z >= 1
+\end{cases}
+\]
+so that the pdf is
+\[
+f_Z(z) = \begin{cases}
+\frac{1}{2} & \forall z \in (0, 1) \\
+\frac{1}{2z^2} & \forall z \ge 1.
+\end{cases}
+\]
+
+\item[21.] Let $X_1, \ldots, X_n \sim \dExp(\beta)$ be iid and let $Y = 
+\max\{X_1, \ldots, X_n\}$. Then, $F_Y(y) = P(Y \le y)$. This is true iff $y$ is
+greater than all $X_1, \ldots, X_n$. Thus,
+\[
+F_Y(y) = \prod_{i=1}^n P(X_i \le y) = \prod{i=1}^n(1 - e^{-y/\beta}) = 
+(1 - e^{-y/\beta})^n
+\]
+so that
+\[
+f_Y(y) = \frac{n}{\beta}(1 - e^{-y/\beta})^{n-1}e^{-y/\beta}.
 \]
 \end{enumerate}
 \end{document}
