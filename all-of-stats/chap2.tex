@@ -993,13 +993,21 @@ F_Z(z) &=& P(Z \le z) = P(X \le Yz) \\
  &=& \int_0^1 \min(1, yz)dy,
 \end{eqnarray*}
 where the last step follows from the fact that $\int_0^a dy = \int_0^1 ady$.
-If $z < 1$ then $y$ can range over $(0, 1)$ and yet keep $yz$ less than $1$ 
-so that
+Refer to figure \ref{c2f3} to understand the range of integration.
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{c2p20}
+\caption{Range of integration}\label{c2f3}
+\end{figure}
+If $z < 1$ then $y$ can range over $(0, 1)$ and yet keep $yz$ less than $1$.
+The probability of this happening is the area of the triangle OCB. It is
 \[
 \int_0^1 \min(1, yz)dy = \int_0^1 yz dy = \frac{z}{2}.
 \]
-If $z >= 1$ then $\min(1, yz) = yz$ for $y \in (0, 1/z)$ or $\min(1, yz) = 1$
-for $y \in (1/z, 1)$. The sum of these terms is
+If $z >= 1$ then $\min(1, yz) = yz$ for $y \in (0, 1/z)$ and $\min(1, yz) = 1$
+for $y \in (1/z, 1)$. Ths probability of this event is the area of the 
+quadrilateral OADB. It can be calculated as the area of the triangle OAE and
+the area of the rectangle ADCE. It is
 \[
 \int_0^{1/z}yzdy + \int_{1/z}^1 dy = \frac{1}{2z} + 1 - \frac{1}{z} = 
 1 - \frac{1}{2z}
