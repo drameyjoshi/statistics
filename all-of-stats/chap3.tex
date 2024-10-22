@@ -1,0 +1,70 @@
+\documentclass{article}
+\include{common}
+\begin{document}
+\begin{prop}\label{c3p1}
+Let $(\Omega, \mathcal{F}, P)$ be a probability space and $X: \Omega \rightarrow
+\sor$ be a random variable. Then $\mu_F:\mathcal{F} \rightarrow [0, 1]$, where
+$\mu_F((a, b)) = F(b) - F(a)$ is a probability measure on the measurable space 
+$(\sor, \mathcal{B})$.
+\end{prop}
+\begin{proof}
+We first note that $\mu_F(\sor) = 1$. Let $I_1 = (a, b)$ and $I_2 = (c, d)$ be
+disjoint intervals and $I= I_1 \cup I_2$. Now, the probability of $X$ being in
+$I$ is just the sum of probabilities in $I_1$ and $I_2$. Therefore $\mu_F(I) =
+P(X \in I) = P(X \in I_1) + P(X \in I_2) = F(b) - F(a) + F(d) - F(c) =\mu_F(I_1)
++ \mu_F(I_2)$. Thus, $\mu_F$ is indeed a probability measure.
+\end{proof}
+\begin{rem}
+Since $(\sor, \mathcal{B}, \mu_F)$ is a probability space, we can define 
+integrals like $\int_A g(x)d\mu_F$ as Lebesgue integrals. It is common to 
+express this integral as $\int_A gdF$.
+\end{rem}
+
+One can also interpret an integral $\int gdF$ as $\int g(x)f(x)dx$ as $f=F^\op$,
+that is a Riemann-Stieltje integral. However, this depends on $F$ being 
+differentiable. Instead of getting mired in the measure theoretic issues, we 
+will settle with the Riemann-Steiltje interpretation and move on.
+
+\begin{defn}\label{c3d1}
+The expected value of a random variable is defined to be
+\[
+E(X) = \int xdF = \begin{cases}
+\sum_x xf(x) \text{ if } X \text{ is discrete} \\
+\int xf(x)dx \text{ if } X \text{ is continuous.}
+\end{cases}
+\]
+$E(X)$ is also denoted as $\mu_X$.
+\end{defn}
+
+\begin{rem}
+If $X$ is discrete then $F$ is a (normalised) counting measure. It is the 
+probability of $P(X=x)$, which is the ratio of count of the events in $\Omega$
+for which $X = x$ divided by the count of all events. If $p_k$ denotes $P(X=k)$
+then $\mu_X = \sum_k kp_k$.
+\end{rem}
+
+\begin{prop}\label{c3p2}
+Let $X$ be a discrete random variable and $Y = r(X)$, where $r$ is a bijective
+map. Then 
+\[
+E(Y) = \int r(X)dF_X = \sum_x r(x)f_X(x).
+\]
+\end{prop}
+\begin{proof}
+$E(Y) = \sum_y yf_Y(y)$. Since $r$ is bijective, the sum over $y$ can be 
+replaced with that over $x$ so that $E(Y) = \sum_x r(x)f_Y(y)$. Now $f_Y(y)
+= F_Y(y) - F_Y(y - 1) = P(Y \le y) - P(Y \le y - 1) = P(r(X) \le y) - P(r(X) \le
+y - 1) = P(X \le r^{-1}(y)) - P(X \le r^{-1}(y-1)) = F_X(r^{-1}(y)) - F_X(r^{-1}
+(y - 1)) = f_X(x)$. Thus, we have
+\[
+E(Y) = \sum_x r(x)f_X(x).
+\]
+\end{proof}
+
+\begin{thm}[The Rule of the Lazy Statistician]\label{c3t1}
+Let $X$ be a random variable and $Y = r(X)$, then 
+\[
+\mu_Y = E(r(X)) = \int rdF_X.
+\]
+\end{thm}
+\end{document}
