@@ -175,3 +175,15 @@ for i in range(0, len(days)):
 
 Tip amount doesn't seem to depend on the day of the meal.
 
+Now that we have found that smokers tip more, let us separate the two groups and check if there is any correlation between % btip and other variables. We haven't explored the effect of size yet.
+
+```{python}
+sns.histplot(data=tips, x="pct_tip", hue="size", stat="density", kde=True)
+```
+
+There doesn't seem to be enough data for size beyond 4.
+
+```{python}
+tips[['size', 'pct_tip', 'smoker']].groupby(['size', 'smoker'], observed=True).count()
+```
+
