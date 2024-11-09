@@ -67,4 +67,28 @@ Let $X$ be a random variable and $Y = r(X)$, then
 \mu_Y = E(r(X)) = \int rdF_X.
 \]
 \end{thm}
+\begin{proof}
+\[
+E(r(X)) = \int r(x)f_X(x)dx = \int r(x)dF_X.
+\]
+\end{proof}
+
+If $r(x) = I_A(x)$, the indicator function of the set $A$ then,
+\[
+E(r(X)) = \int I_A(x)dF_x = \int_A df_X(x) = P(X \in A).
+\]
+
+\section{Solutions to problems}
+\begin{enumerate}
+\item Solved in the accompanying Python notebook.
+
+\item If $P(X = c) = 1$ then $E(X) = c$ and $E(X^2) = c^2$ so that $\var(X) = 0$.
+If, on the other hand, $\var(X) = 0$ then $E[(X - E(X))^2] = 0$. Now
+$(X - E(X))^2$ is a non-negative random variable. If its expectation is zero then
+it should be zero, almost surely. That is $X = E(X)$ almost surely, which in turn
+means that $X$ is a constant.
+
+\item Solved in the accompanying Python notebook.
+\end{enumerate}
+
 \end{document}
