@@ -89,6 +89,131 @@ it should be zero, almost surely. That is $X = E(X)$ almost surely, which in tur
 means that $X$ is a constant.
 
 \item Solved in the accompanying Python notebook.
-\end{enumerate}
 
+\item Solved in the accompanying Python notebook.
+
+\item Let $Y$ be the random variable to count the number of tosses needed before
+a coin lands head up. If $p$ is the probability of landind head then 
+\[
+P(Y = n) = p^{n-1}q.
+\]
+Therefore,
+\[
+E(Y) = \sum_{n \ge 1}nP(Y = n) = \sum_{n \ge 1}np^{n-1}q = q\sum_{n \ge 1}np^{n-1}.
+\]
+Now,
+\[
+\sum_{n \ge 1}p^n = \frac{1}{1-p} \Rightarrow \sum_{n \ge 1}np^{n-1} = \frac{1}{(1 - p)^2},
+\]
+so that
+\[
+E(Y) = \frac{q}{(1 - p)^2} = \frac{1}{1 - p}.
+\]
+
+\item Let $Y = r(X)$. When $X$ takes values $x_1, x_2, \ldots$ with probability
+$p_1, p_2, \ldots$ then $Y$ takes values $r(x_1), r(x_2), \ldots$ with the same 
+probability. Therefore, its mean value is
+\[
+E(Y) = \sum_{k\ge 1}r(x_k)p_k = \int r(x)dF.
+\]
+
+\item Let us assume that
+\[
+\lim_{x \rightarrow \infty} x(1 - F(x)) = 0.
+\]
+Then,
+\begin{eqnarray*}
+E(X) &=& \int_0^\infty xdF \\
+ &=& \lim_{x^\op\rightarrow\infty}\int_0^{x^\op}xdF \\
+ &=& \lim_{x^\op\rightarrow\infty}\left(x^\op F(x^\op)-\int_0^{x^\op}F(x)dx\right)\\
+ &=& \lim_{x^\op\rightarrow\infty}\left(x^\op F(x^\op) - \int_0^{x^\op}P(X \le x) dx \right) \\
+ &=& \lim_{x^\op\rightarrow\infty}\left(x^\op F(x^\op) - \int_0^{x^\op}(1 - P(X > x)) dx \right) \\
+ &=& \lim_{x^\op\rightarrow\infty}(x^\op F(x^\op) - x^\op) + \int_0^\infty P(X > x)dx \\
+ &=&  \int_0^\infty P(X > x)dx
+\end{eqnarray*}
+
+\item Since,
+\[
+\bar{X}_n = \frac{1}{n}\sum_{i = 1}^n X_i,
+\]
+we have
+\[
+E(\bar{X}_n) = \frac{1}{n}\sum{i=1}^nE(X_i) = \frac{1}{n}\sum_{i=1}^n\mu = \mu.
+\]
+We will now compute
+\begin{equation}\label{e1}
+\var(\bar{X}_n) = E(\bar{X}_n^2) - E^2(\bar{X}_n) = E(\bar{X}_n^2) - \mu^2
+\end{equation}
+Now,
+\[
+E(\bar{X}_n^2) = E\left(\frac{1}{n}\sum_{i=1}^nX_i\right)^2
+\]
+so that
+\[
+n^2E(\bar{X}_n^2) = \sum_{i=1}^n E(X_i^2) + 2\sum_{i=1}^n\sum_{j=i+1}^n E(X_iX_j).
+\]
+Since $X_i$ are all independent, $E(X_iX_j) = E(X_i)E(X_j) = \mu^2$. Furthermore,
+$E(X_i^2) = \mu^2 + \sigma^2$ so that,
+\[
+n^2E(\bar{X}_n^2) = n(\mu^2 + \sigma^2) + 2\frac{n(n-1)}{2}\mu^2 \Rightarrow
+E(\bar{X}_n^2) = \frac{\sigma^2}{n} + \mu^2,
+\]
+so that from equation \eqref{e1} we get
+\[
+\var(\bar{X}_n) = \frac{\sigma^2}{n}.
+\]
+
+Now consider, $(n-1)S_n^2 = \sum_{i=1}^n(X_i - \bar{X}_n)^2$ so that
+\begin{equation}\label{e2}
+(n-1)E(S_n^2) = \sum_{i=1}^n\left(E(X_i^2) - 2E(X_i\bar{X}_n) + E(\bar{X}_n^2)\right)
+\end{equation}
+We first consider the term $E(X_i\bar{X}_n)$. It is
+\begin{eqnarray*}
+E(X_i\bar{X}_n) &=& E\left(X_i \sum_{j=1}^n\frac{X_j}{n}\right) \\
+nE(X_i\bar{X}_n) &=& \sum_{j=1, j\ne i}^n E(X_iX_j) + E(X_i^2) \\
+nE(X_i\bar{X}_n) &=& (n-1)\mu^2 + \mu^2 + \sigma^2 \\
+E(X_i\bar{X}_n) &=& \mu^2 + \frac{\sigma^2}{n},
+\end{eqnarray*}
+as $X_i$ are iid. We have evaluated the other terms in \eqref{e2} previously.
+Thus,
+\[
+(n-1)E(S_n^2) =\sum_{i=1}^n
+\left(\mu^2+\sigma^2-2\mu^2-2\frac{\sigma^2}{n}+\frac{\sigma^2}{n}+\mu^2\right)
+= \sum_{i=1}^n\left(\sigma^2 - \frac{\sigma^2}{n}\right)
+\]
+so that $E(S_n^2) = \sigma^2$.
+
+\item Solved in the accompanying Python notebook.
+
+\item Given that 
+\[
+f_X = \frac{1}{\sqrt{2\pi}}e^{-x^2/2}
+\]
+and $Y = \exp(X)$. Therefore,
+\[
+E(Y) = \frac{1}{\sqrt{2\pi}}\int_{-\infty}^\infty e^{-x^2/2 + x} dx.
+\]
+Now,
+\[
+-x^2/2 + x = \frac{1}{2}(-x^2 + 2x - 1 + 1) = -\frac{(x-1)^2}{2} + \frac{1}{2}
+\]
+so that
+\[
+E(Y) = \frac{e^{1/2}}{\sqrt{2\pi}}\int_{-\infty}^\infty e^{-(x - 1)^2/2}dx.
+\]
+A substitution $u = x - 1$ leads to $E(Y) = e^{1/2}$.
+
+We next compute $E(Y^2) = E(e^{2X})$, which is
+\[
+E(Y^2) = \frac{1}{\sqrt{2\pi}}\int_{-\infty}^\infty e^{-x^2/2 + 2x} dx.
+\]
+Now,
+\[
+-\frac{x^2}{2} + 2x = -\frac{1}{2}(x^2 - 4x + 4) + 2
+\] 
+so that $E(Y^2) = e^2$ and hence $\var(Y) = e^2 - e$.
+
+\item Solved in the accompanying Python notebook.
+\end{enumerate}
+ 
 \end{document}
