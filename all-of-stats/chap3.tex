@@ -332,13 +332,151 @@ so that
 \cov(X,Y) &=& \frac{1}{3}\iint (x^2y + xy^2)dxdy - \frac{1}{3}\iint(x^2+xy)dxdy
 \frac{1}{3}\iint(xy + xy^2)dxdy \nonumber* \\
  &=& \frac{1}{3}\frac{2}{3}\frac{4}{3} - \frac{1}{3}\frac{2}{3}1
- \frac{1}{3}\frac{4}{3}1 \nonumber* \\
+ \frac{1}{3}\frac{4}{3}1 \nonumber \\
  &=& \frac{16}{81} \label{e9}
 \end{eqnarray}
 Finally, from equations \eqref{e5} to \eqref{e9}
 \[
 \var Z = \frac{26}{81} + \frac{23}{9} - \frac{192}{81} = \frac{41}{81}.
 \]
-\end{enumerate}
+
+\item 
+\begin{eqnarray*}
+E(r(X)s(Y)|X) &=& E(r(X=x)s(Y)|X=x) \\
+ &=& \int r(X=x)s(Y)f_{Y|X=x}(y)dy \\
+ &=& r(X=x)\int s(Y)f_{Y|X=x}(y)dy \\
+ &=& r(X)E(s(Y)|X).
+\end{eqnarray*}
+
+\item
+\begin{eqnarray*}
+\var(Y) &=& E(Y^2) - E^2(Y) \\
+ &=& E(E(Y^2|X)) - E^2(Y) \\
+ &=& E(E(Y^2|X) - E^2(Y|X) + E^2(Y|X)) - (E(Y))^2 \\
+ &=& E(E(Y^2|X) - E^2(Y|X)) + E(E^2(Y|X)) - (E(E(Y|X))^2 \\
+ &=& E\var(Y|X) + E^2(E(Y|X)) - E^2(E(Y|X)) \\
+ &=& E\var(Y|X) + \var(E(Y|X)).
+\end{eqnarray*}
+
+\item First note that
+\begin{eqnarray*}
+E(XY) &=& E(E(XY|Y)) \\
+ &=& E\left[\int xyf_{Y=y}dx\right] \\
+ &=& \int\left[\int xyf_{Y=y}dx\right]f_Y(y)dy \\
+ &=& \int\left[y\int xf_{Y=y}dx\right]f_Y(y)dy \\
+ &=& \int y E(X|Y) dy \\
+ &=& cE(Y).
+\end{eqnarray*}
+Now, $\cov(X, Y) = E(XY) - E(X)E(Y) = cE(Y) - E(E(X|Y))E(Y) = cE(Y) - E(c)E(Y)
+ = 0$ so that $X$ and $Y$ are not correlated.
  
+\item Solved in the accompanying Python notebook.
+
+\item $a^TX = (a_1X_1, \ldots, a_nX_n)$ so that $E(a^TX) = (E(a_1X_1), \ldots,
+E(a_nX_n)) = (a_1E(X_1), \ldots, a_nE(X_n)) = a^TE(X)$.
+
+The variance covariance matrix, $V = \var(a^TX)$, of $a^TX$ has elements,
+\begin{eqnarray*}
+V_{ij} &=& \cov(a_iX_i, a_jX_j) \\
+ &=& a_i\cov(X_i, X_j)a_j \\
+ &=& a_i \Sigma_{ij} a_j,
+\end{eqnarray*}
+where $\Sigma_{ij}$ is the $i,j$th element of the variance matrix of $X$. Thus, 
+$V=a^T\Sigma a$.
+
+If $A$ is a matrix then $AX$ is a vector each component of which is $A_{ij}X_j$
+so that $E(AX) = A_{ij}E(X_j) = AE(X)$. We used summation convention here. 
+Likewise, if $V$ is the variance covariance matrix of $AX$ then,
+\begin{eqnarray*}
+V_{ij} &=& \cov(A_{ik}X_k, A_{jl}X_l) \\
+ &=& A_{ij}\cov(X_k, X_)A_{jl} \\
+ &=& A_{ij}\cov(X_k, X_l)A^{lj} 
+\end{eqnarray*}
+that is $V = A\Sigma A^T$.
+
+\item Given that $E(Y|X)=X$, so that $E(E(Y|X)) = E(X)$, that is $E(Y) = E(X)$.
+Next consider
+\[
+E(Y|X) = \int y f_{Y|X=x}dy
+\]
+and hence
+\[
+E(XE(Y|X)) = \int x \int y f_{Y|X=x}dy f_X(x)dx = \iint xy f(x)f_{Y|X=x}(y)dxdy.
+\]
+Since $f(x)f_{Y|X=x}(y) = f(x, y)$,
+\[
+E(XE(Y|X)) = \iint xy f(x, y)dxdy = E(XY).
+\]
+Therefore, $\cov(X, Y) = E(XY) - E(X)E(Y) = E(XE(Y|X)) - E^2(X)$. Since $E(Y|X)
+= X$, $\cov(X, Y) = E(X^2) - E^2(X) = \var(X)$.
+
+\item I simulated $Y$ and $Z$ to conclude that they are not independent.
+$E(Y|Z)$ is a function of $z$. When $z = 0$, $x \in [0, a]$ so that $y = 0$.
+When $z = 1$, $x > a$ so that $y = 1$ when $x \in (a, b)$ and $y = 0$ if $x > b$.
+Therefore,
+\begin{eqnarray*}
+E(Y|Z=0) &=& 0 \\
+E(Y|Z=1) &=& 1/(b - a).
+\end{eqnarray*}
+
+\item The MGF is defined as $\psi_X(t) = \int e^{tx}dF_X$.
+\begin{enumerate}
+\item Poisson distribution. Its pmf is
+\[
+f(x) = \frac{\lambda^k e^{-\lambda}}{k!}
+\]
+so that
+\[
+\psi_X(t) = \sum_{k \ge 0}\frac{\lambda^k e^{-\lambda}e^{tk}}{k!} =
+e^{-\lambda}\sum_{k \ge 0}\frac{(\lambda e^t)^k}{k!} = \exp(\lambda(e^t - 1)).
+\]
+
+\item Normal. The pdf is
+\[
+f(x) = \frac{1}{\sigma\sqrt{2\pi}}\exp\left(-\frac{(x-\mu)^2}{2\sigma^2}\right)
+\]
+so that
+\[
+\psi_X(t) = \frac{1}{\sigma\sqrt{2\pi}}\int_{-\infty}^\infty 
+e^{tx}\exp\left(-\frac{(x-\mu)^2}{2\sigma^2}\right)dx.
+\]
+Put $z = (x - \mu)/\sigma$ so that
+\[
+\psi_X(t) = \frac{e^{t\mu}}{\sqrt{2\pi}}\int_{-\infty}^\infty
+\exp\left(-\frac{z^2}{2} + t\sigma z\right)dz.
+\]
+Completing the square,
+\begin{eqnarray*}
+\psi_X(t) &=& \frac{\exp(t\mu + t^2\sigma^2/2)}{\sqrt{2\pi}}\int_{-\infty}^\infty
+\exp\left(-\left(\frac{z - t\sigma}{\sqrt{2}}\right)^2\right)dz \\
+ &=& \exp\left(\frac{t^2\sigma^2}{2} + t\mu\right).
+\end{eqnarray*}
+
+\item Gamma. 
+\begin{eqnarray*}
+\psi_X(t) &=& \int_{-\infty}^\infty e^{tx}\frac{\beta^\alpha}{\Gamma(\alpha)}
+x^{\alpha - 1}e^{-\beta x}dx \\
+ &=& \frac{\beta^\alpha}{\Gamma(\alpha)}\int_{-\infty}^\infty x^{\alpha - 1}
+e^{-(\beta-t) x}dx \\
+ &=& \frac{\beta^\alpha}{\Gamma(\alpha)}\frac{\Gamma(\alpha)}{(\beta - t)^\alpha} \\
+ &=& \left(1 - \frac{t}{\beta}\right)^{-\alpha}
+\end{eqnarray*}
+\end{enumerate}
+
+\item If $X_i \sim \dExp(\beta)$ then its MGF is
+\[
+\psi_X(t) = \int_{-\infty}^\infty e^{tx}\beta e^{-\beta x}dx = \beta
+\int_{-\infty}^\infty e^{-(\beta - t)x}dx = \frac{\beta}{\beta - t}.
+\]
+
+If $Y = X_1 + \cdots + X_n$, then its MGF is
+\begin{eqnarray*}
+\psi_Y(t) &=& \int e^{tY}dF \\
+ &=& \int e^{tX_1 + \cdots tX_n} dF_{X_1}\cdots dF_{X_n} \\
+ &=& \prod_{i=1}^n \int e^{tX_i}dF_i \\
+ &=& \left(\frac{\beta}{\beta - t}\right)^n \\
+ &= & \left(1 - \frac{t}{\beta}\right)^n.
+\end{eqnarray*}
+The last expression is the MGF of $\dGam(n, \beta)$.
+\end{enumerate}
 \end{document}
