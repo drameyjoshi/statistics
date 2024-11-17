@@ -1,0 +1,240 @@
+\documentclass{article}
+\include{common}
+\begin{document}
+\begin{thm}[Markov's inequality]\label{c4t1}
+Let $X$ be a non-negative random variable such that $E(X)$ exists. For any 
+$t>0$,
+\[
+P(X \ge t) \le \frac{E(X)}{t}.
+\]
+\end{thm}
+\begin{proof}
+We start with the definition,
+\[
+E(X) = \int_{-\infty}^\infty xdF_X.
+\]
+We will first consider $X$ to be a continuous random variable. Since $X$ is 
+non-negative, $f(x) = 0$ for $x \le 0$. Therefore,
+\[
+E(X) = \int_0^\infty xf(x)dx = \int_0^t xf(x)dx + \int_t^\infty xf(x)dx \ge
+t\int_t^\infty f(x)dx = tP(X \ge t).
+\]
+If $X$ is discrete,
+\[
+E(X) = \sum_{x=0}^\infty xf(x) \ge \sum_{x=t}^\infty xf(x) \ge 
+t\sum_{x=t}^\infty f(x) = tP(X \ge t)
+\]
+\end{proof}
+\begin{rem}
+Note that this inequality is applicable only for non-negative random variables.
+Further, the rhs is less than $1$ if $t > E(X)$. For $t < E(X)$, the inequality
+is ineffective. By that, I mean that it is true but not useful.
+\end{rem}
+
+Consider a geometric random variable with parameter $p$. Its pmf is
+\[
+f(x) = (1 - p)^x p, x \in \son,
+\]
+and $E(X) = 1/p$. Let us consider a concrete case with $p = 1/7$. Then, Markov
+inequality guarantees that $P(X \ge 4) \le 7/4$, which is true but not useful.
+We can easily calculate it as
+\[
+P(X \ge 4) = \sum_{x \ge 4}(1 - p)^x p = p(1-p)^4 \sum_{x\ge 0}(1-p)^x = 
+\frac{p(1-p)^4}{1 - (1 - p)} = (1 - p)^3 = \frac{216}{343}.
+\]
+
+\begin{thm}[Chebyshev's inequality]\label{c4t2}
+Let $\mu = E(X)$ and $\sigma^2 = \var(X)$. Then,
+\[
+P(|X - \mu| \ge t) \le \frac{\sigma^2}{t^2}.
+\]
+\end{thm}
+\begin{proof}
+Let $Y = (X - \mu)^2$. Then $Y$ is non-negative and its mean is $\sigma^2$. 
+Using Markov's inequality,
+\[
+P(Y \ge t) \le \frac{\sigma^2}{t^2}.
+\]
+But $P(Y \ge t) = P((X - \mu)^2 \ge t^2) = P(|X - \mu| \ge t)$.
+\end{proof}
+\begin{rem}
+Chebyshev's inequality is useful in estimating the probability of $X$ taking
+extreme values on either side of the mean.
+\end{rem}
+
+\begin{cor}\label{c4c1}
+If $Z = (X - \mu)/\sigma$, where $\mu = E(X)$ and $\sigma^2 = \var(X)$ then
+\[
+P(|Z| \ge t) \le \frac{1}{t^2}.
+\]
+\end{cor}
+\begin{proof}
+Follows from Chebyshev's inequality \ref{c4t2} and $E(Z) = 0, \var(Z) = 1$.
+\end{proof}
+
+\begin{thm}[Hoeffding's inequality]\label{c4t3}
+Let $Y_1, \ldots, Y_n$ be independent observations such that $E(Y_i) = 0$ and
+$a_i \le Y_i \le b_i$, that is $Y_i$ are bounded. For any $\epsilon, t > 0$,
+\[
+P\left(\sum_{i=1}^n Y_i \ge \epsilon\right) \le e^{-t\epsilon}\prod_{i=1}^n
+\exp\left(\frac{t^2(b_i - a_i)^2}{8}\right).
+\]
+\end{thm}
+\begin{proof}
+We start with
+\[
+\sum_{i=1}^n Y_i \ge \epsilon \Rightarrow t\sum_{i=1}^n Y_i \ge t\epsilon,
+\] 
+for $t > 0$. Since $\exp$ is a monotonically increasing function, we also have
+\[
+\sum_{i=1}^n Y_i \ge \epsilon \Rightarrow \exp\left(t\sum_{i=1}^n Y_i\right) \ge 
+\exp(t\epsilon).
+\]
+The random variable $Z = \exp\left(t\sum_{i=1}^n Y_i\right)$ takes non-negative
+values. Therefore, we can use Markov's inequality $P(Z \ge s) \le E(Z)/s$, where
+$s = \exp(t\epsilon)$. Thus,
+\begin{equation}\label{e1}
+P\left(\sum_{i=1}^n Y_i \ge \epsilon\right) = 
+P\left(\exp\left(t\sum_{i=1}^n Y_i\right) \le \exp(t\epsilon)\right) \le 
+\frac{E(Z)}{s}.
+\end{equation}
+Now,
+\[
+E(Z) = E\left(\exp\left(t\sum_{i=1}^n Y_i\right)\right) = 
+\exp\left(t\sum_{i=1}^n E(Y_i)\right)
+\]
+so that
+\begin{equation}\label{e2}
+P\left(\sum_{i=1}^n Y_i \ge \epsilon\right) \le 
+e^{-t\epsilon}\exp\left(t\sum_{i=1}^n E(Y_i)\right) = 
+e^{-t\epsilon}\prod_{i=1}^n E(e^{tY_i}).
+\end{equation}
+Since $a_i \le Y_i \le b_i$, we can write
+\[
+Y_i = (1 - \alpha_i)a_i + \alpha_i b_i
+\]
+where 
+\begin{equation}\label{e3}
+\alpha_i = \frac{Y_i - a_i}{b_i - a_i}.
+\end{equation}
+Since $\exp$ is a convex function, $\exp(tY_i) \le (1 - \alpha_i)\exp(ta_i) +
+\alpha_i\exp(tb_i)$. Putting the value of $\alpha_i$, we get
+\[
+\exp(tY_i) \le \frac{b_i - Y_i}{b_i - a_i}e^{ta_i} + 
+\frac{Y_i - a_i}{b_i - a_i}e^{tb_i}.
+\]
+Taking expectation of both sides and noting that $E(Y_i) = 0$,
+\begin{equation}\label{e4}
+E(e^{tY_i}) \le e^{ta_i}\frac{b_i - a_i e^{t(b_i-a_i)}}{b_i - a_i}.
+\end{equation}
+If 
+\begin{eqnarray*}
+\gamma &=& -\frac{a_i}{b_i - a_i} \\
+u &=& t(b_i - a_i)
+\end{eqnarray*}
+then we can write \eqref{e4} as
+\begin{equation}\label{e5}
+E(e^{tY_i}) \le e^{ta_i}(1 - \gamma + \gamma e^u).
+\end{equation}
+Since $\gamma u = -ta_i$, we can as well write \eqref{e5} as
+\begin{equation}\label{e6}
+E(e^{tY_i}) \le e^{-\gamma u}(1 - \gamma + \gamma e^u) = e^{g(u)},
+\end{equation}
+where
+\begin{equation}\label{e7}
+g(u) = -\gamma u + \log(1 - \gamma + \gamma e^u).
+\end{equation}
+We now use the fact that for a smooth function like $g$, there exists $\xi \in
+(0, u)$ such that
+\[
+g(u) = g(0) + ug^\op(0) + \frac{u^2}{2}g^\tp(\xi).
+\]
+For the function in \eqref{e7}, $g(0) = 0, g^\op(0) = 0$ and hence,
+\begin{equation}\label{e8}
+g(u) = \frac{u^2}{2}g^\tp(\xi)
+\end{equation}
+for some $\xi \in (0, u)$. We next show that $g^\tp(u) \le 1/4$. Now, 
+\[
+g^\tp(u) - \frac{1}{4} = 
+\frac{(1 - \gamma)(\gamma e^u)}{(1 - \gamma + \gamma e^u)^2} - \frac{1}{4}
+= -\frac{[(1 - \gamma) - \gamma e^u]^2}{4} \le 0
+\]
+so that equation \eqref{e8} becomes
+\begin{equation}\label{e9}
+g(u) \le \frac{u^2}{8} = \frac{t^2(b_i - a_i)^2}{8}.
+\end{equation}
+From \eqref{e6} and \eqref{e9}, we finally get
+\[
+E(e^{tY_i}) \le  \exp\left(\frac{t^2(b_i - a_i)^2}{8}\right)
+\]
+Using this in equation \eqref{e2} we get
+\begin{equation}\label{e10}
+P\left(\sum_{i=1}^n Y_i \ge \epsilon\right) \le e^{-t\epsilon}
+\prod_{i=1}^n\exp\left(\frac{t^2(b_i - a_i)^2}{8}\right).
+\end{equation}
+\end{proof}
+
+Using Hoeffding's inequality \ref{c4t3} we prove that
+\begin{thm}\label{c4t4}
+If $X_1, \ldots, X_n \sim \dBer(p)$ then for any $\epsilon > 0$,
+\[
+P(|\bar{X}_n - p| > \epsilon) \le 2e^{-2n\epsilon^2},
+\]
+where 
+\[
+\bar{X}_n = \frac{1}{n}\sum_{i=1}^nX_i.
+\]
+\end{thm}
+\begin{proof}
+Let $Y = \bar{X}_n - p$. Then $E(Y) = 0$. Further, $0 \le \bar{X}_n \le 1
+\Rightarrow -p \le \bar{X}_n - p = Y \le 1 - p$. Therefore, the conditions of
+Hoeffding's inequality apply and we have
+\[
+P(Y \ge \epsilon) \le e^{-t\epsilon}\exp\left(\frac{t^2}{8}\right),
+\]
+for $t > 0$. Choose $t = 4n\epsilon$ so that
+\[
+P(Y \ge \epsilon) = P(\bar{X}_n - p) \le e^{-4n\epsilon^2}e^{2n\epsilon^2} =
+e^{-2n\epsilon^2}.
+\]
+We can similarly show that $P(\bar{X}_n-p \le -\epsilon) \le e^{-2n\epsilon^2}$
+so that
+\[
+P(|\bar{X}_n - p| \le \epsilon) \le 2e^{-2n\epsilon^2}.
+\]
+\end{proof}
+
+\begin{thm}[Mill's inequality]\label{c4t5}
+If $Z \sim \dNor(0, 1)$ then
+\[
+P(|Z| \ge t) \le \frac{2}{\pi}\frac{e^{-t^2/2}}{t}.
+\]
+\end{thm}
+\begin{proof}
+$|Z| \ge t \Rightarrow -Z \le -t$ and $Z \ge t$. Since the distribution is 
+symmetric, $P(-Z \le -t) = P(Z \ge t)$ and hence $P(|Z| \ge t) = 2P(Z \ge t)$.
+Now,
+\[
+P(Z \ge t) = \frac{1}{\sqrt{2\pi}}\int_t^\infty e^{-z^2/2}dz
+\]
+so that
+\[
+tP(Z \ge t) = \frac{t}{\sqrt{2\pi}}\int_t^\infty e^{-z^2/2}dz 
+\le \frac{1}{\sqrt{2\pi}}\int_t^\infty ze^{-z^2/2}dz.
+\] 
+If $u = z^2/2$, $zdz = du$ and the limits of integration go from $t^2/2$ to 
+$\infty$, so that
+\[
+tP(Z \ge t) \le \frac{1}{\sqrt{2\pi}}\int_{t^2/2}^\infty e^{-u}du = 
+\frac{1}{\sqrt{2\pi}}e^{-t^2/2}.
+\]
+That is,
+\[
+P(Z \ge t) \le \frac{1}{\sqrt{2\pi}}\frac{e^{-t^2/2}}{t}
+\]
+from which Mill's inequality follows immediately.
+\end{proof}
+
+\section{Solutions to problems}
+In the accompanying notebook.
+\end{document}
