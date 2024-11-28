@@ -1,0 +1,113 @@
+\documentclass{article}
+\include{common}
+\begin{document}
+\begin{defn}\label{c5d1}
+Let $\{X_n\}$ be a sequence of random variables and $X$ be another random
+variable. Then $\{X_n\}$ converges to $X$ in probability, written 
+$X_n \stackrel{P}\rightarrow X$, if for a given $\epsilon > 0$, we can find
+$N \in \son, \delta \in \sor$ such that 
+\[
+P(|X_n - X| > \delta) < \epsilon
+\]
+for all $n \ge N$.
+\end{defn}
+
+\begin{defn}\label{c5d2}
+Let $\{X_n\}$ be a sequence of random variables each with cdf $F_n$. Let $X$ be
+another random variable with cdf $F$. Then $\{X_n\}$ converges to $X$ in 
+distribution, written as $X_n\stackrel
+{d}\rightarrow X$ if $F_n(t) \rightarrow F(t)$ for all $t$ at which $F$ is 
+continuous.
+\end{defn} 
+
+\begin{defn}\label{c5d3}
+Let $\{X_n\}$ be a sequence of random variables and $X$ be another random
+variable. Then $\{X_n\}$ converges to $X$ in quadratic mean, written 
+$X_n \stackrel{qm}\rightarrow X$, if for a given $\epsilon > 0$, we can find
+$N \in \son$ such that $E(X_n - X)^2 < \epsilon$ for all $n \ge N$.
+\end{defn}
+
+\begin{prop}\label{c5p1}
+If $X_n \stackrel{qm}\rightarrow X$ then $X_n \stackrel{P}\rightarrow X$.
+\end{prop}
+\begin{proof}
+Fix $\delta > 0$. Then $P(|X_n - X| \ge \delta) = P((X_n - X)^2 \ge \delta^2)$.
+Using Markov's inequality, the second term is lesser than $E(X_n - X)^2/\delta^2$.
+Thus, we have
+\[
+P(|X_n - X| \ge \delta) \le \frac{E(X_n - X)^2}{\delta^2}.
+\]
+Since $X_n \stackrel{qm}\rightarrow X$, for any $\epsilon > 0$, we can find
+$N \in \son$ such that $E(X_n - X)^2 < \epsilon \delta^2$ for all $n \ge N$. 
+Therefore, for all $n \ge N$, we also have $P(|X_n - X| \ge \delta) < \epsilon$.
+\end{proof}
+
+\begin{prop}\label{c5p2}
+If $X_n \stackrel{P}\rightarrow X$ then $X_n \stackrel{d}\rightarrow X$.
+\end{prop}
+\begin{proof}
+Fix an $\delta_1 > 0$ and let $x$ be a point of continuity of $F$. Then
+\[
+F(x) = P(X_n \le x) = P(X_n \le x, X \le x + \delta_1) + 
+P(X_n \le x, X > x + \delta_1)
+\]
+Now for any two event, $A$ and $B$, $P(AB) \le P(A)$. Therefore,
+\[
+F_n(x) \le P(X \le x + \delta_1) + P(X_n \le x, X > x + \delta_1) = 
+F(x + \delta_1) + P(X_n \le x, X > x + \delta_1).
+\]
+Now, $X > x + \delta_1 \Rightarrow X - X_n > x - X_n + \delta_1 > \delta_1$.
+Thus, we have
+\begin{equation}\label{e1}
+F_n(x) \le F(x + \delta_1) + P(X - X_n > \delta_1).
+\end{equation}
+
+Likewise,
+\begin{eqnarray*}
+F(x - \delta_1) &=& P(X \le x - \delta_1) \\
+ &=& P(X \le x - \delta_1, X_n \le x) + P(X \le x - \delta_1, X_n > x) \\
+ &\le& P(X_n \le x) + P(X \le x - \delta_1, X_n > x) \\
+ &\le& F_n(x) + P(X \le x - \delta_1, X_n > x)
+\end{eqnarray*}
+Now $X_n > x, X \le x - \delta_1 \Rightarrow X_n - X > x - X \ge \delta_1$. Thus,
+we have
+\begin{equation}\label{e2}
+F(x - \delta_1) \le F_n(x) + P(X_n - X \ge \delta_1).
+\end{equation}
+From equations \eqref{e1} and \eqref{e2} we have
+\begin{equation}\label{e3}
+F(x - \delta_1) - P(X_n - X \ge \delta_1) \le F_n(x) \le F(x + \delta_1) + 
+P(X - X_n > \delta_1)
+\end{equation}
+Fix an $\epsilon > 0$. Since $X_n \stackrel{P}\rightarrow X$, we can find $N
+\in \son$ such that for all $n \ge N$, $P(|X_n - X| > \delta_1) < \epsilon/2$.
+Therefore, $-P(|X_n - X| > \delta_1) > -\epsilon/2$ or $F(x - \delta_1) - 
+P(X_n - X \ge \delta_1) > F(x - \delta_1) - \epsilon/2$. Therefore, equation \eqref{e3}
+gives,
+\begin{equation}\label{e4}
+F(x - \delta_1) - \frac{\epsilon}{2} < F_n(x) < 
+F(x + \delta_1) + \frac{\epsilon}{2}.
+\end{equation}
+Since $F$ is continuous at $x$, for the same $\epsilon > 0$, we can find 
+$\delta_2 > 0$ such that $|F(x) - F(x \pm \delta_2)| \le \epsilon/2$, that is,
+$-\epsilon/2 \le F(x) - F(x \pm \delta_2) \le \epsilon/2$ or
+\[
+F(x \pm \delta_2) -\frac{\epsilon}{2} \le F(x) \le F(x \pm \delta_2) + 
+\frac{\epsilon}{2}
+\]
+or
+\begin{equation}\label{e5}
+-F(x \pm \delta_2) - \frac{\epsilon}{2} \le -F(x) \le -F(x \pm \delta_2) + 
+\frac{\epsilon}{2}
+\end{equation}
+Let $\delta = \min(\delta_1, \delta_2)$. Then equations \eqref{e4} and \eqref{e5}
+can be written as 
+\begin{eqnarray*}
+F(x - \delta) - \frac{\epsilon}{2} &<& F_n(x) < F(x + \delta) + \frac{\epsilon}{2} \\
+-F(x - \delta) - \frac{\epsilon}{2} &\le& -F(x) \le -F(x \pm \delta) + \frac{\epsilon}{2}.
+\end{eqnarray*}
+Adding them we get $-\epsilon \le F_n(x) - F(x) \le \epsilon$, that is, $|F_n(x)
+- F(x)| \le \epsilon$.
+\end{proof}
+
+\end{document}
