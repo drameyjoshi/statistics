@@ -55,7 +55,7 @@ fit the past data.
 - Double exponential smoothing
 The formula is
 $$
-\hat{S}_t = \alpha\hat{S}_{t-1} + \sum_{k = 1}^n(1 - \alpha)^k \hat({S}_{t-k} +
+\hat{S}_t = \alpha\hat{S}_{t-1} + \sum_{k = 1}^n(1 - \alpha)^k (\hat{S}_{t-k} +
 b_{t - k})
 $$
 where
