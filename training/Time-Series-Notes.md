@@ -70,3 +70,10 @@ The formula is not too clear to me. I would rather just note the take away.
 Single exponential smoothing takes into account recent values. Double exponential
 smoothing takes into account trend and the triple exponential smoothing admints
 seasonality in the prediction.
+
+Moral of the story:
+
+- If the data has no trend and seasonality then single exponential smoothing 
+suffices
+- If the data has only trend but no seasonality then use double exponential smoothing.
+- If the data has trend and seasonality use triple exponential smoothing.
