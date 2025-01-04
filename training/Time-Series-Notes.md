@@ -1,3 +1,5 @@
+# Stationarity
+
 A stationary time series has three characteristics:
 
 - Constant mean
@@ -31,4 +33,40 @@ one or more transformations.
 - Removal of trend and seasonality. However, we must know the period to decompose
 the time series.
 - Wildly fluctuating variance can be dampened by a log-transformation.
-- Taking differences can remove the auto-correlation structure. This is akin to differentiating the series.
+- Taking differences can remove the auto-correlation structure. This is akin to 
+differentiating the series.
+
+# Smoothing techniques
+
+- Simple moving average
+- Exponential smoothing. This one is more sensitive to local changes.
+
+Both of them tend to lag (lead in case of negative values) the original time 
+series.
+
+- Single exponential smoothing
+The formula is
+$$
+\hat{S}_t = \alpha\hat{S}_{t-1} + \sum_{k = 1}^n(1 - \alpha)^k \hat{S}_{t-k}
+$$
+The parameter $\alpha$ is chosen to be between $0$ and $1$. It is optimised to
+fit the past data.
+
+- Double exponential smoothing
+The formula is
+$$
+\hat{S}_t = \alpha\hat{S}_{t-1} + \sum_{k = 1}^n(1 - \alpha)^k \hat({S}_{t-k} +
+b_{t - k})
+$$
+where
+$$
+b_t = \beta(S_t - S_{t-1}) + (1 - \beta)b_{t-1}
+$$
+The parameter $\alpha$ is chosen to be between $0$ and $1$. It is optimised to
+fit the past data. The parameter $\beta$ smooths the trend of the series.
+
+- Triple exponential smoothing
+The formula is not too clear to me. I would rather just note the take away.
+Single exponential smoothing takes into account recent values. Double exponential
+smoothing takes into account trend and the triple exponential smoothing admints
+seasonality in the prediction.
