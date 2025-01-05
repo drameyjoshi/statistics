@@ -1,0 +1,290 @@
+---
+title: Check if data exists
+jupyter: python3
+---
+
+```{python}
+import matplotlib.pyplot as plt
+import numpy as np
+import os
+import pandas as pd
+
+from datetime import datetime, timedelta
+from statsmodels.graphics.tsaplots import (
+    plot_acf, 
+    plot_pacf, 
+    month_plot, 
+    quarter_plot
+)
+
+pd.options.display.float_format = '{:,.2f}'.format
+```
+
+
+
+```{python}
+DATASET_LOC = '/home/amey/repos/statistics/training/datasets'
+datafiles = ['ts_orders.csv', 'ts_returns.csv', 'ts_people.csv']
+existence = [os.path.exists(os.path.join(DATASET_LOC, d)) for d in datafiles]
+if all(existence):
+    print('Found all data files.')
+else:
+    print('Could not find these files:')
+    _ = [print(m) for m in [datafiles[i] for (i, v) in enumerate(existence) if not v]]
+```
+
+# Load the main data set
+
+Examine the data structure.
+
+```{python}
+df = pd.read_csv(os.path.join(DATASET_LOC, datafiles[0]), encoding = 'ISO-8859-1')
+```
+
+```{python}
+df.head()
+```
+
+```{python}
+df.dtypes
+```
+
+```{python}
+df.columns
+```
+
+Convert strings to dates.
+
+```{python}
+for dc in ['Order Date', 'Ship Date']:
+    df[dc] = pd.to_datetime(df[dc], format='%d/%m/%Y')
+```
+
+```{python}
+_ = [print(f'dtype of {dc} is {df.dtypes[dc]}') for dc in ['Order Date', 'Ship Date']]
+```
+
+# Extract category-wise sales data
+
+```{python}
+df[['Order Date', 'Category', 'Sales']].head()
+```
+
+There are multiple rows for combination of order date and category. We aggregate the sales data to get a unique number for each combination of order date and category.
+
+```{python}
+cat_sales = df[['Order Date', 'Category', 'Sales']].groupby(['Order Date', 'Category']).sum().reset_index()
+cat_sales.head()
+```
+
+## Understanding the data structure
+
+```{python}
+cat_sales.index
+```
+
+```{python}
+assert len(cat_sales) == (cat_sales.index.stop - cat_sales.index.start)
+```
+
+```{python}
+_ = [print(c, type(cat_sales[c]), cat_sales[c].dtype) for c in cat_sales.columns]
+```
+
+### How many unique months are there?
+
+```{python}
+np.unique(np.array(cat_sales['Order Date'], 'datetime64[M]'))
+```
+
+At the moment, the dataframe `cat_sales` has the default index, its row number. We can set it to be the `Order Date`.
+
+```{python}
+cat_sales.set_index('Order Date', inplace=True)
+cat_sales.head()
+```
+
+This allows us to easily answer questions like "get all orders on 7-Jan-2011".
+
+```{python}
+cat_sales.loc['2011-01-07']
+```
+
+Or "get all orders in Jan 2011".
+
+```{python}
+cat_sales.loc['2011-01']
+```
+
+Likewise, orders in the year 2011 can be found using `cat_sales.loc['2011']`.
+
+### Creating a pivot table
+The data has multiple entries for a single date, one each for the category sold. Time series data should have only only observation for each time value. We can achieve that by pivoting the dataframe.
+
+```{python}
+sales_pivot = cat_sales.pivot(columns='Category', values='Sales')
+sales_pivot.head()
+```
+
+```{python}
+print(f'# days in sales data = {(sales_pivot.index.max() - sales_pivot.index.min()).days}')
+print(f'# rows in sales data = {len(sales_pivot)}')
+```
+
+There are gaps in our data. We do not have data for many days. Therefore, we cannot use it as a time series.
+
+```{python}
+full_index = pd.date_range(sales_pivot.index.min(), sales_pivot.index.max())
+sales_pivot.reindex(full_index, fill_value=0)
+```
+
+We can also fill `NaN` with zeros.
+
+```{python}
+sales_pivot.fillna(0, inplace=True)
+```
+
+### Alternate ways of aggregation
+Having a `DatetimeIndex` allows us to easily roll-up data at various time scales.
+
+#### Weekly sales
+
+```{python}
+sales_pivot.resample('W').sum().head()
+```
+
+#### Monthly sales
+
+```{python}
+sales_pivot.resample('ME').sum().head()
+```
+
+#### Yearly sales
+
+```{python}
+sales_pivot.resample('YE').sum()
+```
+
+### Creation of new variables
+Time series analysis often needs creation of new variables that are functions of the 'observation' variable. We will show how they are created using the moderately sized monthly sales data.
+
+```{python}
+monthly_sales = sales_pivot.resample('ME').sum()
+```
+
+#### First difference
+It takes shows the difference $X[t+1] - X[t]$ for  $t \ge 0$. Note that, unlike the `lead` or `lag` columns, the original data is not shown. 
+
+```{python}
+monthly_sales.diff().head()
+```
+
+However, it is not hard to join it.
+
+```{python}
+first_diff = monthly_sales.diff()
+first_diff.columns = [c + ' diff' for c in first_diff.columns]
+```
+
+```{python}
+monthly_sales.join(first_diff).head()
+```
+
+#### Percentage change
+It shows $(X[t] - X[t-1])/X[t-1]$. Note that the ratio is *not* multiplied by $100$. For example, the Furniture sales dropped by $64\%$ in February 2011.
+
+```{python}
+monthly_sales.pct_change().head()
+```
+
+#### Cumulative sales
+
+```{python}
+monthly_sales.cumsum().head()
+```
+
+#### Rolling stats
+
+```{python}
+rolling_window = monthly_sales.rolling(6)
+rolling_window.mean().dropna().head()
+```
+
+```{python}
+rolling_window.std().dropna().head()
+```
+
+# Illustrative exercices
+
+## Sales and profit by Segment
+
+```{python}
+df[['Order Date', 'Segment', 'Sales', 'Profit']].head()
+```
+
+We need to aggregate the metrics.
+
+```{python}
+sales_by_segment = df[['Order Date', 'Segment', 'Sales']].groupby(['Order Date', 'Segment']).sum().reset_index()
+profit_by_segment = df[['Order Date', 'Segment', 'Profit']].groupby(['Order Date', 'Segment']).sum().reset_index()
+
+sales_by_segment.set_index('Order Date', inplace=True)
+profit_by_segment.set_index('Order Date', inplace=True)
+```
+
+```{python}
+sales_by_segment.head(10)
+```
+
+```{python}
+sales_pivot = sales_by_segment.pivot(columns='Segment', values='Sales').fillna(0)
+profit_pivot = profit_by_segment.pivot(columns='Segment', values='Profit').fillna(0)
+```
+
+```{python}
+monthly_sales = sales_pivot.resample('ME').sum()
+monthly_profit = profit_pivot.resample('ME').sum()
+```
+
+```{python}
+monthly_sales.columns = [c + ' sales' for c in monthly_sales.columns]
+monthly_profit.columns = [c + ' profit' for c in monthly_profit.columns]
+```
+
+```{python}
+monthly_sales.head()
+```
+
+```{python}
+monthly_profit.head()
+```
+
+## Solution
+
+```{python}
+consolidated = monthly_sales.join(monthly_profit, how='outer')
+```
+
+```{python}
+consolidated.head()
+```
+
+## Visualisation of sales and profits
+
+```{python}
+segments = ['Consumer', 'Corporate', 'Home Office']
+metrics = ['sales', 'profit']
+fig, axes = plt.subplots(9, 2, figsize=(20, 20))
+
+for i, s in enumerate(segments):
+    for j, m in enumerate(metrics):
+        colname = f'{s} {m}'
+        axes[i,j].plot(consolidated[colname])
+        axes[i,j].title.set_text(colname)
+        plot_acf(consolidated[colname], ax=axes[i + 3, j], title = colname + ' ACF')
+        month_plot(consolidated[colname], ax=axes[i + 6, j], title = colname + ' month plot')
+
+fig.tight_layout()
+plt.show()
+```
+

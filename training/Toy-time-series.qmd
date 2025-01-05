@@ -1,0 +1,53 @@
+---
+jupyter: python3
+---
+
+```{python}
+import matplotlib.pyplot as plt
+import numpy as np
+```
+
+```{python}
+time = np.arange(1, 51)
+beta = 2.75
+trend = beta * time
+plt.scatter(time, trend, s=3)
+plt.xlabel('Time')
+plt.ylabel('Power consumption')
+_ = plt.title('Trend')
+```
+
+```{python}
+alpha = 10
+seasonality = alpha + alpha * np.sin(time)
+plt.plot(time, seasonality, linestyle='dashdot', color='green')
+plt.xlabel('Time')
+plt.ylabel('Variation')
+_ = plt.title('Seasonality')
+```
+
+```{python}
+rng = np.random.default_rng(18111842)
+noise = rng.normal(loc=0.0, scale=1.0, size=len(time))
+plt.plot(time, noise, linestyle='dashdot', color='red')
+plt.xlabel('Time')
+plt.ylabel('Noise')
+_ = plt.title('Random component')
+```
+
+```{python}
+ats = trend + seasonality + noise
+plt.plot(time, ats, color='black')
+plt.xlabel('Time')
+plt.ylabel('Electricity consumption')
+_ = plt.title('Additive time series')
+```
+
+```{python}
+mts = trend * seasonality * (noise**2) # We don't want negative electricity consumption.
+plt.plot(time, mts, color='black', linestyle='dashdot')
+plt.xlabel('Time')
+plt.ylabel('Electricity consumption')
+_ = plt.title('Multiplicative time series')
+```
+

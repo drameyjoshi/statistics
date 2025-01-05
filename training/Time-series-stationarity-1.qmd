@@ -1,0 +1,99 @@
+---
+title: Simple tests of non-stationarity
+jupyter: python3
+---
+
+```{python}
+import matplotlib.pyplot as plt
+import numpy as np
+import os
+import pandas as pd
+
+from statsmodels.tsa.stattools import adfuller
+from statsmodels.tsa.seasonal import seasonal_decompose
+from typing import List
+```
+
+```{python}
+DATASET_LOC = os.path.join(os.environ['HOME'], 'repos/statistics/training/datasets')
+datafiles = ['dataset_SNS_1.npy', 'dataset_SNS_2.npy']
+
+exist = [os.path.exists(os.path.join(DATASET_LOC, f)) for f in datafiles]
+if all(exist):
+    print('All data files are present.')
+else:
+    print('Could not find these files:')
+    _ = [print(os.path.join(DATASET_LOC, datafiles[i])) for i, e in enumerate(exist) if not e]
+```
+
+```{python}
+sns1 = np.load(os.path.join(DATASET_LOC, datafiles[0]))
+sns2 = np.load(os.path.join(DATASET_LOC, datafiles[1]))
+```
+
+```{python}
+def plot_ts(t: List[int], X: List[float], title: str, xlabel: str='time', ylabel: str='time') -> None:
+    assert len(t) == len(X)
+    plt.plot(t, X)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.title(title)
+```
+
+```{python}
+plot_ts([t for t in range(len(sns1))], sns1, 'SNS-1')
+```
+
+This is clearly a non-stationary time series because the variance between $t=35$ and $t=65$ appears to be much large than at other times.
+
+```{python}
+plot_ts([t for t in range(len(sns2))], sns2, 'SNS-2')
+```
+
+This time series too appears to be non-stationary due to a pronounced trend.
+
+
+We check if the mean and the variance of the data remains constant.
+
+
+```{python}
+print(f'The size of the first dataset is {len(sns1)}.')
+```
+
+We can split it into $10$ chunks and compute mean and variances for each.
+
+```{python}
+def print_chunk_stats(X: np.ndarray, chunk_size: int) -> None:
+    _ = [print(f'Chunk: {i}, mean: {np.mean(c):0.6f}, variance: {np.var(c):0.6f}') 
+         for i, c in enumerate(np.split(X, chunk_size))]
+```
+
+```{python}
+print_chunk_stats(sns1, 10)
+```
+
+```{python}
+print_chunk_stats(sns2, 10)
+```
+
+# Augmented Dickey-Fuller test
+
+```{python}
+def show_adf_results(X: np.ndarray) -> None:
+    res = adfuller([x for x in X if not np.isnan(x)])
+    metrics = ['adf', 'pvalue', 'usedlag', 'nobs', 'critical_values', 'icbest']
+    _ = [print(f'{m}: {res[i]}') for i, m in enumerate(metrics)]
+```
+
+```{python}
+show_adf_results(sns1)
+```
+
+Quite strange that the augmented Dickey-Fuller test classifies the time series as stationary.
+
+```{python}
+show_adf_results(sns2)
+```
+
+This result was expected. We cannot reject the null hypothesis that the time series is non-stationary.
+
