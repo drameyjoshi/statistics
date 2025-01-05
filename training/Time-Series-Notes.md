@@ -75,5 +75,56 @@ Moral of the story:
 
 - If the data has no trend and seasonality then single exponential smoothing 
 suffices
-- If the data has only trend but no seasonality then use double exponential smoothing.
+- If the data has only trend but no seasonality then use double exponential 
+smoothing.
 - If the data has trend and seasonality use triple exponential smoothing.
+
+# ARMA models
+
+- AR stands for auto-regressive. AR models predict the next value based on the
+past values.
+- MA stands for moving average. MA models predict the value based on past 
+forecast errors.
+- ARMA models use past values and forecast errors. Also called Box-Jenkins 
+approach.
+- An AR(p) model uses that last $p$ values to predict the next value. It is
+defined as
+$$
+\hat{X}_t = \sum_{i=1}^q\phi_i X_{t-i} + \omega_t,
+$$
+where $\omega_t$ is the estimation error and $\phi_i$ are to be estimated by
+minimising the prediction error.
+- An MA(q) model uses the last $q$ _errors_ to predict the next values. If 
+$\omega_1, \ldots, \omega_q$ are the past $q$ errors then the MA(q) model is
+$$
+\hat{X}_t = \sum_{i=1}^q\theta_i\omega_{t-i} + \omega_t,
+$$
+where $\theta_1, \ldots, \theta_p$ are the parameters to be estimated by 
+minimising the prediction error.
+- An ARMA(p, q) model has the form
+$$
+\hat{X}_t = \sum_{i=1}^q\phi_i X_{t-i} + \sum_{i=1}^q\theta_i\omega_{t-i} + 
+\omega_t,
+$$
+where the terms have the same meanings as before. Note that the error term
+$\omega_t$ is common to AR and MA parts of the model. It links the two parts 
+providing a feedback to each one.
+- ARMA models work only with stationary time series.
+- Should have at least 100 observations.
+- The parameters $p$ and $q$ of the ARMA model can be found using:
+    - ACF and PACF plots.
+    - Hyperparameter search.
+- To find $p$, plot the PACF and choose $p$ to be the lag beyond which PACF is
+insignificant.
+- To find $q$, plot the ACF and choose $q$ to be the lag beyond with the ACF is
+insignificant.
+- Try not to use too large $p$ or $q$.
+- The ACF plot can also be used to determine which type of model should be used.
+    - Use AR model if the ACF decays to zero exponentially.
+    - Use AR model if the ACF alternates sign and decays.
+    - Use MA model if there are one or two spikes but the rest are zero.
+    - Use ARMA model if it decays after a few lags.
+    - If all lags are zero, the data is probably random.
+    - If there is a spike at a high lag, there is perhaps a seasonal component.
+    - If there are no lags, there is perhaps a trend.
+- Like other modelling algorithms, the fit it good if the residuals are gaussian.
