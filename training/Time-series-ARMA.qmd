@@ -1,0 +1,225 @@
+---
+title: Toy AR series
+jupyter: python3
+---
+
+```{python}
+import matplotlib.pyplot as plt
+import numpy as np
+import os
+import statsmodels.api as sm
+
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+from statsmodels.tsa.arima.model import ARIMA
+```
+
+
+We will generate three series that are generated using an auto-regressive process.
+
+
+```{python}
+n_samples = 500
+ar1 = np.zeros(n_samples)
+ar2 = np.zeros(n_samples)
+ar3 = np.zeros(n_samples)
+rng = np.random.default_rng(12111842)
+for i in range(n_samples):    
+    ar1[i] = rng.normal(loc=0, scale=2.5, size=1)[0] if i <= 0 else 0.7 * ar1[i-1] + rng.normal(loc=0, scale=2.5, size=1)[0]
+    ar2[i] = rng.normal(loc=0, scale=2.5, size=1)[0] if i <= 1 else 0.3 * ar2[i-1] + 0.3 * ar2[i-2] + rng.normal(loc=0, scale=2.5, size=1)[0]
+    ar3[i] = rng.normal(loc=0, scale=2.5, size=1)[0] if i <= 2 else 0.3 * ar3[i-1] + 0.2 * ar3[i-2] + 0.1 * ar3[i-3] + rng.normal(loc=0, scale=2.5, size=1)[0]
+```
+
+```{python}
+fig, ax = plt.subplots(1, 3, figsize=(15, 5))
+T = [t for t in range(n_samples)]
+ax[0].plot(T, ar1, label='AR(1)')
+ax[0].legend()
+ax[1].plot(T, ar2, label='AR(2)')
+ax[1].legend()
+ax[2].plot(T, ar3, label='AR(3)')
+ax[2].legend()
+_ = plt.suptitle('AR processes')
+```
+
+I cannot visually tell if the three time series are qualitatively different. 
+
+```{python}
+fig, ax = plt.subplots(1, 3, figsize=(15, 5))
+_ = plot_acf(ar1, label='AR(1)', ax=ax[0])
+_ = plot_acf(ar2, label='AR(2)', ax=ax[1])
+_ = plot_acf(ar3, label='AR(3)', ax=ax[2])
+ax[0].legend()
+ax[1].legend()
+ax[2].legend()
+_ = plt.suptitle('AR processes')
+```
+
+```{python}
+fig, ax = plt.subplots(1, 3, figsize=(15, 5))
+_ = plot_pacf(ar1, label='AR(1)', ax=ax[0])
+_ = plot_pacf(ar2, label='AR(2)', ax=ax[1])
+_ = plot_pacf(ar3, label='AR(3)', ax=ax[2])
+ax[0].legend()
+ax[1].legend()
+ax[2].legend()
+_ = plt.suptitle('AR processes')
+```
+
+I would have expected the ACF and PACF plots of AR(2) and AR(3) processes to be qualitiatively different. They are not. Therefore, plotting them is not always helpful to guess the order $p$ in an AR(p) or an ARMA(p, q) model.
+
+## Fitting AR models on the data
+
+We will now use the `statsmodels` `ARIMA` API to fit models for the data. The model order is specified as $(p, d, q)$ where $p$ is the order of AR process, $q$ that of $MA$ process and $d$ is the order of differences. Since we are fitting AR models, $d = 0$ and $q = 0$.
+
+```{python}
+ar1_model = sm.tsa.ARIMA(endog=ar1, exog=None, order= (1, 0, 0), trend=None).fit()
+print(f'Estimated parameters: {ar1_model.arparams} against true parameter: [0.7].')
+```
+
+```{python}
+ar2_model = sm.tsa.ARIMA(endog=ar2, exog=None, order= (2, 0, 0), trend=None).fit()
+print(f'Estimated parameters: {ar2_model.arparams} against true parameter: [0.3, 0.3]')
+```
+
+```{python}
+ar3_model = sm.tsa.ARIMA(endog=ar3, exog=None, order= (3, 0, 0), trend=None).fit()
+print(f'Estimated parameters: {ar3_model.arparams} against true parameter: [0.3, 0.2, 0.1]')
+```
+
+# Toy MA models
+
+We will generate three series using MA processes.
+
+```{python}
+n_samples = 500
+error = rng.normal(loc=0, scale=2.5, size=500)
+ma1 = np.zeros(n_samples)
+ma2 = np.zeros(n_samples)
+ma3 = np.zeros(n_samples)
+rng = np.random.default_rng(12111842)
+for i in range(n_samples):    
+    ma1[i] = rng.normal(loc=0, scale=2.5, size=1)[0] if i <= 0 else error[i] + 0.7 * error[i-1]
+    ma2[i] = rng.normal(loc=0, scale=2.5, size=1)[0] if i <= 1 else error[i] + 0.3 * error[i-1] + 0.3 * error[i-2]
+    ma3[i] = rng.normal(loc=0, scale=2.5, size=1)[0] if i <= 2 else error[i] + 0.3 * error[i-1] + 0.2 * error[i-2] + 0.1 * error[i-3]
+```
+
+```{python}
+fig, ax = plt.subplots(1, 3, figsize=(15, 5))
+T = [t for t in range(n_samples)]
+ax[0].plot(T, ma1, label='MA(1)')
+ax[0].legend()
+ax[1].plot(T, ma2, label='MA(2)')
+ax[1].legend()
+ax[2].plot(T, ma3, label='MA(3)')
+ax[2].legend()
+_ = plt.suptitle('MA processes')
+```
+
+The three processes look alike. In fact, they don't look drastically different from the three AR processes considered before.
+
+```{python}
+fig, ax = plt.subplots(1, 3, figsize=(15, 5))
+_ = plot_acf(ma1, label='MA(1)', ax=ax[0])
+_ = plot_acf(ma2, label='MA(2)', ax=ax[1])
+_ = plot_acf(ma3, label='MA(3)', ax=ax[2])
+ax[0].legend()
+ax[1].legend()
+ax[2].legend()
+_ = plt.suptitle('MA processes')
+```
+
+```{python}
+fig, ax = plt.subplots(1, 3, figsize=(15, 5))
+_ = plot_pacf(ma1, label='MA(1)', ax=ax[0])
+_ = plot_pacf(ma2, label='MA(2)', ax=ax[1])
+_ = plot_pacf(ma3, label='MA(3)', ax=ax[2])
+ax[0].legend()
+ax[1].legend()
+ax[2].legend()
+_ = plt.suptitle('MA processes')
+```
+
+I was expecting the ACF plots reveal $q$ but unfortunately, the plots for MA(2) AND MA(3) are very similar. The PACF plots are not effective to understand MA processes.
+
+## Fitting MA models on the data
+
+We will now use the `statsmodels` `ARIMA` API to fit models for the data. The model order is specified as $(p, d, q)$ where $p$ is the order of AR process, $q$ that of $MA$ process and $d$ is the order of differences. Since we are fitting MA models, $p = 0$ and $d = 0$.
+
+```{python}
+ma1_model = sm.tsa.ARIMA(endog=ma1, exog=None, order= (0, 0, 1), trend=None).fit()
+print(f'Estimated parameters: {ma1_model.maparams} against true parameter: [0.7].')
+```
+
+```{python}
+ma2_model = sm.tsa.ARIMA(endog=ma2, exog=None, order= (0, 0, 2), trend=None).fit()
+print(f'Estimated parameters: {ma2_model.maparams} against true parameter: [0.3, 0.3].')
+```
+
+```{python}
+ma3_model = sm.tsa.ARIMA(endog=ar3, exog=None, order= (0, 0, 3), trend=None).fit()
+print(f'Estimated parameters: {ma3_model.maparams} against true parameter: [0.3, 0.2, 0.1]')
+```
+
+# Beyond toy models
+
+```{python}
+DATASET_LOC = os.path.join(os.environ['HOME'], 'repos/statistics/training/datasets')
+datafiles = ['auto_1.npy', 'auto_2.npy']                                                                            
+exist = [os.path.exists(os.path.join(DATASET_LOC, f)) for f in datafiles]
+if all(exist):
+    print('All data files are present.')
+else:
+    print('Could not find these files:')
+    _ = [print(os.path.join(DATASET_LOC, datafiles[i])) for i, e in enumerate(exist) if not e]
+```
+
+```{python}
+auto1 = np.load(os.path.join(DATASET_LOC, datafiles[0]))
+auto2 = np.load(os.path.join(DATASET_LOC, datafiles[1]))
+```
+
+```{python}
+print(f'Size of auto1: {len(auto1)}')
+print(f'Size of auto2: {len(auto2)}')
+```
+
+```{python}
+fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+T = [t for t in range(len(auto1))]
+ax[0].plot(T, auto1, label='Time series 1')
+ax[0].legend()
+ax[1].plot(T, auto2, label='Time series 2')
+ax[1].legend()
+_ = plt.suptitle('Time series')
+```
+
+```{python}
+fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+_ = plot_acf(auto1, label='Time series 1', ax=ax[0])
+_ = plot_acf(auto2, label='Time series 2', ax=ax[1])
+ax[0].legend()
+ax[1].legend()
+_ = plt.suptitle('Can q be determined?')
+```
+
+```{python}
+fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+_ = plot_pacf(auto1, label='Time series 1', ax=ax[0])
+_ = plot_pacf(auto2, label='Time series 2', ax=ax[1])
+ax[0].legend()
+ax[1].legend()
+_ = plt.suptitle('Can p be determined?')
+```
+
+The parameters of first process are likely to be $p=1, q=6$ and those of the second process are likely to be $p=2, q=6$.
+
+```{python}
+model_1 = sm.tsa.ARIMA(endog=auto1, exog=None, order= (1, 0, 6), trend=None).fit()
+print(f'Estimated AR parameters: {model_1.arparams} and MA parameters: {model_1.maparams}.')
+```
+
+```{python}
+model_2 = sm.tsa.ARIMA(endog=auto2, exog=None, order= (2, 0, 6), trend=None).fit()
+print(f'Estimated AR parameters: {model_2.arparams} and MA parameters: {model_2.maparams}.')
+```
+
