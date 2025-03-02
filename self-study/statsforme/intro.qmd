@@ -108,7 +108,10 @@ $$
 (n - 1)\frac{s^2}{\sigma^2} \sim \chi^2(n - 1).
 $$
 A proof of this statement can be found in [The Book of Statistical Proofs](
-https://statproofbook.github.io/P/norm-chi2).
+https://statproofbook.github.io/P/norm-chi2). Another proof is available in
+an [Eberly College of Science](https://online.stat.psu.edu/stat414/lesson/26/26.3)
+course.
+
 - If $X_1, \ldots, X_n$ are drawn from a distibution with variance $\sigma^2$
 and kurtosis $\kappa$ then 
 $$
