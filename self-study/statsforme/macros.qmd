@@ -1,0 +1,12 @@
+---
+format: html
+---
+
+::: {.hidden}
+\newcommand{\var}{\text{Var}}
+
+$$
+\declareMathOperator{dNorm}{\mathcal{N}}
+$$
+
+:::

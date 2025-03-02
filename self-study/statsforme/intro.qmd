@@ -1,0 +1,154 @@
+{{< include macros.qmd >}}
+# Population and Samples
+
+A population is characterised by a cumulative probability distribution. A sample
+is a subset of the population that we observe and measure. Measurements of the
+sample are used to infer the parameters of the population. We will illustreate
+this idea with the simplest of measurements - the mean.
+
+## Sample mean
+Consider a population with an infinite number of tosses of a fair coin. We draw
+a random sample of ten such and find its mean.
+```{r}
+set.seed(12111842)
+s1 <- rbinom(n=10, size=1, prob=0.5)
+cat("Sample mean = ", mean(s1))
+```
+The mean of the sample is not $0.5$ although the population consists of tosses
+of a fair coin. We next repeat the procedure a large number of times.
+```{r}
+n.sims <- 100
+sample.size <- 10
+S <- matrix(rbinom(n=n.sims * sample.size, size=1, prob=0.5), nrow=sample.size)
+sample.means <- colMeans(S)
+hist(sample.means, xlab='Sample mean', main='Histogram of sample means')
+```
+We see that there is a wide variation in the sample means although a majority
+of the times we do get the value $0.5$ appropriate for the tosses of a fair coin.
+
+The sample mean is also a random variable and it has a distribution. It is 
+called the _sampling distribution of mean_.
+
+We can carry out this procedure for an infinite population of standard normal
+variates.
+```{r}
+S <- matrix(rnorm(n=n.sims * sample.size), nrow=sample.size)
+sample.means <- colMeans(S)
+X <- seq(from=-3, to=3, length.out=100)
+hist(sample.means,
+     xlab="Sample mean",
+     main="Sampling from a standard normal distribution",
+     prob=TRUE,
+     xlim=range(X))
+lines(X, dnorm(X))
+legend("topleft", 
+       legend=c("Population density"), 
+       col=c("black"), 
+       cex=0.7, 
+       lty=1,
+       bty="n")
+```
+
+We observe that the sampling distribution of mean has a much lesser spread 
+compared to the distribution of the population. This is to be expected as each
+sample mean tries to come closer to the true centre of the population. We can
+easily show that
+
+::: {#prp-c1p1}
+If a population has mean $\mu$ and variance $\sigma^2$ then the sampling 
+distribution of mean has mean $\mu$ and variance $\sigma^2/n$, where $n$ is the
+sample size.
+:::
+
+::: {.proof}
+The sample mean is
+$$
+\bar{x} = \frac{1}{n}\sum_{i=1}^n x_i,
+$$
+so that
+$$
+E(\bar{x}) = \frac{1}{n}\sum_{i=1}^n E(x_i) = \frac{1}{n}\sum_{i=1}^n \mu = \mu,
+$$
+and
+$$
+\var(\bar{x}) = \frac{1}{n^2}\var\left(\sum_{i=1}^n x_i\right).
+$$
+Here we used the fact that $\\var(aX) = a^2\var(X)$. Since 
+$\var(X_1 + \cdots + X_n) = n\var{X}$, we have
+$$
+\var(\bar{x}) = \frac{1}{n^2} n\sigma^2 = \frac{\sigma^2}{n}.
+$$
+:::
+
+The standard deviation of the sampling distribution is called its _standard
+error_.
+
+The histograms of the means of samples drawn from Bernoulli and standard normal
+distibutions seem to be peaked around the population mean and tapering away from
+it. The central limit theorem (see @wasserman2013all) guarantees that if $X_1,
+\ldots, X_n$ are random variables drawn independently from a population with
+mean $\mu$ and variance $\sigma^2 < \infty$ then 
+$$
+Z_n = \frac{\bar{X} - \mu}{\sigma/\sqrt{n}}
+$$
+is a standard normal random variable. In other words, the random variable 
+$\bar{X}$ has a normal distribution of mean $\mu$ and variance $\sigma^2/n$.
+
+## Sample variance
+If $X_1, \ldots, X_n$ are a sample drawn from a population, its sample variance
+is
+$$
+s^2 = \frac{1}{n-1}\sum_{i=1}^n(X_i - \bar{X})^2.
+$$
+Being a quantity computed from the sample, $s^2$ is also a random variable. 
+There are two results known about the distribution of sample variance:
+
+- If $X_1, \ldots, X_n$ are such that $X_i \sim dNorm(\mu, \sigma^2)$ then
+$$
+(n - 1)\frac{s^2}{\sigma^2} \sim \chi^2(n - 1).
+$$
+A proof of this statement can be found in [The Book of Statistical Proofs](
+https://statproofbook.github.io/P/norm-chi2).
+- If $X_1, \ldots, X_n$ are drawn from a distibution with variance $\sigma^2$
+and kurtosis $\kappa$ then 
+$$
+\frac{s^2}{\sigma^2} \sim \frac{\chi^2(m)}{m},
+$$
+where
+$$
+m = \frac{2n}{\kappa - (n - 3)/(n - 1)}.
+$$
+This fact is mentioned in an answer to a question on [Stack Exchange](https://stats.stackexchange.com/questions/316714/sampling-distribution-of-sample-variance-of-non-normal-iid-r-v-s)
+in which the paper @ONeill02102014 is referred.
+
+We will now show that
+
+::: {#prp-c1p2}
+$E(s^2) = \sigma^2$.
+:::
+
+::: {.proof}
+Consider, $(n-1)S_n^2 = \sum_{i=1}^n(X_i - \bar{X}_n)^2$ so that
+\begin{equation}\label{e2}
+(n-1)E(S_n^2) = \sum_{i=1}^n\left(E(X_i^2) - 2E(X_i\bar{X}_n) + E(\bar{X}_n^2)\right)
+\end{equation}
+We first consider the term $E(X_i\bar{X}_n)$. It is
+\begin{eqnarray*}
+E(X_i\bar{X}_n) &=& E\left(X_i \sum_{j=1}^n\frac{X_j}{n}\right) \\
+nE(X_i\bar{X}_n) &=& \sum_{j=1, j\ne i}^n E(X_iX_j) + E(X_i^2) \\
+nE(X_i\bar{X}_n) &=& (n-1)\mu^2 + \mu^2 + \sigma^2 \\
+E(X_i\bar{X}_n) &=& \mu^2 + \frac{\sigma^2}{n},
+\end{eqnarray*}
+as $X_i$ are iid. 
+
+From proposition @prp-c1p1, 
+$$
+E(\bar{X}_n^2) = \var{\bar{X}_n} - (E(\bar{X}_n))^2 = \frac{\sigma^2}{n} - \mu^2
+$$
+so that we have
+$$
+(n-1)E(S_n^2) = \sum_{i=1}^n\left(E(X_i^2) - 2\mu^2 - \frac{2\sigma^2}{n}
++ \frac{\sigma^2}{n} + \mu^2\right).
+$$
+The result follows from the fact that $E(X_i^2) = \mu^2 + \sigma^2$.
+:::

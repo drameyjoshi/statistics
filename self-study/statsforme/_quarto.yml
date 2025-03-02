@@ -1,0 +1,25 @@
+project:
+  type: book
+
+book:
+  title: "Statistics for Me"
+  author: "Amey Joshi"
+  date: "3/2/2025"
+  chapters:
+    - index.qmd
+    - intro.qmd
+    - summary.qmd
+    - references.qmd
+
+bibliography: references.bib
+
+format:
+  html:
+    theme: cosmo
+    include-in-header:
+        - file: macros.html
+  pdf:
+    documentclass: scrreprt
+
+
+
