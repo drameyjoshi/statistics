@@ -4,9 +4,5 @@ format: html
 
 ::: {.hidden}
 \newcommand{\var}{\text{Var}}
-
-$$
-\declareMathOperator{dNorm}{\mathcal{N}}
-$$
-
+\DeclareMathOperator{\dNorm}{\mathcal{N}}
 :::

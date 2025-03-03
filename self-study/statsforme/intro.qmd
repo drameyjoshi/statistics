@@ -6,7 +6,7 @@ is a subset of the population that we observe and measure. Measurements of the
 sample are used to infer the parameters of the population. We will illustreate
 this idea with the simplest of measurements - the mean.
 
-## Sample mean
+## Sample mean {#sec-c1s1}
 Consider a population with an infinite number of tosses of a fair coin. We draw
 a random sample of ten such and find its mean.
 ```{r}
@@ -94,7 +94,7 @@ $$
 is a standard normal random variable. In other words, the random variable 
 $\bar{X}$ has a normal distribution of mean $\mu$ and variance $\sigma^2/n$.
 
-## Sample variance
+## Sample variance {#sec1-c1s2}
 If $X_1, \ldots, X_n$ are a sample drawn from a population, its sample variance
 is
 $$
@@ -103,7 +103,7 @@ $$
 Being a quantity computed from the sample, $s^2$ is also a random variable. 
 There are two results known about the distribution of sample variance:
 
-- If $X_1, \ldots, X_n$ are such that $X_i \sim dNorm(\mu, \sigma^2)$ then
+- If $X_1, \ldots, X_n$ are such that $X_i \sim \dNorm(\mu, \sigma^2)$ then
 $$
 (n - 1)\frac{s^2}{\sigma^2} \sim \chi^2(n - 1).
 $$
@@ -155,3 +155,82 @@ $$
 $$
 The result follows from the fact that $E(X_i^2) = \mu^2 + \sigma^2$.
 :::
+
+## Convergence of mean {#sec1-c1s3}
+If we toss a fair coin a large number of times we expect that eventually the
+number of heads will be almost the same as the number of tails. However, the 
+way this equality emerges is quite unlike the way a mathematical series 
+converges. In the experiment with coins, let us calculate the empirical 
+probability of getting a head as the number of tosses increases. It is 
+interesting to observe that different experiments will converge to the expected
+value of $0.5$ in different ways. If $X_n$ denotes the outcome of the $n$th toss
+and if we let $X_n = 1$ if the coin lands on head and $X_n = 0$ if it lands on
+tail then the probability of the number of times we get a head is also equal to
+the sample mean $\bar{X}_n$. We treat this experiment as a way to determine the
+sample mean.
+```{r}
+n.sims <- 1000
+exp1 <- cumsum(sample(0:1, n.sims, replace=TRUE))/1:n.sims
+exp2 <- cumsum(sample(0:1, n.sims, replace=TRUE))/1:n.sims
+exp3 <- cumsum(sample(0:1, n.sims, replace=TRUE))/1:n.sims
+
+plot(1:n.sims, exp1, xlab="# tosses", ylab="P(H)", col="green", type="l", 
+     main="Convergence of probability")
+lines(1:n.sims, exp2, col="red", type="l")
+lines(1:n.sims, exp3, col="blue", type="l")
+abline(h=0.5, col="black", lty=2)
+legend("topright",
+       legend=c("Experiment 1", "Experiment 2", "Experiment 3"),
+       col=c("green", "red", "blue"),
+       lty=1,
+       bty="n")
+```
+Eventually, the sample means calculated in all experiments tends to be close to
+$0.5$ but each one approaches it differently. This type of convergence is called
+'convergence in probability'. The law of large number assures us that $\bar{X}_n$
+converges to $\mu$ in probability.
+
+## Confidence intervals of means {#sec1-c1s4}
+We saw in section @sec-c1s1 that the sample mean is itself a random variable 
+and has a distribution. Therefore, it is not usually helpful to quote just the
+sample mean. We need some way to indicate how far the population mean is from
+the sample mean.
+
+The sampling distribution of means is a gaussian distribution with parameters
+$\mu, \sigma^2/n$, where $n$ is the size of the sample. Therefore, the 
+probability of getting a sample mean in the range $(\mu - \sigma/\sqrt{n}, \mu
++ \sigma/\sqrt{n})$ is close to $68\%$. Similarly, the probability of getting
+an $\bar{X}_n$ in the range $(\mu - 2\sigma/\sqrt{n}, \mu + 2\sigma/\sqrt{n})$
+is close to $95\%$ or the probability of $\bar{X}_n \le \mu - 2\sigma/\sqrt{n}$
+or $\bar{X}_n \ge \mu + 2\sigma/\sqrt{n}$ is $5\%$. Now the event
+$$
+\mu - 2\frac{\sigma}{\sqrt{n}} \le \bar{X}_n \le \mu + 2\frac{\sigma}{\sqrt{n}}
+$$
+is equivalent to
+$$
+-2\frac{\sigma}{\sqrt{n}} \le \bar{X}_n - \mu \le 2\frac{\sigma}{\sqrt{n}}
+$$
+which is same as
+$$
+-2\frac{\sigma}{\sqrt{n}} \le -\bar{X}_n + \mu \le 2\frac{\sigma}{\sqrt{n}}
+$$
+or
+$$
+\bar{X}_n -2\frac{\sigma}{\sqrt{n}} \le \mu \le 
+\bar{X}_n + 2\frac{\sigma}{\sqrt{n}}.
+$$
+Thus, the probability of $\bar{X}_n$ lying in an interval around $\mu$ is the
+same as the probability of $\mu$ lying in the interval of same size around
+$\bar{X}_n$. A statement about the complement of this event is that the
+probability of $\bar{X}_n$ lying outside an interval around $\mu$ is the same
+as the probability of $\mu$ lying outside the interval of the same size around
+$\bar{X}_n$.
+
+Note that this equivalence is as a result of the symmetry of the gaussian
+distribution and it should not be applied to other distributions without
+considerations of its shape.
+
+We can summarise this section by stating that for a data set $X_1, \ldots, X_n$,
+the probability of $\mu \in (\bar{X}_n - k\sigma/\sqrt{n}, \bar{X}_n + 
+k\sigma/\sqrt{n})$ is `1 - 2 * pnorm(-k)` for an positive integer $k$.
+
