@@ -174,8 +174,8 @@ exp1 <- cumsum(sample(0:1, n.sims, replace=TRUE))/1:n.sims
 exp2 <- cumsum(sample(0:1, n.sims, replace=TRUE))/1:n.sims
 exp3 <- cumsum(sample(0:1, n.sims, replace=TRUE))/1:n.sims
 
-plot(1:n.sims, exp1, xlab="# tosses", ylab="P(H)", col="green", type="l", 
-     main="Convergence of probability")
+plot(1:n.sims, exp1, xlab="# tosses", ylab=expression(bar(X)[n]), 
+     col="green", type="l", main="Convergence of probability")
 lines(1:n.sims, exp2, col="red", type="l")
 lines(1:n.sims, exp3, col="blue", type="l")
 abline(h=0.5, col="black", lty=2)
