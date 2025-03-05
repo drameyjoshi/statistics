@@ -91,10 +91,11 @@ mean $\mu$ and variance $\sigma^2 < \infty$ then
 $$
 Z_n = \frac{\bar{X} - \mu}{\sigma/\sqrt{n}}
 $$
-is a standard normal random variable. In other words, the random variable 
-$\bar{X}$ has a normal distribution of mean $\mu$ and variance $\sigma^2/n$.
+is a standard normal random variable as $n \rightarrow \infty$. In other words, 
+the random variable $\bar{X}$ has a normal distribution of mean $\mu$ and 
+variance $\sigma^2/n$.
 
-## Sample variance {#sec1-c1s2}
+## Sample variance {#sec1-s2}
 If $X_1, \ldots, X_n$ are a sample drawn from a population, its sample variance
 is
 $$
@@ -144,7 +145,7 @@ E(X_i\bar{X}_n) &=& \mu^2 + \frac{\sigma^2}{n},
 \end{eqnarray*}
 as $X_i$ are iid. 
 
-From proposition @prp-c1p1, 
+From @prp-c1p1, 
 $$
 E(\bar{X}_n^2) = \var{\bar{X}_n} - (E(\bar{X}_n))^2 = \frac{\sigma^2}{n} - \mu^2
 $$
@@ -156,7 +157,7 @@ $$
 The result follows from the fact that $E(X_i^2) = \mu^2 + \sigma^2$.
 :::
 
-## Convergence of mean {#sec1-c1s3}
+## Convergence of mean {#sec1-s3}
 If we toss a fair coin a large number of times we expect that eventually the
 number of heads will be almost the same as the number of tails. However, the 
 way this equality emerges is quite unlike the way a mathematical series 
@@ -190,7 +191,7 @@ $0.5$ but each one approaches it differently. This type of convergence is called
 'convergence in probability'. The law of large number assures us that $\bar{X}_n$
 converges to $\mu$ in probability.
 
-## Confidence intervals of means {#sec1-c1s4}
+## Confidence intervals of means {#sec1-s4}
 We saw in section @sec-c1s1 that the sample mean is itself a random variable 
 and has a distribution. Therefore, it is not usually helpful to quote just the
 sample mean. We need some way to indicate how far the population mean is from
@@ -234,3 +235,51 @@ We can summarise this section by stating that for a data set $X_1, \ldots, X_n$,
 the probability of $\mu \in (\bar{X}_n - k\sigma/\sqrt{n}, \bar{X}_n + 
 k\sigma/\sqrt{n})$ is `1 - 2 * pnorm(-k)` for an positive integer $k$.
 
+
+## Confidence intervals in practice {#sec1-s5}
+The confidence interval derived in the previous section depends on the 
+distribution of the sample means. The central limit theorem guarantees that it
+will be gaussian in the limit of the sample size going to infinity. In practice,
+it means that when the sample sizes are large enough, the sampling distribution
+of means looks like a gaussian. But the sample size at which it starts happening
+depends on the distribution and its parameters from which the data are sampled. 
+We will illustrate this point with the example of a binomial distribution.
+```{r, fig.width=6, fig.height=12}
+p1 <- 0.5
+p2 <- 0.8
+sample.size <- 20
+n.samples <- 100
+means.1 <- colMeans(matrix(rbinom(n=sample.size*n.samples, size=1, p=p1), 
+                           nrow=sample.size))
+means.2 <- colMeans(matrix(rbinom(n=sample.size*n.samples, size=1, p=p2), 
+                           nrow=sample.size))
+mean.means.1 <- p1
+mean.means.2 <- p2
+sd.means.1 <- sqrt(p1 * (1 - p1)/sample.size)
+sd.means.2 <- sqrt(p2 * (2 - p2)/sample.size)
+X1 <- seq(from=mean.means.1 - 0.5, to=mean.means.1 + 0.5, length.out=100)
+X2 <- seq(from=mean.means.2 - 0.5, to=mean.means.2 + 0.5, length.out=100)
+N1 <- dnorm(X1, mean=mean.means.1, sd=sd.means.1)
+N2 <- dnorm(X2, mean=mean.means.2, sd=sd.means.2)
+oldpar <- par(mfrow=c(2, 1))
+plot(X1, N1, lty=2, main=paste("p =", p1), type="l")
+lines(density(means.1))
+legend("topright",
+       legend=c("Density", "Gaussian"),
+       lty = c(1, 2),
+       bty = "n")
+plot(density(means.2), main=paste("p =", p2), type="l")
+lines(X2, N2, lty=2)
+legend("topright",
+       legend=c("Density", "Gaussian"),
+       lty = c(1, 2),
+       bty = "n")
+```
+
+Clearly, the density is much closer to being an gaussian when $p = 0.5$ than
+when $p = 0.8$. Therefore, building a confidence interval assuming that the
+sampling distribution of means is gaussian is grossly wrong in the latter case.
+In the former case, the parameters of the sampling distribution can be taken as 
+$\mu = \hat{p} = \bar{X}_n$ and $\sigma^2 = \hat{p}(1 - \hat{p})$. An interval
+calculated using these parameters is called the _Wald interval_. For the second
+sample, the Wald interval is not appropriate. We will mention a few alternatives.
