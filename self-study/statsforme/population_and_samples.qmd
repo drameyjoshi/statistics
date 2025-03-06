@@ -19,7 +19,8 @@ of a fair coin. We next repeat the procedure a large number of times.
 ```{r}
 n.sims <- 100
 sample.size <- 10
-S <- matrix(rbinom(n=n.sims * sample.size, size=1, prob=0.5), nrow=sample.size)
+S <- matrix(rbinom(n=n.sims * sample.size, size=1, prob=0.5), 
+            nrow=sample.size)
 sample.means <- colMeans(S)
 hist(sample.means, xlab='Sample mean', main='Histogram of sample means')
 ```
@@ -184,7 +185,8 @@ legend("topright",
        legend=c("Experiment 1", "Experiment 2", "Experiment 3"),
        col=c("green", "red", "blue"),
        lty=1,
-       bty="n")
+       bty="n",
+       cex=0.7)
 ```
 Eventually, the sample means calculated in all experiments tends to be close to
 $0.5$ but each one approaches it differently. This type of convergence is called
