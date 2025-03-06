@@ -7,7 +7,7 @@ book:
   date: "3/2/2025"
   chapters:
     - index.qmd
-    - intro.qmd
+    - population_and_samples.qmd
     - summary.qmd
     - references.qmd
 
