@@ -246,7 +246,7 @@ depends on the distribution and its parameters from which the data are sampled.
 We will illustrate this point with the example of a binomial distribution.
 ```{r, fig.width=6, fig.height=12}
 p1 <- 0.5
-p2 <- 0.8
+p2 <- 0.9
 sample.size <- 20
 n.samples <- 100
 means.1 <- colMeans(matrix(rbinom(n=sample.size*n.samples, size=1, p=p1), 
@@ -255,12 +255,14 @@ means.2 <- colMeans(matrix(rbinom(n=sample.size*n.samples, size=1, p=p2),
                            nrow=sample.size))
 mean.means.1 <- p1
 mean.means.2 <- p2
-sd.means.1 <- sqrt(p1 * (1 - p1)/sample.size)
-sd.means.2 <- sqrt(p2 * (2 - p2)/sample.size)
+sd.means.1 <- sqrt(means.1 * (1 - means.1)/sample.size)
+sd.means.2 <- sqrt(means.2 * (1 - means.2)/sample.size)
 X1 <- seq(from=mean.means.1 - 0.5, to=mean.means.1 + 0.5, length.out=100)
 X2 <- seq(from=mean.means.2 - 0.5, to=mean.means.2 + 0.5, length.out=100)
-N1 <- dnorm(X1, mean=mean.means.1, sd=sd.means.1)
-N2 <- dnorm(X2, mean=mean.means.2, sd=sd.means.2)
+N1 <- dnorm(X1, mean=mean.means.1, 
+            sd=sqrt(mean.means.1 * (1 - mean.means.1)/sample.size))
+N2 <- dnorm(X2, mean=mean.means.2, 
+            sd=sqrt(mean.means.2 * (1 - mean.means.2)/sample.size))
 oldpar <- par(mfrow=c(2, 1))
 plot(X1, N1, lty=2, main=paste("p =", p1), type="l")
 lines(density(means.1))
@@ -282,4 +284,67 @@ sampling distribution of means is gaussian is grossly wrong in the latter case.
 In the former case, the parameters of the sampling distribution can be taken as 
 $\mu = \hat{p} = \bar{X}_n$ and $\sigma^2 = \hat{p}(1 - \hat{p})$. An interval
 calculated using these parameters is called the _Wald interval_. For the second
-sample, the Wald interval is not appropriate. We will mention a few alternatives.
+sample, the Wald interval is not appropriate as we show in the simulation below
+for the case $p = 0.9$.
+```{r}
+samples <- matrix(data=rbinom(n=sample.size*n.samples, size=1, p=p2),
+                  nrow=sample.size)
+sample.means <- colMeans(samples)
+sample.sd <- sqrt(sample.means * (1 - sample.means)/sample.size)
+# We are looking for a 95% interval, so the limits are +/- 2 standard
+# deviations from the mean.
+k <- 2
+lower.lim <- sample.means - k * sample.sd
+upper.lim <- sample.means + k * sample.sd
+mu <- p2
+# Find out if mu lies in these limits for each sample.
+result <- (lower.lim <= mu) & (mu <= upper.lim)
+cat(paste("The confidence interval captured parametric mean",
+          round(sum(result)/length(result) * 100, 2),
+          "% of times.\n"))
+cat("We expected it to capture 95% of times.\n")
+```
+
+This is not a pathological example of the failure of Wald interval. Often times
+we want to sample to estimate the parametric probability of a rare event. 
+Clearly, in this case, the Wald interval misses to capture the parametric 
+probability far too many times. A simple trick due to Agresti and Coull seems to
+work wonders. It consists of augumenting every sample with two successes and two
+failures.
+```{r}
+# Quantities related to Agreti-Coull interval will be prefixed with 'ac.'.
+ac.samples <- rbind(samples,
+                    rep(1, n.samples),
+                    rep(1, n.samples),
+                    rep(0, n.samples),
+                    rep(0, n.samples))
+ac.sample.means <- colMeans(ac.samples)
+ac.sd <- sqrt(ac.sample.means * (1 - ac.sample.means)/sqrt(sample.size))
+ac.lower.lim <- ac.sample.means - k * ac.sd
+ac.upper.lim <- ac.sample.means + k * ac.sd
+ac.result <- (ac.lower.lim <= mu) & (mu <= ac.upper.lim)
+cat(paste("The confidence interval captured parametric mean",
+          round(sum(ac.result)/length(ac.result) * 100, 2),
+          "% of times.\n"))
+cat("We expected it to capture 95% of times.\n")
+```
+
+However, this adjustment comes at a cost. Let us compare the sample means with
+and without the Agresti-Coull adjustment.
+```{r}
+summary(sample.means)
+summary(ac.sample.means)
+```
+
+The sample means of the Agresit-Coull augmented data are shifted lower than the
+observed sample means. However, one must note that the Agresti-Coull adjustment
+is done only to find good confidence intervals. The reported sample mean should 
+be the one calculated prior to augmentation of two successes and two failures.
+
+There are other methods of computing the confidence intervals for a binomial
+distribution. An early method by Clopper and Pearson [@ClopperPearson1934] is called
+and _exact_ method because it does not use the central limit theorem to 
+approximate the sampling distribution of means. Rather, it derives them from the
+properties of binomial distribution alone. The [Wikipedia page](https://en.wikipedia.org/wiki/Binomial_proportion_confidence_interval#)
+on binomial proportions describes a few more ways to compute the confidence
+intervals.
