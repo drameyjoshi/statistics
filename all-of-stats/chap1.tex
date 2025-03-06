@@ -1,0 +1,232 @@
+\documentclass{article}
+\include{common}
+
+\begin{document}
+\begin{enumerate}
+\item[1.] Solved in the Python notebook for this chapter.
+
+\item[2.] Quite straightforward.
+
+\item[3.] Given that $\Omega$ is a sample space and $A_1, A_2, \ldots$ are
+events. Let
+\begin{eqnarray*}
+B_n &=& \bigcup_{k=n}^\infty A_k \\
+C_n &=& \bigcap_{k=n}^\infty A_k
+\end{eqnarray*}
+
+Clearly, $B_{n+1} \cup A_{n} = B_{n}$ so that $B_n \supseteq B_{n+1}$ for all $n
+\ge 1$, or $B_1 \supseteq B_2 \supseteq \ldots$. Likewise $C_{n+1} \cap A_{n} = 
+C_n$ so that $C_{n+1} \supseteq C_n$ or that $C_1 \subseteq C_2 \subseteq \ldots$.
+
+Now,
+\[
+\omega \in \cap_{k=1}^\infty B_k \Rightarrow \omega \in B_k \forall k \in \son
+\Rightarrow \omega \in \bigcup_{j=k}^\infty A_j \forall k \in \son \Rightarrow
+\omega \in A_j \forall j \in \son
+\]
+Conversely, suppose that $\omega \in A_k$, for all $k \in \son$. Then $\omega \in
+B_n$ for all $n$ and hence $\omega \in \cap_{n=1}^\infty B_n$.
+
+On the other hand
+\[
+\omega \in \cup_{k=1}^\infty C_k \Rightarrow \exists k \in \son, \omega \in C_k
+\Rightarrow \omega \in \cap_{j=k}^n A_j \Rightarrow \omega \in A_j \forall j
+\ge k.
+\]
+Conversely, if $\omega \in A_k$ for all $k \ge N$ then $\omega \in C_k$ for all
+$k \ge N$ and hence $\omega \in \cup_{k=1}^\infty C_k$.
+
+\item[4.] Let $I$ be an arbitrary index set and let
+\[
+x \in \left(\bigcup_{i \in I}A_i\right)^c \Rightarrow x \notin \bigcup_{i \in I}A_i
+\Rightarrow x \notin A_i \forall i \Rightarrow x \in A_i^c \forall i \Rightarrow 
+x \in \bigcap_{i\in I}A_i^c,
+\]
+so that
+\begin{equation}\label{e1}
+\left(\bigcup_{i \in I}A_i\right)^c \subset \bigcap_{i\in I}A_i^c.
+\end{equation}
+If,
+\[
+x \in \cap_{i\in I}A_i^c \Rightarrow x \in A_i^c \forall i \Rightarrow
+x \notin A_i \forall i \Rightarrow x \notin \bigcup_{i \in I}A_i
+\Rightarrow x \in \left(\bigcup_{i \in I}A_i\right)^c,
+\]
+so that
+\begin{equation}\label{e2}
+\bigcap_{i\in I}A_i^c \subseteq \left(\bigcup_{i \in I}A_i\right)^c.
+\end{equation}
+From \eqref{e1} and \eqref{e2},
+\[
+\bigcap_{i\in I}A_i^c = \left(\bigcup_{i \in I}A_i\right)^c.
+\]
+
+If we make the substitution $A_i \rightarrow A_i^c$ in the above equation, we 
+get
+\[
+\bigcap_{i\in I}A_i = \left(\bigcup_{i \in I}A_i^c\right)^c \Rightarrow
+\left(\bigcap_{i \in I}A_i\right)^c = \bigcup_{i \in I}A_i^c
+\]
+
+\item[5.] $\Omega = \{T^i H T^j H\;|\; i \ge 0, j \ge 0\}$.
+
+\item[6.] Let $\Omega = \{0, 1, \ldots\}$. Let, if possible, there be a 
+uniform probability distribution on it. That is, if $A, B$ are finite subsets of
+$\Omega$ then $P(A) = P(B)$ if $|A| = |B|$. If $A$ and $B$ are singleton sets 
+and if $P(A) = k$ then $P(\Omega) = \infty$. 
+
+\item[7.] Let $A_1, A_2, \ldots$ be events. We will use induction on $n$.
+Let us start with the base case of $n = 2$. Then,
+\[
+P(\cup_{i=1}^2 A_i) = P(A_1) + P(A_2) - P(A_1 \cap A_2) \le \sum_{i=1}^2 P(A_i).
+\]
+Assume that the hypothesis is true for all $n \le k$ and consider.
+\[
+P(\cup_{i=1}^{k+1} A_i) = P(A_{k+1} + \cup_{i=1}^k A_i) \le P(A_{k+1}) + 
+\sum_{i=1}^k P(A_i)
+\]
+by induction hypothesis. Therefore,
+\[
+P(\cup_{i=1}^{k+1} A_i) \le \sum_{i=1}^{k+1} P(A_i)
+\]
+so that the hypothesis is true for all $k \in \son$.
+
+\item[8.] Given that $P(A_i) = 1$ so that $P(A_i^c) = 0$ and
+\[
+P(\cup_{i \ge 1} A_i^c \le \sum_{i \ge 1} P(A_i^c) = 0,
+\]
+where we used the previous problem. Therefore,T
+\[
+P(\cup_{i \ge 1} A_i^c) = 0.
+\]
+Now,
+\[
+P(\cap_{i \ge 1}A_i) = 1 - P(\cup_{i \ge 1}A_i^c) = 1 - 0 = 1.
+\]
+
+\item[9.] Let $P(B) > 0$ for a certain event $B$. Then $P(\varnothing|B)
+= P(\varnothing \cap B)/P(B) = 0$; 
+\[
+P(A^c|B) = \frac{P(A^c \cap B}{P(B)}
+\]
+Since $B$ is a disjoint union of $A \cap B$ and $A^c \cap B$, $P(B) = P(A \cap B)
++ P(A^c \cap B)$ so that
+\[
+P(A^c|B) = 1 - \frac{P(A \cap B)}{P(B)} = 1 - P(A|B).
+\]
+If $A_1, A_2, \ldots$ are pairwise disjoint sets then,
+\[
+P(\cup_{k \ge 1}A_k | B) = \frac{P((\cup_{k\ge 1} A_k) \cap B)}{P(B)}
+= \frac{P(\cup_{k\ge 1} (A_k \cap B))}{P(B)}
+\]
+Since the sets $A_k \cap B$ are also pairwise disjoint,
+\[
+P(\cup_{k \ge 1}A_k | B) = \sum_{k \ge 1}\frac{P(A_k \cap B)}{P(B)} = 
+\sum_{k \ge 1}P(A_k | B).
+\]
+
+\item[10.] Solved in the Python notebook for this chapter.
+
+\item[11.] $P(A \cap B) = P(A)P(B) = (1 - P(A^c))(1 - P(B^c)) = 1 - P(A^c) - 
+P(B^c) + P(A^c)P(B^c) = P(A) + P(B) - 1 + P(A^c)P(B^c)$ so that,
+\begin{eqnarray*}
+P(A^c)P(B^c) &=& 1 - P(A) - P(B) - P(A \cap B) \\
+ &=& 1 - P(A \cup B) \\
+ &=& P((A \cup B)^c) \\
+ &=& P(A^c \cap B^c)
+\end{eqnarray*}
+
+\item[12.] Let $G_1$ and $G_2$ be the events that the first side is green and the
+second side is green. Then $G_1 \cap G_2$ is the event that the first card is 
+chosen and hence $P(G_1 \cap G_2) = 1/3$. $P(G_1) = 1/2$ because half the faces
+are green and any one could have been chosen. Therefore,
+\[
+P(G_2 | G_1) = \frac{P(G_1 \cap G_2)}{P(G_1)} = \frac{1/3}{1/2} = \frac{2}{3}.
+\]
+
+\item[13.] The sample space is of the form $\{H^nT, T^nH \;|\; n \ge 1\}$. The
+probability of $n + 1$ tosses before seeing both sides is 
+\[
+\frac{1}{2^{n+1}} + \frac{1}{2^{n+1}} = \frac{1}{2^n}.
+\]
+For $n + 1 = 3$, the probability is $1/4$.
+
+\item[14.] Let $B$ denote a blue-eyed child and $\bar{B}$ denote the event if the
+child's eyes are not blue.
+\begin{enumerate}
+\item Probability of at least two blue eyed children is the sum of probability of
+all three blue-eyed children, $1/4^3$ and the probability of any two children
+being blue eyed,
+\[
+\binom{3}{2}\left(\frac{1}{4}\right)^2\frac{3}{4} = 3\times\frac{1}{16}\times\frac{3}{4}
+= \frac{9}{64}
+\]
+so that the required probability is $10/64$.
+
+\item[15.] Let $B_{\ge 2}$ be the event that at least two children have blue eyes 
+and $Y$ denote the event that the youngest child is blue-eyed. Then $P(Y) = 1/4$.
+Further, $P(B_{\ge 2} \cap Y) = P(BBB) + P(\bar{B}BB) + P(B\bar{B}B) = 1/4^3 +
+(3/4)(1/4)(1/4) + (1/4)(3/4)(1/4) = 7/64$. Therefore,
+\[
+P(B_{\ge 2} | Y) = \frac{7/64}{1/4} = \frac{7}{16}.
+\]
+
+\item[17.] $P(ABC) = P(A|BC)P(BC) = P(A|BC)P(B|C)P(C)$.
+
+\item[18.] Let, if possible $P(A_i | B) < P(A_i)$ for all $i = 1, \ldots, k$. 
+Since $A_1, \ldots, A_k$ partition $\Omega$,
+\[
+\sum_{i=1}^n P(A_i|B) < \sum_{i=1}^k P(A_i) = 1.
+\]
+This violates the axioms of probability for the measure $P(\cdot|B)$.
+\end{enumerate}
+
+\item[19.] Given that $P(M) = 0.3, P(W) = 0.5, P(L) = 0.2$ and that $P(V|M) =
+0.65, P(V|W) = 0.82, P(V|L) = 0.5$. Note that $P(V|M) + P(V|W) + P(V|L) \ne 1$
+and that is ok. We are asked to find $P(W|V)$. Using Bayes' theorem,
+\[
+P(W|V) = \frac{P(V|W)P(W)}{P(V|M)P(M) + P(V|W)P(W) + P(V|L)P(L)} = 0.5816
+\]
+
+\item[20.] Given that $P(H|C_1) = 0, P(H|C_2) = 0.25, P(H|C_3) = 0.5, P(H|C_4)
+= 0.75, P(H|C5) = 1$.
+\begin{enumerate}
+\item $P(C_i|H) = P(C_i \cap H)/P(H) = P(H|C_i)P(C_i)/P(H)$. The denominator is
+$P(H) = P(H|C_1)P(C_1) + P(H|C_2)P(C_2) + P(H|C_3)P(C_3) + P(H|C_4)P(C_4) +
+P(H|C_5)P(C_5) = 2.5/5 = 0.5$. Therefore, $P(C_1|H) = 0, P(C_2|H) = 
+(0.25 \times 0.2) /0.5 = 0.1, P(C_3|H) = (0.5 \times 0.2)/0.5 = 0.2, P(C_4|H) =
+(0.75 \times 0.2)/0.5 = 0.3, P(C_5|H) = (1 \times 0.2)/0.5 = 0.4$. We check that 
+\[
+\sum_{k=1}^5 P(C_k|H) = 0 + 0.1 + 0.2 + 0.3 + 0.4 = 1.
+\]
+
+\item $P(H_2|H_1) = P(H_2 \cap H_1)/P(H_1)$. $P(H_1)$ is indeed $P(H)$ in the
+previous step. It is $0.5$. The two coin tosses are independent, therefore, 
+$P(H_2) = P(H_1)$.
+
+\item $P(C_i|B_4) = P(B_4|C_i)P(C_i)/P(B_4)$, where
+\[
+P(B_4) = \sum_{j=1}^5 P(B_4|C_j)P(C_j).
+\]
+Now, $P(B_4|C_1) = 0, P(B_4|C_2) = 27/64, P(B_4|C_3) = 1/16, P(B_4|C_4) = 3/64,
+P(B_4|C_5) = 0$ so that $P(B_4) = (34/64)(1/5)$. Therefore,
+\[
+P(C_i|B_4) = \frac{P(B_4|C_i)P(C_i)}{(34/64)(1/5)},
+\]
+as $P(C_i) = 1/5$,
+\[
+P(C_i|B_4) = \frac{64}{34}P(B_4|C_i).
+\]
+so that $P(C_1|B_4) = 0, P(C_2|B_4) = (64/34)(27/64), P(C_3|B_4) = (64/34)(1/16),
+P(C_4|B_4) = (64/34)(3/64), P(C_5|B_4) = 0$. We confirm that,
+\[
+\sum_{i=1}^5 P(C_i|B_4) = 1.
+\]
+\end{enumerate}
+\item[21.] Solved in the Python notebook for this chapter.
+
+\item[22.] Solved in the Python notebook for this chapter.
+
+\item[23.] Solved in the Python notebook for this chapter.
+\end{enumerate}
+\end{document}

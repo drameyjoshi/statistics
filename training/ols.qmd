@@ -1,0 +1,284 @@
+---
+title: "Ordinary Least Square Regression"
+author: "Amey Joshi"
+date: "22/11/2019"
+format: html
+editor: visual
+---
+
+```{=tex}
+\newcommand{\ev}{\operatorname{E}}
+\newcommand{\var}{\operatorname{var}}
+\newcommand{\cov}{\operatorname{cov}}
+```
+## The data set
+
+We will illustrate linear regression using the 'cars' data set. It has the distance taken to stop a car moving at a certain speed. In this experiment, speed is a deterministic variable and the distance it travelled before stopping is a random variable. Before trying to fit a regression model we will first check if a model can at all be built. The easiest first step is to visualize the data.
+
+```{r}
+with(cars, plot(dist, speed, main = "Stopping distance of cars"))
+```
+
+The scatter plot shows that there is a positive correlation between the two variables. The correlation coefficient is
+
+```{r}
+with(cars, cor(speed, dist))
+```
+
+There is a high enough correlation between the two variables. Yet one sees a significant scatter along with a positive trend. It might be fruitful to check if there are any outliers in the data.
+
+```{r}
+par(mfrow = c(1, 2))
+with(cars, boxplot(speed, main = "Speed"))
+with(cars, boxplot(dist, main = "Distance"))
+```
+
+The distance data seems to have an outlier. We can find it using the box-plot statistics.
+
+```{r}
+boxplot.stats(cars$dist)$out
+```
+
+The outlier rows are
+
+```{r}
+cars[which(cars$dist %in% boxplot.stats(cars$dist)$out), ]
+```
+
+For the moment we wil not worry about the sole outlier in our data set.
+
+Let us also examine the distribution of the two variables.
+
+```{r}
+library(MASS)
+truehist(cars$speed, nbins = 10, xlab = "Speed")
+lines(density(cars$speed))
+rug(cars$speed)
+```
+
+The distribution is symmetric but we do not know if it is gaussian. We check it using the Shapiro-Wilk test whose null hypothesis is that the data is normal.
+
+```{r}
+shapiro.test(cars$speed)
+```
+
+The high p-value suggests that the data is indeed normal.
+
+```{r}
+truehist(cars$dist, nbins = 10, xlab = "Distance")
+lines(density(cars$dist))
+rug(cars$dist)
+```
+
+The outlier detected in the boxplot is visible in the histogram as well. The distribution appears to be skewed to the right. Perhaps the distribution is not normal. If we run the Shapiro-Wilk test,
+
+```{r}
+shapiro.test(cars$dist)
+```
+
+the low $p$-value allows us to reject the null hypothesis that the data is normal.
+
+## The theory of regression
+
+In its simplest case, when a single deterministic variable $x$ is used to predict $y$ using a linear relationship between the two, regression consists in fitting the 'best' line passing through the given data points $(x_i, y_i)$. If $\hat{y}_i$ is the value of $y$ predicted by a linear relationship, we want to minimize the 'error', \begin{equation}\label{e1}
+E = \sum_{i=1}^N (y_i - \hat{y}_i)^2,
+\end{equation} where $N$ is the number of data points. If $y$ is modelled as a linear function of $x$ then we want to fit a line \begin{equation}\label{e2}
+\hat{y}_i = \beta_1 x_i + \beta_0
+\end{equation} such that $E$ is minized. The values of $\beta_1$ and $\beta_0$ are found using the relations \begin{eqnarray}
+\frac{\partial E}{\partial\beta_0} &=& 0 \label{e3} \\
+\frac{\partial E}{\partial\beta_1} &=& 0 \label{e4}
+\end{eqnarray} They are \begin{equation}\label{e5}
+\beta_0 = \frac{\sum_{i=1}^N x_i^2\sum_{i=1}^Ny_i - \sum_{i=1}^N x_i\sum_{i=1}^N x_iy_i}{N\sum_{i=1}^N x_i^2 - \left(\sum_{i=1}^N x_i\right)^2}
+\end{equation} and \begin{equation}\label{e6}
+\beta_1 = \frac{N\sum_{i=1}^N x_iy_i- \sum_{i=1}^N x_i\sum_{i=1}^N y_i}{N\sum_{i=1}^N x_i^2 - \left(\sum_{i=1}^N x_i\right)^2}
+\end{equation}
+
+## The regression model
+
+We will now build and diagnose a linear regression model on the cars data.
+
+```{r}
+
+m.1 <- lm(dist ~ speed, cars)
+summary(m.1)
+```
+
+We confirm that the values of the slope and the intercept are indeed those predicted by the two equations derived in the previous section.
+
+```{r}
+sum.x <- sum(cars$speed)
+sum.y <- sum(cars$dist)
+sum.x.sq <- sum(cars$speed^2)
+sum.xy <- cars$speed %*% cars$dist
+N <- nrow(cars)
+
+den <- N * sum.x.sq - (sum.x)^2
+num.1 <- N * sum.xy - sum.x * sum.y
+num.0 <- sum.x.sq * sum.y - sum.x * sum.xy
+
+beta.1 <- num.1/den
+beta.0 <- num.0/den
+cat(paste("Slope", round(beta.1, 4), "\n"))
+cat(paste("Intercept", round(beta.0, 4), "\n"))
+```
+
+We show the data and the fitted linear model in the previous plot.
+
+```{r}
+with(cars, plot(speed, dist))
+abline(m.1)
+```
+
+We next look at the residuals.
+
+```{r}
+plot(m.1$residuals, ylab = "residual", main = "Model residuals")
+abline(h = 0)
+```
+
+The mean and standard error of residuals is
+
+```{r}
+residual.mean <- mean(m.1$residuals)
+
+# Subtracting 2 because we fitted 2 parameters, slope and the intercept
+residual.df <- length(m.1$residuals) - 2 
+residual.se <- sqrt(sum(m.1$residuals^2)/residual.df)
+```
+
+The residuals seems to be distributed evenly on either side of zero. There does not appear to be a trend in them. To find out if they are normally distributed we examine their Q-Q plot.
+
+```{r}
+qqnorm(m.1$residuals)
+qqline(m.1$residuals)
+```
+
+The data may not be far from normal. Let us also see the histogram and the density of the residuals before subjecting them to Shapiro-Wilk test.
+
+```{r}
+library(MASS)
+truehist(m.1$residuals, 
+         xlab = "residual", 
+         main = "Histogram and density of residuals", 
+         nbins = 10)
+lines(density(m.1$residuals))
+```
+
+The residuals are skewed to the right.
+
+```{r}
+shapiro.test(m.1$residuals)
+```
+
+The small $p$-value suggests that we reject the null hypothesis that the residuals are normally distributed must be rejected. This shatters one of the assumptions of a linear model. Nevertheless, we look at other aspects.
+
+## Further diagnostics
+
+We will now understand the other numbers printed while summarizing the linear model. Before we get there, we recall the formulae for $\beta_0$ and $\beta_1$. They depends on the $N$ data points $(x_i, y_i)$. A different sample of the $N$ data points will give (hopefully slightly) different values of the intercept $\beta_0$ and the slope $\beta_1$. Thus, the estimates of slope and intercept are themselves 'statistics' and therefore they too have their sampling distributions. The ones computed using equations \eqref{e5} and \eqref{e6} are thus the estimates of the true intercept and slope. In order to differentiate an estimate from the true value, we fill follow the standard convention of putting a hat on the estimates.
+
+It is easy to get an expression for the mean and variance of these estimates if we recast the expressions for $\beta_0$ and $\beta_1$ in a slightly different form. We start with $\beta_1$. Its numerator $n_1$ can be written as \begin{equation}\label{e7}
+n_1 = N^2\operatorname{E}(xy) - N^2\operatorname{E}(x)\operatorname{E}(y).
+\end{equation} Now, \begin{equation}\label{e8}
+\operatorname{E}((x - \operatorname{E}(x))(y - \operatorname{E}(y)) = 
+\operatorname{E}(xy) - \operatorname{E}(x)\operatorname{E}(y) - \operatorname{E}(x)\operatorname{E}(y) + \operatorname{E}(x)\operatorname{E}(y) = 
+\operatorname{E}(xy) - \operatorname{E}(x)\operatorname{E}(y).
+\end{equation} By the same principles, the denominator $d$ of the expression for $\beta_1$ can be written as \begin{equation}\label{e9}
+d = \operatorname{E}(x - \operatorname{E}x)^2.
+\end{equation} Thus, \begin{equation}\label{e10}
+\hat{\beta_1} = \frac{N^2\operatorname{E}((x - \operatorname{E}x)(y - \operatorname{E}y))}{N^2\operatorname{E}((x - \operatorname{E}x)^2)}  
+= \frac{\sum_{i=1}^N(x_i - \operatorname{E}x)(y_i - \operatorname{E}y)}{\sum_{i=1}^N{(x_i - \operatorname{E}x)^2}}
+\end{equation}
+
+The denominators of $\beta_0$ and $\beta_1$ are identical. Let us denote the common denominator by $d$ and let us write $\beta_0 = n_0/d$ and $\beta_1 = n_1/d$. Now \begin{equation}\label{e11}
+n_1\sum_{i=1}^Nx_i = N\sum_{i=1}^Nx_i\sum_{i=1}^Nx_iy_i - \left(\sum_{i=1}^Nx_i\right)^2\sum_{i=1}^Ny_i
+\end{equation} so that \begin{equation}\label{e12}
+\sum_{i=1}^Nx_i\sum_{i=1}^Nx_iy_i = n_1\operatorname{E}{x} + \left(\sum_{i=1}^Nx_i\right)^2\operatorname{E}{y}.
+\end{equation} We can now write \begin{equation}\label{e13}
+n_0 = \sum_{i=1}^N x_i^2\sum_{i=1}^N y_i - n_1\operatorname{E}x + \left(\sum_{i=1}^Nx_i\right)^2\operatorname{E}y
+= N\sum_{i=1}^N x_i^2\operatorname{E}y - n_1\operatorname{E}x + \left(\sum_{i=1}^Nx_i\right)^2\operatorname{E}y = d\operatorname{E}y - n_1\operatorname{E}x.
+\end{equation} The estimate of intercept is thus \begin{equation}\label{e14}
+\hat{\beta}_0 = \frac{n_0}{d} = \operatorname{E}y - \beta_1\operatorname{E}x.
+\end{equation}
+
+We will now state the expression for the variance of the estimated regression coefficients. \begin{eqnarray}
+\operatorname{var}(\hat{\beta}_0) &=& \sigma^2\left(\frac{1}{N} + \frac{\operatorname{E}x}{\sum_{i=1}^N(x_i - \operatorname{E}x)^2}\right) \label{e15} \\
+\operatorname{var}(\hat{\beta}_1) &=& \frac{\sigma^2}{\sum_{i=1}^N(x_i - \operatorname{E}x)^2} \label{e16}
+\end{eqnarray} $\sigma^2$ in these equations is the variance of the residuals computed using $N - 2$ degrees of freedom. The reason for choosing $N - 2$ and not $N - 1$ is explained a little later.
+
+We will now confirm the formulae of equations \eqref{e15} and \eqref{e16}.
+
+```{r}
+x.bar <- mean(cars$speed)
+ss.x <- sum((cars$speed - x.bar)^2)
+N <- nrow(cars)
+
+sigma.sq <- var(m.1$residuals) * (N-1)/(N-2)
+
+se.beta.0 <- sqrt(sigma.sq * (1/N + x.bar^2/ss.x))
+se.beta.1 <- sqrt(sigma.sq/ss.x)
+
+cat(paste("Standard error of intercept:", round(se.beta.0, 4), "\n"))
+cat(paste("Standard error of slope:", round(se.beta.1, 4), "\n"))
+```
+
+Now that we have the standard errors for the estimates, we can get their $t$-values as well. The $t$-values are computed to test the null hypothesis that the coefficients are zero. As a result, we assume that the true mean is zero and we estimate the probability of finding a value that we estimated.
+
+```{r}
+t.beta.0 <- (beta.0 - 0)/se.beta.0
+t.beta.1 <- (beta.1 - 0)/se.beta.1
+
+cat(paste("t-value of intercept:", round(t.beta.0, 4), "\n"))
+cat(paste("t-value of slope:", round(t.beta.1, 4), "\n"))
+```
+
+How good the model is can be judged by comparing its estimates with those of a 'null-model', that is the one whose coefficients are zero. The predictions of the 'null-model' are the random noise introduced by the standard normally distributed $\epsilon_i$. We will now introduce the concept of variance due to the model and that due to random noise. Let \begin{equation}\label{e17}
+SS = \sum_{i=1}^N (y_i - \bar{y})^2,
+\end{equation} be the sum of squares of the predicted variables. The model predicts $\hat{y}_i$ for $y_i$. Therefore, the 'explained sum of squares' is \begin{equation}\label{e18}
+ESS = \sum_{i=1}^N (\hat{y}_i - \bar{y})^2.
+\end{equation} The difference between $SS$ and $ESS$ is called the residual sum of squares, $RSS$. It is also called the *deviance*. Let us get them for our model.
+
+```{r}
+SS <- sum((cars$dist - mean(cars$dist))^2)
+ESS <- sum((fitted(m.1) - mean(cars$dist))^2)
+RSS <- SS - ESS
+
+cat(paste("SS =", SS, "\n"))
+cat(paste("ESS =", ESS, "\n"))
+cat(paste("RSS =", RSS, "\n"))
+```
+
+The residuals also available as a part of model summary. We can readily compute $RSS$ from them.
+
+```{r}
+RSS.model <- sum(m.1$residuals^2)
+```
+
+The variance $ESS$ arises from choosing the two parameters that we did. The number of degrees of freedom giving rise to it is $2$. Therefore, the mean variance due to the model is $ESS/1 = ESS$. Let us call it 'explained variance'. Thus,
+
+```{r}
+explained.variance <- ESS/(2 - 1)
+```
+
+The total number of degrees of freedom is $N - 1$, of which $2 - 1$ are taken up by $ESS$. Therefore, the number of degrees of freedom taken by $RSS$ is $N - 2$. The 'unexplained variances' is thus,
+
+```{r}
+unexplained.variance <- RSS/(N - 2)
+```
+
+The ratio of variances gives us the $F$-statistic for the model. The number of degrees of freedom are $1$ for the numerator and $48$ for the denominator.
+
+```{r}
+F.stat <- explained.variance/unexplained.variance
+cat(paste("F statistic =", F.stat, "\n"))
+```
+
+$F$-statistic is quite sensitive to lack of normality of the residual data. It is important to check the $QQ$-plot of the residuals while interpreting the $F$-statistic.
+
+The $p$-value for the model is
+
+```{r}
+p.val <- 1 - pf(F.stat, 1, 48)
+cat(paste("p-value for the model =", p.val, "\n"))
+```
+
+Both these numbers match the one given by the model's summary.

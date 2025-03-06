@@ -1,0 +1,189 @@
+---
+title: Analysis of Tips data
+author: Amey Joshi
+date: 24-Oct-2024
+format:
+  html:
+    code-fold: true
+jupyter: python3
+---
+
+```{python}
+import matplotlib
+import seaborn as sns
+import scipy.stats as stats
+import pandas as pd
+
+matplotlib.pyplot.ion()
+sns.set_theme()
+```
+
+# Tips data
+
+```{python}
+tips = sns.load_dataset("tips")
+tips.dtypes
+```
+
+```{python}
+colnames = tips.dtypes.index
+for n in range(len(tips.dtypes)):
+    if tips.dtypes.iloc[n] == "category":
+        print("Categories of {0}:".format(colnames[n]))
+        print(tips[colnames[n]].unique())
+```
+
+```{python}
+sns.relplot(data=tips,
+            x="total_bill",
+            y="tip",
+            col="time",
+            hue="smoker",            
+            size="size")
+```
+
+## Does tip depend on time?
+
+Tip usually depends on the total bill. In order to remove this dependency, we consider the ratio of tip to the total bill. We seek to investigate if this ratio depends on time when the meal was had.
+
+```{python}
+tips['pct_tip'] = tips['tip']/tips['total_bill'] * 100
+```
+
+```{python}
+sns.histplot(data=tips, x="pct_tip", hue="time", stat="density", kde=True)
+```
+
+The distributions look similar. They have similar shape although the 'height' of the histograms differs. Perhaps the distribution function will shed more light.
+
+```{python}
+sns.ecdfplot(data=tips, x='pct_tip', hue='time')
+```
+
+The distribution functions are very much alike leading to the suspicion that the ratio of tip to total bill does not depend on the time of the meal. We will check this hypothesis using the Kolmogorov-Smirnov test.
+
+```{python}
+result = stats.ks_2samp(tips[tips['time'] == 'Lunch']['pct_tip'], tips[tips['time'] == 'Dinner']['pct_tip'])
+H0 = '% tip does not depend on time.'
+print('Null hypothesis: {0}'.format(H0))
+if result.pvalue < 0.05:
+    print('Reject the null hypothesis')
+else:
+    print('Fail to reject the null hypothesis')
+```
+
+## Does tip depend on gender?
+
+```{python}
+sns.histplot(data=tips, x="pct_tip", hue="sex", stat="density", kde=True)
+```
+
+The histograms and densities look remarkably similar. Let us see the distributions.
+
+```{python}
+sns.ecdfplot(data=tips, x='pct_tip', hue='sex')
+```
+
+Once again, tip amount seems to be independent of the gender. Nevertheless, let us check the results of Kolmogorov-Smirnov test.
+
+```{python}
+result = stats.ks_2samp(tips[tips['sex'] == 'Male']['pct_tip'], tips[tips['sex'] == 'Female']['pct_tip'])
+H0 = '% tip does not depend on gender.'
+print('Null hypothesis: {0}'.format(H0))
+if result.pvalue < 0.05:
+    print('Reject the null hypothesis')
+else:
+    print('Fail to reject the null hypothesis')
+```
+
+## Do smokers pay more tip?
+
+```{python}
+sns.histplot(data=tips, x="pct_tip", hue="smoker", stat="density", kde=True)
+```
+
+A large proportion of non-smokers seem to give around 15% tip and most of them between 10 and 20%. The latter observation is true for smokers as well however the former is not so. Let us look at the distribution.
+
+```{python}
+sns.ecdfplot(data=tips, x='pct_tip', hue='smoker')
+```
+
+Smokers seem to tip more, especially on the lower end of the range.
+
+```{python}
+result = stats.ks_2samp(tips[tips['smoker'] == 'Yes']['pct_tip'], tips[tips['smoker'] == 'No']['pct_tip'])
+H0 = '% tip does not depend on smoking habits.'
+print('Null hypothesis: {0}'.format(H0))
+if result.pvalue < 0.05:
+    print('Reject the null hypothesis')
+else:
+    print('Fail to reject the null hypothesis')
+```
+
+Smoking habits seem to influence tipping behaviour. The previous test shows that the behaviour is different. We will now check is smokers tip more.
+
+```{python}
+result = stats.ks_2samp(tips[tips['smoker'] == 'Yes']['pct_tip'], tips[tips['smoker'] == 'No']['pct_tip'], alternative='greater')
+H0 = 'Smokers do not tip more than non-smokers.'
+print('Null hypothesis: {0}'.format(H0))
+if result.pvalue < 0.05:
+    print('Reject the null hypothesis')
+else:
+    print('Fail to reject the null hypothesis')
+```
+
+## Do people tip on a certain day of week?
+
+```{python}
+sns.histplot(data=tips, x="pct_tip", hue="day", stat="density", kde=True)
+```
+
+The densities look similar in shape although differing in heights. Let us compare the distributions.
+
+```{python}
+sns.ecdfplot(data=tips, x='pct_tip', hue='day')
+```
+
+Before carrying out the Kolmogorov-Smirnov test, let us check if we have enough data for each day
+
+```{python}
+tips[['day', 'pct_tip']].groupby('day', observed=True).count()
+```
+
+There isn't as much data available for Friday as for other days. However, 19 observations is not an abysmally low number.
+
+```{python}
+def kstest_for_days(day_1: str, day_2: str) -> None:
+    result = stats.ks_2samp(
+        tips[tips["day"] == day_1]["pct_tip"], tips[tips["day"] == day_2]["pct_tip"]
+    )
+    H0 = "% tip is the same on {0} and {1}.".format(day_1, day_2)
+    print("Null hypothesis: {0}".format(H0))
+    if result.pvalue < 0.05:
+        print("Reject the null hypothesis")
+    else:
+        print("Fail to reject the null hypothesis")
+```
+
+```{python}
+days = tips['day'].unique().tolist()
+for i in range(0, len(days)):
+    for j in range(1, len(days)):
+        kstest_for_days(days[i], days[j])
+        print('-' * 80)
+```
+
+Tip amount doesn't seem to depend on the day of the meal.
+
+Now that we have found that smokers tip more, let us separate the two groups and check if there is any correlation between % btip and other variables. We haven't explored the effect of size yet.
+
+```{python}
+sns.histplot(data=tips, x="pct_tip", hue="size", stat="density", kde=True)
+```
+
+There doesn't seem to be enough data for size beyond 4.
+
+```{python}
+tips[['size', 'pct_tip', 'smoker']].groupby(['size', 'smoker'], observed=True).count()
+```
+

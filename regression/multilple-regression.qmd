@@ -1,0 +1,201 @@
+---
+title: "Examples of Multiple Regression"
+format:
+  html:
+    code-fold: true
+jupyter: python3
+---
+```{python}
+import os
+
+import pandas as pd
+import numpy as np
+import statsmodels.api as sm
+import statsmodels.formula.api as sa
+```
+
+# Example 1
+We use the Swiss Fertility data available on R and exported as a CSV file for our
+analysis.
+
+```{python}
+filename = 'swiss.csv'
+pathname = os.path.join('.', 'datasets', filename)
+
+if os.path.isfile(pathname):
+    swiss = pd.read_csv(pathname)
+else:
+    assert False
+
+swiss.head()
+swiss.rename(columns={'Infant.Mortality': 'Infant_Mortality'},
+             inplace=True)
+swiss.head()            
+```
+
+`Fertility` is an endogenous variable that depends on five other exogenous variables. Before proceceeding, let is look at how they correlate with each other.
+```{python}
+_ = pd.plotting.scatter_matrix(frame=swiss)
+```
+
+A quick linear model looks like
+```{python}
+Xs = swiss.columns[1:]
+model_swiss = sa.ols(data=swiss,
+                     formula='Fertility ~ Agriculture + Examination + Education + Catholic + Infant_Mortality')
+result_swiss = model_swiss.fit()
+result_swiss.summary()
+```
+
+`Agriculture`, `Examination` and `Education` have negative slopes. One would expect the corresponding scatter plots to show negative correlation as well. Let us find out how they look like.
+```{python}
+for c in ['Agriculture', 'Examination', 'Education']:
+    _ = swiss.plot(x=c, y='Fertility', kind='scatter')
+```
+
+`Agriculture` seems to be positively correlated with `Fertility` with a correlation coefficient
+```{python}
+swiss[['Agriculture', 'Fertility']].corr()
+```
+
+_Simpson's paradox_ seems to be at play here. Strangely, even though `Examination` seems to be well-correlated with `Fertility` the p-value of its coefficient is quite high. To confirm, the correlation is
+```{python}
+swiss[['Examination', 'Fertility']].corr()
+```
+This is respectably strong, negative correlation.
+
+There is another interesting fact, `Examination` and `Education` sound similar enough and are likely to be correlated. Let's confirm that suspision.
+```{python}
+swiss[['Examination', 'Education']].corr()
+```
+
+Indeed, they are strongly correlated.
+
+## Does `statsmodels` detect linearly dependent variables?
+
+R drops correlated variables. Let's check if Python does the same.
+```{python}
+lc = swiss['Agriculture'] + swiss['Education']
+model_swiss = sa.ols(data=swiss,
+                     formula='Fertility ~ Agriculture + Education + lc')
+result_swiss = model_swiss.fit()
+result_swiss.summary()
+```
+
+It does not. The variable `lc` is considered in regression. Let me try another way
+to introduce it.
+```{python}
+swiss['lc'] = swiss['Agriculture'] + swiss['Education']
+Xs = swiss.columns[1:]
+# print(Xs)
+model_swiss = sm.OLS(endog=swiss['Fertility'], exog=swiss[Xs])
+result_swiss = model_swiss.fit()
+result_swiss.summary()
+```
+
+The functions to build and fit models **do not** recognise that `lc` is a linear combination of other columns. Can one detect that `lc` is a linear combination of two other variabled?
+```{python}
+swiss[Xs].corr()
+```
+
+## Way to find linearly dependent columns in Python
+
+`lc` shows a high correlation with `Agriculture` but not with `Education`. To find independent columns in the dataset, we consider the QR-decomposition of the corresponding matrix.
+```{python}
+Q, R = np.linalg.qr(swiss[Xs])
+tol = 1e-6
+independent = np.where(np.abs(R.diagonal()) > tol)[0]
+dependent = set(range(0, len(Xs))) - set(independent)
+print('These columns are dependent on the rest:')
+for d in dependent:
+    print(Xs[d])
+```
+
+# Example 2
+We next consider a dataset with categorical variables.
+```{python}
+filename = 'insectsprays.csv'
+pathname = os.path.join('.', 'datasets', filename)
+
+if os.path.isfile(pathname):
+    insect = pd.read_csv(pathname)
+else:
+    assert False
+
+insect.head()
+```
+
+We run a regression model
+```{python}
+insect_model = sa.ols(data=insect, formula ='count ~ spray')
+insect_result = insect_model.fit()
+insect_result.summary()
+```
+
+Like `lm` in R, the intercept is really the effect of spray A. To see it explicitly, one can use
+```{python}
+insect_model = sa.ols(data=insect, formula ='count ~ spray - 1')
+insect_result = insect_model.fit()
+insect_result.summary()
+```
+
+## Interpretation of coefficients
+### When one of the levels is the intercept
+
+- The intercept is an estimate of the mean of the reference level.
+- The other coefficients are tested with respect to the reference level. We will check this observation with a t-test. The t-statistic for Spray B is 0.520. We will compute it afresh.
+
+The standard error is computed from the residuals as follows:
+```{python}
+# Fit the linear model.
+insect_model = sa.ols(data=insect, formula ='count ~ spray')
+insect_result = insect_model.fit()
+
+# Compute the standard error of residuals.
+n_groups = len(insect['spray'].unique())
+n_obs = len(insect)
+se_resid = np.sqrt(np.sum(insect_result.resid**2)/(n_obs - n_groups))
+
+# Standard error for difference in two groups is
+counts = insect.groupby('spray').count()
+
+n_A = counts.loc['A', 'count']
+n_B = counts.loc['B', 'count']
+se_B = se_resid * np.sqrt(1/n_A + 1/n_B)
+print(f'Std. error of coeff of spray B is {np.round(se_B, 3)}.')
+
+means = insect.groupby('spray').mean()
+mean_A = means.loc['A', 'count']
+mean_B = means.loc['B', 'count']
+diff_means = mean_B - mean_A
+t_stat = diff_means/se_B
+print(f't-statistic for coeff of spray B is {np.round(t_stat, 3)}.')
+```
+
+These numbers indeed matches the number given in the summary table. I am still not able to compute the standard error for the intercept but I think it will be done in the next section.
+
+## When there is no intercept.
+
+- The coefficients are now the group means.
+- The t-values test if the mean of each group differs from zero.
+```{python}
+insect_model_ni = sa.ols(data=insect, formula ='count ~ spray')
+insect_result_ni = insect_model_ni.fit()
+se_resid_ni = np.sqrt(np.sum(insect_result_ni.resid**2)/(n_obs - n_groups))
+
+if np.abs(se_resid_ni - se_resid) < 1e-8:
+    print('The residual standard error is the same in the two models.')
+else:
+    print('The residual standard error is the different in the two models.')
+
+counts = insect.groupby('spray').count()
+n_A = counts.loc['A', 'count']
+se_A = se_resid_ni/np.sqrt(n_A)
+print(f'Std. error for A is {np.round(se_A, 3)}.')
+```
+
+This number matches that in the summary. Further, it also matches the standard error of the coefficient of spray 'A' in the previous model. We also confirm that the coefficients of the second model are the grouped means of counts.
+```{python}
+insect.groupby('spray').mean()
+```
+

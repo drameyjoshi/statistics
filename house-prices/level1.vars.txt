@@ -1,0 +1,37 @@
+0.  Id *retain*
+1.  MSSubClass *retain.*
+2.  MSZoning *retain after reducing to $4$ levels.*
+3.  LotShape *drop*
+4.  LandContour *retain.*
+5.  LotConfig *combine "Corner","FR2", "Inside" into one*.
+6.  Neighborhood * collapse 25 levels into 6*.
+7.  Condition1 *drop it*.
+8.  BldgType *drop it*.
+9.  HouseStyle *drop it in first model*.
+10. OverallQual *collapse first two levels.*
+11. OverallCond *drop it in favor of OverallQual.*
+12. RoofStyle *drop it.*
+13. ExterQual *drop, retain OverallQual instead.*
+14. ExterCond *drop*
+15. Foundation *retain.*
+16. BsmtQual *drop it in favor of OverallQual.*
+17. BsmtCond *drop*
+18. BsmtExposure *retain*
+19. TotalBsmtSF *retain but remove cases with zero area.*
+20. HeatingQC *retain.*
+21. CentralAir *retain*
+22. Electrical *retain, club all fuse types together.*
+23. GrLivArea *retain*
+24. BsmtFullBath *collapse into two levels before retaining.*
+25. FullBath *retain*
+26. KitchenQual *drop it in favor of OverallQual.*
+27. TotRmsAbvGrd *retain*
+28. Functional *retain after reducing the number of level from 7 to 3.*
+29. FireplaceQu *drop*
+30. GarageFinish *drop*
+31. GarageCond *drop*
+32. PavedDrive *retain*
+33. YrSold *create bins.*
+34. SaleType *retain after collapsing into 5 levels.*
+35. SaleCondition *retain after collapsing into 4 levels.*
+36. SalePrice

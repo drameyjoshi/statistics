@@ -1,0 +1,159 @@
+---
+title: "A Toy Perceptron"
+author: "Amey Joshi"
+date: "2/22/2020"
+format: html
+editor: visual
+---
+
+## Brief history of neural networks
+
+- Models to solve complex problems.
+- Inspired by biology the way birds inspired aircraft.
+- First model by McCulloch and Pitts used neurons with binary inputs. They were
+  proven to evaluate any propositional expression.
+- Rosenblatt relaxed the constraint of binary inputs and introduced the linear
+  threshold unit (LTU). If $x_1, \ldots, x_n$ are its inputs then its output is 
+  $\theta(z)$ where $z = (w, x)$ and $\theta$ is the Heaviside step function. The
+  components of the vector $w$ are called the weights.
+  
+## Binary classification using perceptron
+
+- A perceptron is a single layer of LTUs.
+- We will illustrate the working of a perceptron using a simple example of
+  the Iris data set.
+- Perceptron are classifiers which use linear boundaries between classes. 
+  Therefore, we will construct an example where a linear boundary suffices
+  to demonstrate how the perceptron works.
+- To that end, we will examine the iris data in greater details.  
+
+## The iris data set
+
+- Which features of iris can be chosen as best candidates for linear 
+  classification?
+```{r warning=FALSE}
+old.par <- par()
+pairs(
+  x = iris[, 1:4],
+  col = as.numeric(iris$Species),
+  cex = 0.3,
+  lower.panel = NULL,
+  oma = c(15, 3, 3, 3)
+)
+par(xpd = TRUE)
+legend(
+  "bottom",
+  legend = unique(iris$Species),
+  col = as.numeric(iris$Species),
+  horiz = TRUE,
+  fill = unique(iris$Species),
+  bty = "n"
+)
+par(old.par)
+```
+
+- We observe that petal length and petal width seem to be excellent features 
+  to classify the Setosa from Versicolor and Virginica species of Iris flowers.
+  
+## Preparing the data set
+
+- We create class labels, '1' for Versicolor and Virginica and '-1' for Setosa.
+
+```{r}
+X <- iris[, 3:5]
+X$f.class <- 1
+X[X$Species == "setosa", ]$f.class <- -1
+```
+
+- We will first create the input and output data sets.
+```{r}
+# The output
+Y <- X$f.class
+X <- X[, c(1, 2)]
+colnames(X) <- c("length", "width")
+```
+
+- Next, we create the training and the test data sets.
+```{r}
+n.samples <- 2*nrow(X)/3
+trn <- sample.int(nrow(X), n.samples, replace = FALSE)
+train.x <- X[trn, ]
+train.y <- Y[trn]
+
+test.x <- X[setdiff(1:nrow(X), trn), ]
+test.y <- Y[setdiff(1:nrow(X), trn)]
+```
+
+## Building the perceptron - 1
+- Training a perceptron means generating a set of weights that will
+  classify an unknown vector. We start with weights $w = (0, 0, 0)$.
+  There are three weights although we have two features. The third one
+  is called a bias neuron.
+- The extent to which weights are adjusted in the case of misclassification
+  is determined by learning rate $\eta$. It is a hyper-parameter of the
+  model.
+- The algorithm is implemented in the function adjust_wts.
+```{r}
+#'
+#' Adjust weight using one case of training data. The data is passed as a vector
+#' r. First two components of r are the inputs and the third one is the label.
+adjust_wts <- function(r) {
+  # Extract input and output.
+  x <- as.numeric(r[1:2])
+  y <- as.numeric(r[3])
+  
+  # Evaluate the output. In this case, it is just w[1] + x[1]w[2] + x[2]w[3].
+  z <- x %*% w[2:length(w)] + w[1]
+  y.pred <- ifelse(z < 0, -1, 1)
+  
+  # Update the global weights vector if the prediction is not correct.
+  assign("w", w + c(eta * (y - y.pred)) * c(1, x), envir = .GlobalEnv)
+}
+```
+
+## Building the perceptron - 2
+- The algorithm is iterative. We run in on the entire data set several times.
+  Quite arbitrarily, let us run it $100$ times.
+```{r}
+# Initial weights, all zeros.
+w <- rep(0, dim(X)[2] + 1)
+# Training rate.
+eta <- 1
+
+n.iter <- 1
+ignore <- lapply(1:n.iter, function(n) apply(data.frame(X=X, Y=Y), 1, adjust_wts))
+```
+
+## How good is our classifier?
+- We run it on the test data.
+```{r}
+perceptron.predict <- function(r) {
+  x <- c(1, r)
+  ifelse(w %*% x < 0, -1, 1)
+}
+
+test.pred <- apply(test.x, 1, perceptron.predict)
+comparison <- data.frame(actual = test.y, predicted = test.pred)
+```
+
+- How many cases were misclassified?
+```{r}
+cat(paste("Number of wrong classifications =", 
+          nrow(comparison[comparison$actual != comparison$predicted,])))
+```
+
+## Can we improve the classification by another iteration?
+```{r}
+ignore <- lapply(1:n.iter, function(n) apply(data.frame(X=X, Y=Y), 1, adjust_wts))
+test.pred <- apply(test.x, 1, perceptron.predict)
+comparison <- data.frame(actual = test.y, predicted = test.pred)
+cat(paste("Number of wrong classifications =", 
+          nrow(comparison[comparison$actual != comparison$predicted, ])))
+```
+
+- It did.
+
+## Closing remarks
+- We deliberately chose a simple problem, primarily to demonstrate a technique.
+- We knew that a linear boundary can classify the data into 'Setosa' and 'not
+  Setosa'.

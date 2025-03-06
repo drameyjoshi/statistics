@@ -1,0 +1,115 @@
+---
+title: "Analysis of chicken weight"
+author: "Amey Joshi"
+date: "20/11/2019"
+format: html
+editor: visual
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+The data describing the effect of certain choices of diet on weight of chicken
+is part of every R installation. We first find out how many diet plans were
+examined.
+```{r}
+unique(ChickWeight$Diet)
+```
+
+For each diet plan, we will see the variation in the chicken's weight from its
+birth to the twentieth day. Since the steps to build the plots are very similar 
+for the different diet plans, we write a function for that purpose.
+```{r}
+build_coplot <- function(n) {
+  coplot(
+  weight ~ Time |
+    Chick,
+  data = ChickWeight,
+  given.values = as.numeric(unique(ChickWeight[ChickWeight$Diet == n,]$Chick)),
+  show.given = FALSE,
+  xlab = c("Time", paste("Diet", n)),
+  ylab = c("Weight")
+)
+}
+```
+This is for diet 1.
+```{r}
+build_coplot(1)
+```
+
+Some chickens showed a modest rise in weight but many did not. A few of them 
+do not have data for all twenty days, perhaps they did not survive.
+
+For diet 2 it is
+```{r}
+build_coplot(2)
+```
+
+Barring one, all chickens gained weight in twenty days - some substantially, 
+others more modestly.
+
+For diet 3 it is
+```{r}
+build_coplot(3)
+```
+
+Every chicken gained weight, though not to the same extent.
+
+Finally, for diet 4 the data is
+```{r}
+build_coplot(4)
+```
+
+The weight gain through diet 4 is monotonous in all but one case. One of the 
+chickens does not have data beyong 18 days suggesting a case of mortality.
+
+We will now analyze the efficacy of the four diets using ANOVA. In order to 
+do that, we first find the weight gain for each bird.
+```{r}
+gain <- function(x) {
+  x[length(x)] - x[1]
+}
+
+X <- with(ChickWeight, tapply(weight, Chick, gain))
+weight.gain <- data.frame(Chick = names(X), gain = X)
+rm(X)
+```
+
+We then merge this data with the main data set to get the weight gain by a 
+bird for a diet.
+```{r}
+X <- merge(weight.gain, ChickWeight, by.x = "Chick", by.y = "Chick")
+anova.data <- unique(X[, c("gain", "Chick", "Diet")])
+rm(X)
+```
+
+Before a statistical analysis, we view the data.
+```{r}
+boxplot(gain ~ Diet, data = anova.data, main = "Weight gain for diet plans")
+```
+
+The means are not all the same. However, we will do an ANOVA to find out if the 
+null hypothesis that all diets led to an equal weight gain is true.
+```{r}
+oneway.test(gain ~ Diet, data = anova.data, var.equal = TRUE)
+```
+
+The very small value of making a type I error indicates that we can reject the
+null hypothesis. 
+
+We notice that the mean gain in weight for diets 2 and 4 are quite similar. In
+order to examine if there is a significant statistical difference between the two,
+we will run an ANOVA on just those two data.
+```{r}
+anova.subset <- anova.data[anova.data$Diet %in% c(2, 4), ]
+oneway.test(gain ~ Diet, data = anova.subset, var.equal = TRUE)
+```
+
+The high p-value suggests that we should not reject the null hypothesis that the
+two means are indeed equal. We confirm out findings using a two-sample $t$-test.
+```{r}
+t.test(gain ~ Diet, data = anova.subset)
+```
+The p-value of the $t$-test is in line with that of ANOVA.

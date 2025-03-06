@@ -1,0 +1,482 @@
+\documentclass{article}
+\include{common}
+\begin{document}
+\begin{prop}\label{c3p1}
+Let $(\Omega, \mathcal{F}, P)$ be a probability space and $X: \Omega \rightarrow
+\sor$ be a random variable. Then $\mu_F:\mathcal{F} \rightarrow [0, 1]$, where
+$\mu_F((a, b)) = F(b) - F(a)$ is a probability measure on the measurable space 
+$(\sor, \mathcal{B})$.
+\end{prop}
+\begin{proof}
+We first note that $\mu_F(\sor) = 1$. Let $I_1 = (a, b)$ and $I_2 = (c, d)$ be
+disjoint intervals and $I= I_1 \cup I_2$. Now, the probability of $X$ being in
+$I$ is just the sum of probabilities in $I_1$ and $I_2$. Therefore $\mu_F(I) =
+P(X \in I) = P(X \in I_1) + P(X \in I_2) = F(b) - F(a) + F(d) - F(c) =\mu_F(I_1)
++ \mu_F(I_2)$. Thus, $\mu_F$ is indeed a probability measure.
+\end{proof}
+\begin{rem}
+Since $(\sor, \mathcal{B}, \mu_F)$ is a probability space, we can define 
+integrals like $\int_A g(x)d\mu_F$ as Lebesgue integrals. It is common to 
+express this integral as $\int_A gdF$.
+\end{rem}
+
+One can also interpret an integral $\int gdF$ as $\int g(x)f(x)dx$ as $f=F^\op$,
+that is a Riemann-Stieltje integral. However, this depends on $F$ being 
+differentiable. Instead of getting mired in the measure theoretic issues, we 
+will settle with the Riemann-Steiltje interpretation and move on.
+
+\begin{defn}\label{c3d1}
+The expected value of a random variable is defined to be
+\[
+E(X) = \int xdF = \begin{cases}
+\sum_x xf(x) \text{ if } X \text{ is discrete} \\
+\int xf(x)dx \text{ if } X \text{ is continuous.}
+\end{cases}
+\]
+$E(X)$ is also denoted as $\mu_X$.
+\end{defn}
+
+\begin{rem}
+If $X$ is discrete then $F$ is a (normalised) counting measure. It is the 
+probability of $P(X=x)$, which is the ratio of count of the events in $\Omega$
+for which $X = x$ divided by the count of all events. If $p_k$ denotes $P(X=k)$
+then $\mu_X = \sum_k kp_k$.
+\end{rem}
+
+\begin{prop}\label{c3p2}
+Let $X$ be a discrete random variable and $Y = r(X)$, where $r$ is a bijective
+map. Then 
+\[
+E(Y) = \int r(X)dF_X = \sum_x r(x)f_X(x).
+\]
+\end{prop}
+\begin{proof}
+$E(Y) = \sum_y yf_Y(y)$. Since $r$ is bijective, the sum over $y$ can be 
+replaced with that over $x$ so that $E(Y) = \sum_x r(x)f_Y(y)$. Now $f_Y(y)
+= F_Y(y) - F_Y(y - 1) = P(Y \le y) - P(Y \le y - 1) = P(r(X) \le y) - P(r(X) \le
+y - 1) = P(X \le r^{-1}(y)) - P(X \le r^{-1}(y-1)) = F_X(r^{-1}(y)) - F_X(r^{-1}
+(y - 1)) = f_X(x)$. Thus, we have
+\[
+E(Y) = \sum_x r(x)f_X(x).
+\]
+\end{proof}
+
+\begin{thm}[The Rule of the Lazy Statistician]\label{c3t1}
+Let $X$ be a random variable and $Y = r(X)$, then 
+\[
+\mu_Y = E(r(X)) = \int rdF_X.
+\]
+\end{thm}
+\begin{proof}
+\[
+E(r(X)) = \int r(x)f_X(x)dx = \int r(x)dF_X.
+\]
+\end{proof}
+
+If $r(x) = I_A(x)$, the indicator function of the set $A$ then,
+\[
+E(r(X)) = \int I_A(x)dF_x = \int_A df_X(x) = P(X \in A).
+\]
+
+\section{Solutions to problems}
+\begin{enumerate}
+\item Solved in the accompanying Python notebook.
+
+\item If $P(X = c) = 1$ then $E(X) = c$ and $E(X^2) = c^2$ so that $\var(X) = 0$.
+If, on the other hand, $\var(X) = 0$ then $E[(X - E(X))^2] = 0$. Now
+$(X - E(X))^2$ is a non-negative random variable. If its expectation is zero then
+it should be zero, almost surely. That is $X = E(X)$ almost surely, which in turn
+means that $X$ is a constant.
+
+\item Solved in the accompanying Python notebook.
+
+\item Solved in the accompanying Python notebook.
+
+\item Let $Y$ be the random variable to count the number of tosses needed before
+a coin lands head up. If $p$ is the probability of landind head then 
+\[
+P(Y = n) = p^{n-1}q.
+\]
+Therefore,
+\[
+E(Y) = \sum_{n \ge 1}nP(Y = n) = \sum_{n \ge 1}np^{n-1}q = q\sum_{n \ge 1}np^{n-1}.
+\]
+Now,
+\[
+\sum_{n \ge 1}p^n = \frac{1}{1-p} \Rightarrow \sum_{n \ge 1}np^{n-1} = \frac{1}{(1 - p)^2},
+\]
+so that
+\[
+E(Y) = \frac{q}{(1 - p)^2} = \frac{1}{1 - p}.
+\]
+
+\item Let $Y = r(X)$. When $X$ takes values $x_1, x_2, \ldots$ with probability
+$p_1, p_2, \ldots$ then $Y$ takes values $r(x_1), r(x_2), \ldots$ with the same 
+probability. Therefore, its mean value is
+\[
+E(Y) = \sum_{k\ge 1}r(x_k)p_k = \int r(x)dF.
+\]
+
+\item Let us assume that
+\[
+\lim_{x \rightarrow \infty} x(1 - F(x)) = 0.
+\]
+Then,
+\begin{eqnarray*}
+E(X) &=& \int_0^\infty xdF \\
+ &=& \lim_{x^\op\rightarrow\infty}\int_0^{x^\op}xdF \\
+ &=& \lim_{x^\op\rightarrow\infty}\left(x^\op F(x^\op)-\int_0^{x^\op}F(x)dx\right)\\
+ &=& \lim_{x^\op\rightarrow\infty}\left(x^\op F(x^\op) - \int_0^{x^\op}P(X \le x) dx \right) \\
+ &=& \lim_{x^\op\rightarrow\infty}\left(x^\op F(x^\op) - \int_0^{x^\op}(1 - P(X > x)) dx \right) \\
+ &=& \lim_{x^\op\rightarrow\infty}(x^\op F(x^\op) - x^\op) + \int_0^\infty P(X > x)dx \\
+ &=&  \int_0^\infty P(X > x)dx
+\end{eqnarray*}
+
+\item Since,
+\[
+\bar{X}_n = \frac{1}{n}\sum_{i = 1}^n X_i,
+\]
+we have
+\[
+E(\bar{X}_n) = \frac{1}{n}\sum{i=1}^nE(X_i) = \frac{1}{n}\sum_{i=1}^n\mu = \mu.
+\]
+We will now compute
+\begin{equation}\label{e1}
+\var(\bar{X}_n) = E(\bar{X}_n^2) - E^2(\bar{X}_n) = E(\bar{X}_n^2) - \mu^2
+\end{equation}
+Now,
+\[
+E(\bar{X}_n^2) = E\left(\frac{1}{n}\sum_{i=1}^nX_i\right)^2
+\]
+so that
+\[
+n^2E(\bar{X}_n^2) = \sum_{i=1}^n E(X_i^2) + 2\sum_{i=1}^n\sum_{j=i+1}^n E(X_iX_j).
+\]
+Since $X_i$ are all independent, $E(X_iX_j) = E(X_i)E(X_j) = \mu^2$. Furthermore,
+$E(X_i^2) = \mu^2 + \sigma^2$ so that,
+\[
+n^2E(\bar{X}_n^2) = n(\mu^2 + \sigma^2) + 2\frac{n(n-1)}{2}\mu^2 \Rightarrow
+E(\bar{X}_n^2) = \frac{\sigma^2}{n} + \mu^2,
+\]
+so that from equation \eqref{e1} we get
+\[
+\var(\bar{X}_n) = \frac{\sigma^2}{n}.
+\]
+
+Now consider, $(n-1)S_n^2 = \sum_{i=1}^n(X_i - \bar{X}_n)^2$ so that
+\begin{equation}\label{e2}
+(n-1)E(S_n^2) = \sum_{i=1}^n\left(E(X_i^2) - 2E(X_i\bar{X}_n) + E(\bar{X}_n^2)\right)
+\end{equation}
+We first consider the term $E(X_i\bar{X}_n)$. It is
+\begin{eqnarray*}
+E(X_i\bar{X}_n) &=& E\left(X_i \sum_{j=1}^n\frac{X_j}{n}\right) \\
+nE(X_i\bar{X}_n) &=& \sum_{j=1, j\ne i}^n E(X_iX_j) + E(X_i^2) \\
+nE(X_i\bar{X}_n) &=& (n-1)\mu^2 + \mu^2 + \sigma^2 \\
+E(X_i\bar{X}_n) &=& \mu^2 + \frac{\sigma^2}{n},
+\end{eqnarray*}
+as $X_i$ are iid. We have evaluated the other terms in \eqref{e2} previously.
+Thus,
+\[
+(n-1)E(S_n^2) =\sum_{i=1}^n
+\left(\mu^2+\sigma^2-2\mu^2-2\frac{\sigma^2}{n}+\frac{\sigma^2}{n}+\mu^2\right)
+= \sum_{i=1}^n\left(\sigma^2 - \frac{\sigma^2}{n}\right)
+\]
+so that $E(S_n^2) = \sigma^2$.
+
+\item Solved in the accompanying Python notebook.
+
+\item Given that 
+\[
+f_X = \frac{1}{\sqrt{2\pi}}e^{-x^2/2}
+\]
+and $Y = \exp(X)$. Therefore,
+\[
+E(Y) = \frac{1}{\sqrt{2\pi}}\int_{-\infty}^\infty e^{-x^2/2 + x} dx.
+\]
+Now,
+\[
+-x^2/2 + x = \frac{1}{2}(-x^2 + 2x - 1 + 1) = -\frac{(x-1)^2}{2} + \frac{1}{2}
+\]
+so that
+\[
+E(Y) = \frac{e^{1/2}}{\sqrt{2\pi}}\int_{-\infty}^\infty e^{-(x - 1)^2/2}dx.
+\]
+A substitution $u = x - 1$ leads to $E(Y) = e^{1/2}$.
+
+We next compute $E(Y^2) = E(e^{2X})$, which is
+\[
+E(Y^2) = \frac{1}{\sqrt{2\pi}}\int_{-\infty}^\infty e^{-x^2/2 + 2x} dx.
+\]
+Now,
+\[
+-\frac{x^2}{2} + 2x = -\frac{1}{2}(x^2 - 4x + 4) + 2
+\] 
+so that $E(Y^2) = e^2$ and hence $\var(Y) = e^2 - e$.
+
+\item Solved in the accompanying Python notebook.
+
+\item To do.
+
+\item Let $B$ be a Bernoulli random variable, $U_1 \sim \dUni(0, 1)$ and $U_2 
+\sim \dUni(3, 4)$. Then
+\[
+Y = BU_1 + (1 - B)U_2
+\]
+so that $E(Y) = E(BU_1) + E((1 - B)U_2)$. $B$ and $U_1$ are independent. So are
+$1 - B$ and $U_2$. Therefore, 
+\[
+E(Y) = \frac{p}{1} + (1 - p)\frac{7}{2} = \frac{p + 7q}{2}.
+\]
+To compute the variance, we need $E(Y^2)$. $Y^2 = B^2U_1^2 + (1 - B)^2U_2^2 +
+B(1 - B)U_1U_2$. If $X = \dUni(a, b)$, 
+\[
+E(X^2) = \int_a^b x^2dx = \frac{b^3 - a^3}{3}
+\]
+so that $E(U_1^2) = 1/3$ and $E(U_2^2) = 37/3$. $E(B_1^2) = p, E((1 - B)^2) = q$.
+Therefore,
+\[
+E(Y^2) = \frac{p}{3} + \frac{37q}{3}
+\]
+and hence,
+\[
+\var(Y) = \frac{p}{3} + \frac{37q}{3} - \frac{(p + 7q)^2}{4}.
+\]
+If $p = q = 1/2$ then
+\[
+\var(Y) = \frac{7}{3}.
+\]
+
+\item $\cov(X, Y) = E(XY) - E(X)E(Y)$ so that
+\begin{eqnarray*}
+\cov\left(\sum_{i=1}^ma_iX_i, \sum_{i=1}^nb_iY_i\right) &=& 
+E\left(\sum_{i=1}^m\sum_{j=1}^na_ib_jX_iY_j\right) - 
+E\left(\sum_{i=1}^ma_iX_i\right)E\left(\sum_{i=1}^nb_iY_i\right) \\
+ &=& \sum_{i=1}^m\sum_{j=1}^na_ib_jE(X_iY_j) - 
+ \sum_{i=1}^ma_iE(X_i)\sum_{j=1}^nb_jE(Y_j) \\
+ &=& \sum_{i=1}^m\sum_{j=1}^na_ib_j\cov(X_i, Y_j)
+\end{eqnarray*}
+
+\item We will first get a formula for the variance of a linear combination of
+random variables that are not necessarily independent. Let $Y = \sum_{i=1}^na_i
+X_i$. Then $E(Y) = \sum_{i=1}^na_iE(X_i)$. However,
+\[
+Y^2 = \sum_{i=1}^n\sum_{j=1}^n a_ia_jX_iX_j = \sum_{i=1}^na_i^2X_i^2 + 
+\sum_{i=1}^n\sum{j=i+1}^na_ia_j X_iX_j
+\]
+so that
+\begin{equation}\label{e3}
+E(Y^2) = \sum_{i=1}^na_i^2E(X_i^2) + 2\sum_{i=1}^n\sum_{j=i+1}^na_ia_jE(X_iX_j)
+\end{equation}
+and 
+\begin{equation}\label{e4}
+E^2(Y) = \sum_{i=1}^n a_i^2E^2(X_i) + 
+2\sum_{i=1}^n\sum_{j=i+1}^n a_ia_jE(X_i)E(X_j).
+\end{equation}
+Therefore,
+\begin{equation}\label{e5}
+\var(Y) = \sum_{i=1}^na_i^2\var(X_i) + 2\sum_{i=1}^n\sum_{j=i+1}^n\cov(X_i,X_j).
+\end{equation}
+
+If $Z = 2X - 3Y + 8)$, 
+\begin{equation}\label{e6}
+\var{Z} = 4\var{X} + 9\var{Y} + 0 - 12\cov(X, Y)+0+0.
+\end{equation}
+Now,
+\[
+\var{X} = \iint f(x, y)x^2dxdy - \left(\iint f(x, y)xdxdy\right)^2
+\]
+where the range of integration is over $[0, 1] \times [0, 2]$ and $f(x, y) = 
+(x + y)/3$.
+\begin{eqnarray*}
+\iint f(x, y)x^2dxdy &=& \frac{1}{3}\iint(x^3 + x^2y)dxdy \\
+ &=& \frac{1}{3}\int_0^1x^3dx\int_0^2 dy + \frac{1}{3}\int_0^1x^2dx\int_0^2ydy \\
+ &=& \frac{1}{3}\frac{1}{4}2 + \frac{1}{3}\frac{1}{3}2 \\
+ &=& \frac{7}{18}.
+\end{eqnarray*}
+\begin{eqnarray*}
+\iint f(x, y)xdxdy &=& \frac{1}{3}\int_0^1x^2dx\int_0^2dy + 
+ \frac{1}{3}\int_0^1xdx\int_0^2ydy \\
+ &=& \frac{1}{3}\frac{1}{3}2 + \frac{1}{3}\frac{1}{2}2 \\
+ &=& \frac{5}{9}
+\end{eqnarray*}
+so that 
+\begin{equation}\label{e7}
+\var(X) = 7/18 - 25/81 = 13/162.
+\end{equation}
+Similarly,
+\[
+\var{Y} = \iint f(x, y)y^2dxdy - \left(\iint f(x, y)ydxdy\right)^2
+\]
+\begin{eqnarray*}
+\iint f(x, y)y^2dxdy &=& \frac{1}{3}\iint xy^2dxdy + \frac{1}{3}\iint y^3dxdy \\
+ &=& \frac{1}{3}\int_0^1xdx\int_0^2y^2dy + \frac{1}{3}\int_0^1dx\int_0^2y^3dy \\
+ &=& \frac{1}{3}\frac{1}{2}\frac{8}{3} + \frac{1}{3}\;1\;4 \\
+ &=& \frac{16}{9}
+\end{eqnarray*}
+\begin{eqnarray*}
+\iint f(x, y)ydxdy &=& \frac{1}{3}\iint xydxdy + \frac{1}{3}\iint y^2dxdy \\
+ &=& \frac{1}{3}\int_0^1xdx\int_0^2ydy + \frac{1}{3}\int_0^1dx\int_0^2y^2dy \\
+ &=& \frac{1}{3}\frac{1}{2}2 + \frac{1}{3}\;1\;\frac{8}{3} \\
+ &=& \frac{11}{9}
+\end{eqnarray*}
+so that 
+\begin{equation}\label{e8}
+\var Y = 16/9 - 121/81 = 23/81.
+\end{equation}
+Likewise,
+\[
+\cov(XY) = E(XY) = E(X)E(Y)
+\]
+so that
+\begin{eqnarray}
+\cov(X,Y) &=& \frac{1}{3}\iint (x^2y + xy^2)dxdy - \frac{1}{3}\iint(x^2+xy)dxdy
+\frac{1}{3}\iint(xy + xy^2)dxdy \nonumber* \\
+ &=& \frac{1}{3}\frac{2}{3}\frac{4}{3} - \frac{1}{3}\frac{2}{3}1
+ \frac{1}{3}\frac{4}{3}1 \nonumber \\
+ &=& \frac{16}{81} \label{e9}
+\end{eqnarray}
+Finally, from equations \eqref{e5} to \eqref{e9}
+\[
+\var Z = \frac{26}{81} + \frac{23}{9} - \frac{192}{81} = \frac{41}{81}.
+\]
+
+\item 
+\begin{eqnarray*}
+E(r(X)s(Y)|X) &=& E(r(X=x)s(Y)|X=x) \\
+ &=& \int r(X=x)s(Y)f_{Y|X=x}(y)dy \\
+ &=& r(X=x)\int s(Y)f_{Y|X=x}(y)dy \\
+ &=& r(X)E(s(Y)|X).
+\end{eqnarray*}
+
+\item
+\begin{eqnarray*}
+\var(Y) &=& E(Y^2) - E^2(Y) \\
+ &=& E(E(Y^2|X)) - E^2(Y) \\
+ &=& E(E(Y^2|X) - E^2(Y|X) + E^2(Y|X)) - (E(Y))^2 \\
+ &=& E(E(Y^2|X) - E^2(Y|X)) + E(E^2(Y|X)) - (E(E(Y|X))^2 \\
+ &=& E\var(Y|X) + E^2(E(Y|X)) - E^2(E(Y|X)) \\
+ &=& E\var(Y|X) + \var(E(Y|X)).
+\end{eqnarray*}
+
+\item First note that
+\begin{eqnarray*}
+E(XY) &=& E(E(XY|Y)) \\
+ &=& E\left[\int xyf_{Y=y}dx\right] \\
+ &=& \int\left[\int xyf_{Y=y}dx\right]f_Y(y)dy \\
+ &=& \int\left[y\int xf_{Y=y}dx\right]f_Y(y)dy \\
+ &=& \int y E(X|Y) dy \\
+ &=& cE(Y).
+\end{eqnarray*}
+Now, $\cov(X, Y) = E(XY) - E(X)E(Y) = cE(Y) - E(E(X|Y))E(Y) = cE(Y) - E(c)E(Y)
+ = 0$ so that $X$ and $Y$ are not correlated.
+ 
+\item Solved in the accompanying Python notebook.
+
+\item $a^TX = (a_1X_1, \ldots, a_nX_n)$ so that $E(a^TX) = (E(a_1X_1), \ldots,
+E(a_nX_n)) = (a_1E(X_1), \ldots, a_nE(X_n)) = a^TE(X)$.
+
+The variance covariance matrix, $V = \var(a^TX)$, of $a^TX$ has elements,
+\begin{eqnarray*}
+V_{ij} &=& \cov(a_iX_i, a_jX_j) \\
+ &=& a_i\cov(X_i, X_j)a_j \\
+ &=& a_i \Sigma_{ij} a_j,
+\end{eqnarray*}
+where $\Sigma_{ij}$ is the $i,j$th element of the variance matrix of $X$. Thus, 
+$V=a^T\Sigma a$.
+
+If $A$ is a matrix then $AX$ is a vector each component of which is $A_{ij}X_j$
+so that $E(AX) = A_{ij}E(X_j) = AE(X)$. We used summation convention here. 
+Likewise, if $V$ is the variance covariance matrix of $AX$ then,
+\begin{eqnarray*}
+V_{ij} &=& \cov(A_{ik}X_k, A_{jl}X_l) \\
+ &=& A_{ij}\cov(X_k, X_)A_{jl} \\
+ &=& A_{ij}\cov(X_k, X_l)A^{lj} 
+\end{eqnarray*}
+that is $V = A\Sigma A^T$.
+
+\item Given that $E(Y|X)=X$, so that $E(E(Y|X)) = E(X)$, that is $E(Y) = E(X)$.
+Next consider
+\[
+E(Y|X) = \int y f_{Y|X=x}dy
+\]
+and hence
+\[
+E(XE(Y|X)) = \int x \int y f_{Y|X=x}dy f_X(x)dx = \iint xy f(x)f_{Y|X=x}(y)dxdy.
+\]
+Since $f(x)f_{Y|X=x}(y) = f(x, y)$,
+\[
+E(XE(Y|X)) = \iint xy f(x, y)dxdy = E(XY).
+\]
+Therefore, $\cov(X, Y) = E(XY) - E(X)E(Y) = E(XE(Y|X)) - E^2(X)$. Since $E(Y|X)
+= X$, $\cov(X, Y) = E(X^2) - E^2(X) = \var(X)$.
+
+\item I simulated $Y$ and $Z$ to conclude that they are not independent.
+$E(Y|Z)$ is a function of $z$. When $z = 0$, $x \in [0, a]$ so that $y = 0$.
+When $z = 1$, $x > a$ so that $y = 1$ when $x \in (a, b)$ and $y = 0$ if $x > b$.
+Therefore,
+\begin{eqnarray*}
+E(Y|Z=0) &=& 0 \\
+E(Y|Z=1) &=& 1/(b - a).
+\end{eqnarray*}
+
+\item The MGF is defined as $\psi_X(t) = \int e^{tx}dF_X$.
+\begin{enumerate}
+\item Poisson distribution. Its pmf is
+\[
+f(x) = \frac{\lambda^k e^{-\lambda}}{k!}
+\]
+so that
+\[
+\psi_X(t) = \sum_{k \ge 0}\frac{\lambda^k e^{-\lambda}e^{tk}}{k!} =
+e^{-\lambda}\sum_{k \ge 0}\frac{(\lambda e^t)^k}{k!} = \exp(\lambda(e^t - 1)).
+\]
+
+\item Normal. The pdf is
+\[
+f(x) = \frac{1}{\sigma\sqrt{2\pi}}\exp\left(-\frac{(x-\mu)^2}{2\sigma^2}\right)
+\]
+so that
+\[
+\psi_X(t) = \frac{1}{\sigma\sqrt{2\pi}}\int_{-\infty}^\infty 
+e^{tx}\exp\left(-\frac{(x-\mu)^2}{2\sigma^2}\right)dx.
+\]
+Put $z = (x - \mu)/\sigma$ so that
+\[
+\psi_X(t) = \frac{e^{t\mu}}{\sqrt{2\pi}}\int_{-\infty}^\infty
+\exp\left(-\frac{z^2}{2} + t\sigma z\right)dz.
+\]
+Completing the square,
+\begin{eqnarray*}
+\psi_X(t) &=& \frac{\exp(t\mu + t^2\sigma^2/2)}{\sqrt{2\pi}}\int_{-\infty}^\infty
+\exp\left(-\left(\frac{z - t\sigma}{\sqrt{2}}\right)^2\right)dz \\
+ &=& \exp\left(\frac{t^2\sigma^2}{2} + t\mu\right).
+\end{eqnarray*}
+
+\item Gamma. 
+\begin{eqnarray*}
+\psi_X(t) &=& \int_{-\infty}^\infty e^{tx}\frac{\beta^\alpha}{\Gamma(\alpha)}
+x^{\alpha - 1}e^{-\beta x}dx \\
+ &=& \frac{\beta^\alpha}{\Gamma(\alpha)}\int_{-\infty}^\infty x^{\alpha - 1}
+e^{-(\beta-t) x}dx \\
+ &=& \frac{\beta^\alpha}{\Gamma(\alpha)}\frac{\Gamma(\alpha)}{(\beta - t)^\alpha} \\
+ &=& \left(1 - \frac{t}{\beta}\right)^{-\alpha}
+\end{eqnarray*}
+\end{enumerate}
+
+\item If $X_i \sim \dExp(\beta)$ then its MGF is
+\[
+\psi_X(t) = \int_{-\infty}^\infty e^{tx}\beta e^{-\beta x}dx = \beta
+\int_{-\infty}^\infty e^{-(\beta - t)x}dx = \frac{\beta}{\beta - t}.
+\]
+
+If $Y = X_1 + \cdots + X_n$, then its MGF is
+\begin{eqnarray*}
+\psi_Y(t) &=& \int e^{tY}dF \\
+ &=& \int e^{tX_1 + \cdots tX_n} dF_{X_1}\cdots dF_{X_n} \\
+ &=& \prod_{i=1}^n \int e^{tX_i}dF_i \\
+ &=& \left(\frac{\beta}{\beta - t}\right)^n \\
+ &= & \left(1 - \frac{t}{\beta}\right)^n.
+\end{eqnarray*}
+The last expression is the MGF of $\dGam(n, \beta)$.
+\end{enumerate}
+\end{document}

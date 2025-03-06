@@ -1,0 +1,121 @@
+---
+title: "Dummy Variables"
+author: "Amey Joshi"
+format: html
+  df-print: kable
+editor: visual
+---
+
+# Multiple regression
+
+## Examination of the data
+
+Let us once again consider the `swiss` dataset and examine the dependent variables in it.
+
+```{r}
+library(datasets)
+data("swiss")
+head(swiss)
+```
+
+A histogram of the variable `Catholic` is:
+
+```{r}
+hist(swiss$Catholic, xlab='% Catholics', ylab='Frequency', main='Catholics in Swiss cantons')
+```
+
+Its density looks like:
+
+```{r}
+plot(density(swiss$Catholic), main='Catholics in Swiss cantons')
+```
+
+The density is bimodal and it may perhaps not be a bad idea to create a binary variable which it $1$ in cantons with more than $50\%$ Catholics and $0$ in the rest.
+
+## Creation of a binary variable
+
+```{r}
+swiss$Catholic.Bin <- 1 * (swiss$Catholic > 50)
+head(swiss)
+```
+
+Let us check how many cantons have a Catholic majority.
+
+```{r}
+aggregate(Fertility ~ Catholic.Bin, data=swiss, length)
+```
+
+We will check the variation of `Fertility` with `Agriculture` depending on whether the Catholics have a majority in the canton.
+
+```{r}
+plot(swiss$Agriculture,
+     swiss$Fertility,
+     col = ifelse(swiss$Catholic.Bin == 1, 'blue', 'red'),
+     pch = 16,
+     xlab = 'Agriculture',
+     ylab = 'Fertility',
+     main = 'Swiss fertility by Catholic population')
+legend(x = 'bottomright',
+       legend = c('Majority', 'Minority'),
+       pch = c(16, 16),
+       col = c('blue', 'red'),
+       bty = 'n',
+       cex = 1)
+```
+
+The Catholic majority cantons have higher percentage of males practising agriculture and a high fertility as well.
+
+## The model
+
+Let $X_1$ denote `Agriculture` and the categorical variable $X_2$ denote `Catholic.Bin`. We will try to fit the model $$
+Y_i = \beta_0 + \beta_1 X_{1,i} + \beta_2 X_{2, i} + \epsilon_i.
+$$ Since $X_2$ takes only two values, $0$ and $1$, we really are fitting the lines $$
+\begin{eqnarray}
+Y_i &=& \beta_0 + \beta_1 X_{1,i} + \beta_2 + \epsilon_i \\
+    &=& (\beta_0 + \beta_2) + \beta_1 X_{1, i} + \epsilon_i \\
+\end{eqnarray}
+$$ for Catholic majority cantons and $$
+Y_i = \beta_0 + \beta_1 X_{1, i} + \epsilon_i
+$$ for cantons in which the Catholics are a minority. So we are really fitting two lines with same slope but differing intercepts. If the dummy variable had $N$ levels then we would have a set of $N$ parallel lines.
+
+```{r}
+res.1 <- lm(Fertility ~ Agriculture + Catholic.Bin, data=swiss)
+summary(res.1)
+```
+
+The coefficient of `Catholic.Bin` is the change in intercept when we go from a Catholic minority canton to a Catholic majority one. One can choose to experiment with a model where the both the slope and the intercept change among the two categories of cantons.
+
+## Interaction terms
+
+A model with interaction has the form $$
+Y_i = \beta_0 + \beta_1 X_{1,i} + \beta_2 X_{2, i} + \beta_3 X_{1, i}X_{2, i}\epsilon_i.
+$$ When $X_2 = 0$ then it reduces to $Y_i = \beta_0 + \beta_1 X_{1, i} + \epsilon_i$. However, when $X_2 = 1$ it becomes $$
+Y_i = (\beta_0 + \beta_2) + (\beta_1 + \beta_3) X_{1, i} + \epsilon_i.
+$$ This line has different slope and intercept. Let us fit such a model.
+
+```{r}
+res.2 <- lm(Fertility ~ Agriculture * Catholic.Bin, data=swiss)
+summary(res.2)
+
+```
+
+Let us ignore the $p$-values of the coefficients once again. The intercept increases by an amount equal to the coefficient of `Catholic.Bin` when `Catholic.Bin = 1`. Simultaneously, the slope increases by an amount equal to the coefficient of `Agriculture:Catholic.Bin`.
+
+```{r}
+coeffs <- res.2$coefficients
+with(swiss,
+     plot(Agriculture,
+          Fertility,
+          col = ifelse(Catholic.Bin == 1, 'blue', 'red'),
+          xlab = 'Agriculture',
+          ylab = 'Fertility',
+          main = 'Swiss fertility by Catholic population'))
+abline(coeffs[1], coeffs[2], col = 'red')
+abline(coeffs[1] + coeffs[3], coeffs[2] + coeffs[4], col='blue')
+legend(x = 'bottomright',
+       legend = c('Majority', 'Minority'),
+       pch = c(16, 16),
+       col = c('blue', 'red'),
+       bty = 'n',
+       cex = 1)
+```

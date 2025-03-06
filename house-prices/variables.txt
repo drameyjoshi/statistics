@@ -1,0 +1,81 @@
+Id            : Keep
+MSSubClass    : Keep
+MSZoning      : Keep
+LotFrontage   : Drop
+LotArea       : Drop
+Street        : Drop
+Alley         : Drop
+LotShape      : Keep
+LandContour   : Keep
+Utilities     : Drop
+LotConfig     : Keep after reducing levels
+LandSlope     : Drop
+Neighborhood  : Keep
+Condition1    : Keep after reducing levels
+Condition2    : Drop
+BldgType      : Keep after reducing levels
+HouseStyle    : Keep
+OverallQual   : Keep
+OverallCond   : Keep
+YearBuilt     : Transform to age
+YearRemodAdd  : Transform to time since last modeling
+RoofStyle     : Keep
+RoofMatl      : Drop in 1st iteration
+Exterior1st   : Drop in 1st iteration
+Exterior2nd   : Drop in 1st iteration
+MasVnrType    : Drop in 1st iteration
+MasVnrArea    : Drop in 1st iteration
+ExterQual     : Keep
+ExterCond     : Keep
+Foundation    : Keep after reducing levels
+BsmtQual      : Keep
+BsmtCond      : Keep
+BsmtExposure  : Keep
+BsmtFinType1  : Drop in 1st iteration
+BsmtFinSF1    : Drop in 1st iteration
+BsmtFinType2  : Drop in 1st iteration
+BsmtFinSF2    : Drop in 1st iteration
+BsmtUnfSF     : Drop in 1st iteration
+TotalBsmtSF   : Keep
+Heating       : Drop
+HeatingQC     : Keep
+CentralAir    : Keep
+Electrical    : Keep
+X1stFlrSF     : Drop in 1st iteration
+X2ndFlrSF     : Drop in 1st iteration
+LowQualFinSF  : Drop in 1st iteration
+GrLivArea     : Keep
+BsmtFullBath  : Keep
+BsmtHalfBath  : Drop
+FullBath      : Keep
+HalfBath      : Drop
+BedroomAbvGr  : Drop in 1st iteration
+KitchenAbvGr  : Drop in 1st iteration
+KitchenQual   : Keep
+TotRmsAbvGrd  : Keep
+Functional    : Keep
+Fireplaces    : Drop
+FireplaceQu   : Keep
+GarageType    : Drop
+GarageYrBlt   : Drop
+GarageFinish  : Keep
+GarageCars    : Drop in 1st iteration
+GarageArea    : Drop in 1st iteration
+GarageQual    : Drop in 1st iteration
+GarageCond    : Keep 
+PavedDrive    : Keep
+WoodDeckSF    : Drop in 1st iteration
+OpenPorchSF   : Drop in 1st iteration
+EnclosedPorch : Drop in 1st iteration
+X3SsnPorch    : Drop in 1st iteration
+ScreenPorch   : Drop in 1st iteration
+PoolArea      : Drop in 1st iteration
+PoolQC        : Drop in 1st iteration
+Fence         : Drop in 1st iteration
+MiscFeature   : Drop in 1st iteration
+MiscVal       : Drop in 1st iteration
+MoSold        : Drop
+YrSold        : Keep for calculations
+SaleType      : Keep
+SaleCondition : Keep
+SalePrice     : Keep

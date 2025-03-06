@@ -1,0 +1,173 @@
+\documentclass{article}
+\usepackage{amsmath, amssymb, amsfonts, amsthm}
+\begin{document}
+\begin{enumerate}
+\item The linear model is $y_i = \beta_0 + \beta_1 x_i + \epsilon_i$,
+where $\epsilon_i$ are i.i.d. $\mathcal{N}(0, 1)$ and $1 \le i \le n$.
+\begin{enumerate}
+\item As $\hat{y}_i = \bar{y} + b_1(x_i - \bar{x})$, summing over all $i$,
+we get
+\[
+    \sum_{i=1}^n\hat{y}_i = n\bar{y} + b_1\left(\sum_{i=1}^nx_i - \bar{x}\right)
+\]
+However,
+\[
+    \sum_{i=1}^n x_i = n\bar{x}
+\]
+so that the last term in the first equation vanishes and we get
+\begin{equation}\label{e1}
+    \frac{1}{n}\sum_{i=1}^n\hat{y}_i = \bar{y}.
+\end{equation}
+\item Since $e_i = y_i - \hat{y}_i$,
+\[
+    \sum_{i=1}^ne_i = \sum_{i=1}^ny_i - \sum_{i=1}^n\hat{y}_i.
+\]
+From equation \eqref{e1},
+\[
+    \sum_{i=1}^ne_i = \sum_{i=1}^ny_i - n\bar{y}.
+\]
+However, by definition of sample mean, $\sum_{i=1}^n y_i = n\bar{y}$,
+so that
+\begin{equation}\label{e2}
+\sum_{i=1}^n e_i = 0.
+\end{equation}
+\item We can write our linear model as $Y = X\beta + \epsilon$ where $Y$ is the vector
+$(y_1, \ldots, y_N)$, $\beta = (\beta_0, \beta_1)$ and $X$ is an $N \times 2$ matrix
+\[\begin{pmatrix}1 & x_1 \\ \vdots & \vdots \\ 1 & x_N\end{pmatrix}\]. The hat matrix
+is $H = X(X^T X)^{-1}X^T$. The fitted values are $\hat{Y} = HY$. The residuals are
+$e = Y - \hat{Y}$. We want to find out
+\[
+    \sum_{i=1}^N(\hat{y}_i - \bar{y})e_i = (\hat{Y} - \bar{Y}, e),
+\]
+where $(\cdot, \cdot)$ denotes the inner product. We also note that 
+\[
+    e = Y - \hat{Y} = Y - HY = (I - H)Y
+\]
+so that 
+\begin{eqnarray*}
+(\hat{Y} - \bar{Y}, e) &=& (\hat{Y} - \bar{Y}, Y - HY) \\
+	&=& (Y - HY, \hat{Y} - \bar{Y}) \\
+	&=& (Y^T - Y^TH^T)(\hat{Y} - \bar{Y}) \\
+	&=& Y^T\hat{Y} - Y^T\bar{Y} - Y^TH^T\hat{Y} + Y^TH^T\bar{Y} \\
+	&=& Y^THY - Y^T\bar{Y} - Y^TH^THY + Y^TH^T\bar{Y}
+\end{eqnarray*}	
+As $H$ is symmetric $H^T = H$. It is also idempotent so that $H^TH = HH =H$. Therefore,
+\begin{eqnarray*}
+(\hat{Y} - \bar{Y}, e) &=& Y^THY - Y^T\bar{Y} - Y^THY + Y^TH^T\bar{Y} \\
+	&=& Y^TH\bar{Y} - Y^T\bar{Y} \\
+	&=& Y^T(H - I)\bar{Y}.
+\end{eqnarray*}
+Recall that the vector $\bar{Y} = \bar{y}(1, \ldots, 1)$. If we denote the vector of
+all ones as $o$ then $(\hat{Y} - \bar{Y}, e) = \bar{y}Y^T(H - I)o$. As our model has
+an intercept, $o$ is in the linear span of the column space of $X$ because of which
+$(H - I)o = 0$.
+\item We know from the theory of regression that
+\begin{equation}\label{e3}
+b_1 = \frac{\sum_{j=1}^N(x_j - \bar{x})(y_j - \bar{y})}{\sum_{j=1}^N(x_j - \bar{x})^2}
+\end{equation}
+We also know that $\hat{y}_i - \bar{y} = b_1(x_i - \bar{x})$. Using these facts, we 
+readily get
+\[
+\sum_{i=1}^n(\hat{y}_i - \bar{y})^2 = b_1^2\sum_{i=1}^N(x_i - \bar{x})^2.
+\]
+Using equation \eqref{e3} and remembering that the indices $i$ and $j$ are just dummies
+so that
+\[
+\sum_{i=1}^N(x_i - \bar{x})^2 = \sum_{j=1}^N(x_j - \bar{x})^2.
+\]
+The result now follows immediately.
+\item We can write equation \eqref{e1} as
+\[
+    \sum_{i=1}^n \hat{y}_i = n\bar{y} = \sum_{i=1}^n\bar{y}
+\]
+so that
+\[
+    \sum_{i=1}^n(\bar{y}_i - \bar{y}) = 0.
+\]
+\item Follows immediately from (c) and the definition of $SS_{\text{total}}$ as
+\[
+    SS_{\text{total}} = \sum_{i=1}^N(y_i - \bar{y})^2.
+\]
+The expression in terms of sample variances and covariance also follows immediately
+from the definition of the terms.
+\end{enumerate}
+\item I can only partially answer this question.
+\begin{enumerate}
+\item $r_{xy} = \sqrt{0.7114} = 0.8434453$.
+\item Can't solve.
+\item Can't solve.
+\item Can't solve.
+\item $p$ value is $1.196368e-07$.
+I know the formulae for $t$-statistics, its $p$-value and the standard error of the slope.
+However, I can't see how one can get their values from what we have.
+\end{enumerate}
+\item The '?' in ANOVA table are derived here:
+\begin{enumerate}
+\item Regression df is $1$, residual df are $20$.
+\item Regression $MS$ is $1.13 \times 430.65 = 486.6345$.
+\item Regression $SS$ is regression df times regression MS, which is $486.6345$.
+\item Residual $SS$ is residual df times residual MS, which is $20 \times 1.13 = 22.6$.
+\item Total $SS$ is the sum of regression and residual $SS$m which is $509.2345$.
+\item $p$-value is $2.220446e-16$.
+\end{enumerate}
+
+\item All quantities can be found using the following R program.
+\begin{verbatim}
+x.bar <- 39.12
+y.bar <- 310.72
+var.x <- 150.03
+var.y <- 605.738
+s.xy <- 798.24
+
+# These two should give you the regression equation.
+b1 <- s.xy/var.x
+b0 <- y.bar - b1*x.bar
+cat(paste("y =", b0, " + ", b1, "x\n"))
+
+N <- 25 # Number of observations
+regression.df <- 1 # This is a univariate regression
+residual.df <- (N - 1) - regression.df
+
+# Regression sum of square
+reg.ss <- b1^2 * var.x
+# Total sum of square can be immediately found from sample variance.
+tot.ss <- (N - 1) * var.y
+# Residual sum of square
+res.ss <- tot.ss - reg.ss
+
+# Regression variance
+reg.var <- reg.ss/1
+# Residual variance
+res.var <- res.ss/(N - 2)
+
+# F statistics
+F.stat <- reg.var/res.var
+
+# p-value
+p = 1 - pf(F.stat, regression.df, residual.df)
+
+print(paste("Regression df =", regression.df))
+print(paste("Residual df =", residual.df))
+print(paste("Regression SS =", reg.ss))
+print(paste("Residual SS =", res.ss))
+print(paste("Total SS =", tot.ss))
+print(paste("Regression MS =", reg.var))
+print(paste("Residual MS =", res.var))
+print(paste("F statistics =", F.stat))
+print(paste("p-value =", p))
+\end{verbatim}
+Its output is
+\begin{verbatim}
+y = 102.580635872825  +  5.32053589282144 x
+[1] "Regression df = 1"
+[1] "Residual df = 23"
+[1] "Regression SS = 4247.06457108578"
+[1] "Residual SS = 10290.6474289142"
+[1] "Total SS = 14537.712"
+[1] "Regression MS = 4247.06457108578"
+[1] "Residual MS = 447.419453431053"
+[1] "F statistics = 9.49235563746057"
+[1] "p-value = 0.00528024469814259"
+\end{verbatim}
+\end{enumerate}
+\end{document}

@@ -1,0 +1,65 @@
+---
+jupyter: python3
+---
+
+```{python}
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
+import scipy.stats as stats
+import numpy as np
+import statsmodels.api as sm
+
+sns.set_theme()
+plt.ion()
+```
+
+```{python}
+penguins = sns.load_dataset("penguins")
+```
+
+```{python}
+penguins.dtypes
+```
+
+```{python}
+_ = sns.jointplot(data=penguins, x="flipper_length_mm", y="bill_length_mm", hue="species")
+```
+
+The data appears to be linearly separable. It should be easy to cluster it based on `bill_length_mm` and `flipper_length_mm`.
+
+```{python}
+numeric_columns = ['flipper_length_mm', 'bill_length_mm', 'bill_depth_mm', 'body_mass_g']
+penguins[numeric_columns].corr()
+```
+
+There is a strong correlation between `flipper_length_mm` and `body_mass_g`. We can possible find a linear relation between the two.
+
+```{python}
+_ = sns.lmplot(data=penguins, x='flipper_length_mm', y='body_mass_g')
+```
+
+There is indeed a strong linear relation. We will try to fit a linear model.
+
+```{python}
+model = sm.OLS(endog=penguins.dropna()['body_mass_g'], exog=penguins.dropna()['flipper_length_mm'])
+results = model.fit()
+results.summary()
+```
+
+```{python}
+_ = sns.lmplot(data=penguins, x="flipper_length_mm", y="body_mass_g", col='species')
+```
+
+```{python}
+penguins.groupby('species')[numeric_columns].corr()
+```
+
+```{python}
+_ = sns.lmplot(data=penguins, x='flipper_length_mm', y='body_mass_g', col='island')
+```
+
+```{python}
+penguins.groupby('island')[numeric_columns].corr()
+```
+

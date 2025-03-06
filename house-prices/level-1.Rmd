@@ -1,0 +1,1056 @@
+---
+title: "Level-1"
+author: "Amey Joshi"
+date: "05/12/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(MASS)
+library(lattice)
+
+training.data <- read.csv("train.csv")
+```
+
+## Candidate variables
+Of the $81$ variables in the data set, we chose to retain $36$ after a 
+preliminary analysis. In this next stage of analysis, we check if the variables
+selected have a strong correlation with each other.
+
+0.  Id *retain*
+1.  MSSubClass *retain.*
+2.  MSZoning *retain after reducing to $4$ levels.*
+3.  LotShape *drop*
+4.  LandContour *retain.*
+5.  LotConfig *combine "Corner","FR2", "Inside" into one*.
+6.  Neighborhood * collapse 25 levels into 6*.
+7.  Condition1 *drop it*.
+8.  BldgType *drop it*.
+9.  HouseStyle *drop it in first model*.
+10. OverallQual *collapse first two levels.*
+11. OverallCond *drop it in favor of OverallQual.*
+12. RoofStyle *drop it.*
+13. ExterQual *drop, retain OverallQual instead.*
+14. ExterCond *drop*
+15. Foundation *retain.*
+16. BsmtQual *drop it in favor of OverallQual.*
+17. BsmtCond *drop*
+18. BsmtExposure *retain*
+19. TotalBsmtSF *retain but remove cases with zero area.*
+20. HeatingQC *retain.*
+21. CentralAir *retain*
+22. Electrical *retain, club all fuse types together.*
+23. GrLivArea *retain*
+24. BsmtFullBath *collapse into two levels before retaining.*
+25. FullBath *retain*
+26. KitchenQual *drop it in favor of OverallQual.*
+27. TotRmsAbvGrd *retain*
+28. Functional *retain after reducing the number of level from 7 to 3.*
+29. FireplaceQu *drop*
+30. GarageFinish *drop*
+31. GarageCond *drop*
+32. PavedDrive *retain*
+33. YrSold *create bins.*
+34. SaleType *retain after collapsing into 5 levels.*
+35. SaleCondition *retain after collapsing into 4 levels.*
+36. SalePrice *retain*
+
+## MSSubClass and MSZoning
+A contingency table of these variables.
+```{r}
+with(training.data,
+     table(MSSubClass, MSZoning))
+```
+
+Even in the heavilty populated 'RL' and 'RM' classes, the data is not evenly 
+distributed across MSSubClass. Therefore, the two are not correlated.
+
+Is there a scope to reduce levels?
+```{r}
+X <- aggregate(cbind(avg.price = SalePrice) ~ MSZoning, training.data, mean)
+X[order(X$avg.price), ]
+```
+
+Levels RM and RL seem close. Let us investigate.
+```{r}
+oneway.test(SalePrice ~ MSZoning, training.data, subset = MSZoning %in% c("RM", "RH"))
+```
+
+They can be clubbed together.
+```{r}
+msz.map <- data.frame(MSZoning = X[order(X$avg.price), "MSZoning"],
+                      MSZoning.class = as.factor(c(1, 2, 2, 3, 4)))
+rm(X)
+X <- merge(training.data, msz.map)[, c("MSZoning.class", "SalePrice")]
+oneway.test(SalePrice ~ MSZoning.class, X)
+bwplot(SalePrice ~ MSZoning.class, X)
+rm(X, msz.map)
+```
+
+MSZoning, after reduction of levels seems to resolve sale price well.
+
+We repeat the exercise for MSSubClass.
+```{r}
+X <- aggregate(cbind(avg.price = SalePrice) ~ MSSubClass, training.data, mean)
+X[order(X$avg.price), ]
+```
+
+There seems to be a scope for clubbing levels together.
+```{r}
+oneway.test(SalePrice ~ MSSubClass,
+            data = training.data,
+            subset = MSSubClass %in% c(30, 180, 45))
+```
+
+They can be combined into a single level.
+```{r}
+oneway.test(SalePrice ~ MSSubClass,
+            data = training.data,
+            subset = MSSubClass %in% c(190, 90, 160))
+```
+
+These three too can get together.
+```{r}
+oneway.test(SalePrice ~ MSSubClass,
+            data = training.data,
+            subset = MSSubClass %in% c(50, 85, 40))
+```
+
+We can combine them.
+
+```{r}
+oneway.test(SalePrice ~ MSSubClass,
+            data = training.data,
+            subset = MSSubClass %in% c(70, 80))
+```
+
+We can combine them.
+```{r}
+oneway.test(SalePrice ~ MSSubClass,
+            data = training.data,
+            subset = MSSubClass %in% c(20, 75, 120))
+```
+
+We can club these together. Thus, we can map the old levels to
+```{r}
+mss.map <-
+  data.frame(MSSubClass = X[order(X$avg.price), "MSSubClass"],
+             MSSubClass.class = as.factor(
+               c(rep(1, 3), rep(2, 3), rep(3, 3), rep(4, 2), rep(5, 3), 6)
+             ))
+rm(X)
+X <- merge(training.data, mss.map)[, c("SalePrice", "MSSubClass.class")]
+oneway.test(SalePrice ~ MSSubClass.class, X)
+bwplot(SalePrice ~ MSSubClass.class, X)
+rm(X, mss.map)
+```
+
+## Lot shape and configuration
+```{r}
+with(training.data, table(LotShape, LotConfig))
+```
+
+These variables too do not seem to be correlated. How does mean sale price vary
+across them?
+```{r}
+aggregate(SalePrice ~ LotShape, data = training.data, mean)
+aggregate(SalePrice ~ LotConfig, data = training.data, mean)
+```
+
+The average sale price for LotConfig values 'Corner', 'FR2' and 'Inside' are quite close to
+each other. Let us check if they can be considered to be unequal.
+```{r}
+oneway.test(SalePrice ~ LotConfig,
+            data = training.data,
+            subset = LotConfig %in% c("Corner","FR2", "Inside"))
+```
+
+The $p$-value indicates that they should be clubbed together in a level 'CF2I'.
+```{r}
+X <- training.data[, c("LotConfig", "LotShape", "SalePrice")]
+# We need as.character because LotConfig is a factor, not a string.
+X$LotConfig.1 <- ifelse(X$LotConfig %in% c("Corner","FR2", "Inside"), 
+                        "CF2I", 
+                        as.character(X$LotConfig))
+with(X, table(LotShape, LotConfig.1))
+```
+
+Even after collapsing three LotConfig levels into one, there is not corelation
+between the two variables. We, therefore, retain both, the second one after
+combining levels. Let us look at the distribution of sale price across their 
+levels.
+```{r}
+bwplot(SalePrice ~ LotConfig.1, X)
+```
+
+```{r}
+bwplot(SalePrice ~ LotShape, X)
+```
+
+LotConfig, after collapsing to three levels seems to be better at resolving
+sale price than lot shape. We, therefore, retain the latter.
+
+## Land contour
+Average sale price varies by land contour as
+```{r}
+aggregate(cbind(avg.price = SalePrice) ~ LandContour, 
+          data = training.data, 
+          mean)
+```
+
+The division seems quite sharp and so far I haven't discovered another variable
+that could be related to it. We will retain it after examining the distribution
+of sale prices.
+```{r}
+bwplot(SalePrice ~ LandContour, training.data)
+```
+
+I think we should retain this variable.
+
+## Neighborhood
+Average sale price varies with neighborhood as
+```{r}
+X <- aggregate(cbind(avg.price = SalePrice) ~ Neighborhood,
+          data = training.data,
+          mean)
+X[order(X$avg.price), ]
+```
+
+Although the group means are different, there is scope to collapse the 
+neighborhoods into fewer number of classes.
+```{r}
+oneway.test(
+  SalePrice ~ Neighborhood,
+  data = training.data,
+  subset = Neighborhood %in% c("MeadowV", "IDOTRR", "BrDale")
+)
+oneway.test(
+  SalePrice ~ Neighborhood,
+  data = training.data,
+  subset = Neighborhood %in% c("BrkSide", "Edwards", "OldTown")
+)
+oneway.test(
+  SalePrice ~ Neighborhood,
+  data = training.data,
+  subset = Neighborhood %in% c("SWISU", "Blueste", "Sawyer", "NPkVill", "NAmes", "Mitchel")
+)
+oneway.test(
+  SalePrice ~ Neighborhood,
+  data = training.data,
+  subset = Neighborhood %in% c("CollgCr", "Blmngtn", "Gilbert", "NWAmes", "SawyerW")
+)
+oneway.test(
+  SalePrice ~ Neighborhood,
+  data = training.data,
+  subset = Neighborhood %in% c("Somerst", "ClearCr", "Crawfor", "Veenker", "Timber")
+)
+oneway.test(
+  SalePrice ~ Neighborhood,
+  data = training.data,
+  subset = Neighborhood %in% c("StoneBr", "NridgHt", "NoRidge")
+)
+```
+
+Thus, we will classify neighborhoods as
+```{r}
+nbd.map <-
+  data.frame(Neighborhood = X[order(X$avg.price), "Neighborhood"],
+             nbd.class = c(rep(1, 3), rep(2, 3), rep(3, 6), rep(4, 5), rep(5, 5), rep(6, 3)))
+nbd.map$nbd.class <- as.factor(nbd.map$nbd.class)
+rm(X)
+```
+
+We will now use the new neighborhood classes and find out if sale price 
+continues to be well resolved.
+```{r}
+X <- merge(training.data, nbd.map)[, c("nbd.class", "SalePrice")]
+oneway.test(SalePrice ~ nbd.class, data = X)
+```
+
+The average sale prices are
+```{r}
+aggregate(cbind(avg.price = SalePrice) ~ nbd.class, data = X, mean)
+```
+
+We confirm that the neighborhood classes 2 and 3 are indeed different.
+```{r}
+oneway.test(SalePrice ~ nbd.class, data = X, subset = nbd.class %in% c(2, 3))
+```
+
+Before closing, we check the box plot of sale prices with new classes.
+```{r}
+bwplot(SalePrice ~ nbd.class, X)
+rm(X, nbd.map)
+```
+
+We retain Neighborhood after collapsing $25$ levels into $6$.
+
+## Condition1
+We sort the levels by average sale price.
+```{r}
+X <- aggregate(cbind(avg.price = SalePrice) ~ Condition1,
+               training.data,
+               mean)
+X[order(X$avg.price), ]
+```
+
+We explore if we can have three levels instead of nine.
+```{r}
+oneway.test(
+  SalePrice ~ Condition1,
+  data = training.data,
+  subset = Condition1 %in% c("Artery", "RRAe", "Feedr")
+)
+oneway.test(
+  SalePrice ~ Condition1,
+  data = training.data,
+  subset = Condition1 %in% c("RRNe", "Norm", "RRAn")
+)
+oneway.test(
+  SalePrice ~ Condition1,
+  data = training.data,
+  subset = Condition1 %in% c("RRNn", "PosN", "PosA")
+)
+```
+
+We will now confirm that this grouping of levels of Condition1 resolves sale 
+price.
+```{r}
+cond1.map = data.frame(Condition1 = X[order(X$avg.price), "Condition1"],
+                      cond1.class = c(rep(1, 3), rep(2, 3), rep(3, 3)))
+cond1.map$cond1.class <- as.factor(cond1.map$cond1.class)
+rm(X)
+X <- merge(training.data, cond1.map)[, c("cond1.class", "SalePrice")]
+oneway.test(SalePrice ~ cond1.class, X)
+```
+
+A distribution of sale prices across the new classes is
+```{r}
+bwplot(SalePrice ~ cond1.class, X)
+rm(X, cond1.map)
+```
+
+Level 1 has a significant overlap with level 2. I think it is entirely contained
+in level 2. We should, therefore, drop this variable.
+
+## BldgType
+We can possibly have only two types of buildings.
+```{r}
+X <- aggregate(cbind(avg.price = SalePrice) ~ BldgType, training.data, mean)
+X[order(X$avg.price), ]
+```
+
+We will use the following mapping.
+```{r}
+bldgtype.map <- data.frame(BldgType = X[order(X$avg.price), "BldgType"],
+                           BldgType.class = c(rep(1, 3), rep(2, 2)))
+rm(X)
+X <- merge(training.data, bldgtype.map)[, c("BldgType.class", "SalePrice")]
+aggregate(cbind(avg.price = SalePrice) ~ BldgType.class, X, mean)
+oneway.test(SalePrice ~ BldgType.class, X)
+```
+
+Let us see a distribution of prices across the new classes.
+```{r}
+bwplot(BldgType.class ~ SalePrice, X)
+```
+
+```{r}
+rm(X, bldgtype.map)
+```
+
+Level 1 is entirely contained in level 2. We therefore drop this variable.
+
+## HouseStyle
+We can reduce the levels in HouseStyle as well.
+```{r}
+X <- aggregate(cbind(avg.price = SalePrice) ~ HouseStyle, training.data, mean)
+X[order(X$avg.price), ]
+```
+
+Choosing the right group of variables will need a closer examination.
+```{r}
+oneway.test(SalePrice ~ HouseStyle,
+            data = training.data,
+            subset = HouseStyle %in% c("1.5Unf", "SFoyer"))
+oneway.test(
+  SalePrice ~ HouseStyle,
+  data = training.data,
+  subset = HouseStyle %in% c("1.5Unf", "SFoyer", "1.5Fin")
+)
+```
+
+These are not the right groupings.
+```{r}
+oneway.test(SalePrice ~ HouseStyle,
+            data = training.data,
+            subset = HouseStyle %in% c("SFoyer", "1.5Fin"))
+oneway.test(
+  SalePrice ~ HouseStyle,
+  data = training.data,
+  subset = HouseStyle %in% c("SFoyer", "1.5Fin", "2.5Unf")
+)
+oneway.test(
+  SalePrice ~ HouseStyle,
+  data = training.data,
+  subset = HouseStyle %in% c("SFoyer", "1.5Fin", "2.5Unf", "SLvl")
+)
+oneway.test(SalePrice ~ HouseStyle,
+            data = training.data,
+            subset = HouseStyle %in% c("2.5Unf", "SLvl"))
+```
+
+The groups so far are, {"1.5Unf"}, {"SFoyer", "1.5Fn"}, {"2.5Unf", "SLvl"}.
+```{r}
+oneway.test(SalePrice ~ HouseStyle, data = training.data, subset = HouseStyle %in% c("2.5Unf", "SLvl"))
+```
+
+I am not seeing a satisfactory grouping evolve. A distribution of prices across
+building types is
+```{r}
+bwplot(SalePrice ~ HouseStyle, data = training.data)
+```
+
+A wide overlap of prices across house styles and a large number of outliers
+suggests that HouseStyle is probably not a good predictor of sale price.
+
+## Overall condition and quality
+We first check if there is a correlation between the two.
+```{r}
+with(training.data, table(OverallCond, OverallQual))
+```
+
+This does not give much insight. It would be nice to see the mean instead.
+```{r}
+X <- with(training.data, tapply(SalePrice, list(OverallCond, OverallQual), mean))
+```
+
+Row wise range of average sale price is
+```{r}
+Xr <- apply(X, 1, function(x) range(x, na.rm = TRUE))
+Xr[2, ] - Xr[1, ]
+```
+
+Column wise range of average sale price is
+```{r}
+Xc <- apply(X, 2, function(x) range(x, na.rm = TRUE))
+Xc[2, ] - Xc[1, ]
+```
+
+Column-wise range is narrower than row-wise range. Therefore, we will use overall
+quality instead of overall condition in our analysis.
+
+How do the group means look like?
+```{r}
+rm(X, Xc, Xr)
+X <-
+  aggregate(cbind(avg.price = SalePrice) ~ OverallQual, 
+            training.data, mean)[, c("OverallQual", "avg.price")]
+X[order(X$avg.price),]
+```
+
+Let us check if the classes 1 and 2 could be combined?
+```{r}
+oneway.test(SalePrice ~ OverallQual, 
+            data = training.data, 
+            subset = OverallQual %in% c(1, 2))
+```
+
+There is a strong evidence that they are the same. Although this looks like a 
+great predictor, we will still review a distribution of sale price across its 
+levels after combining levels 1 and 2.
+```{r}
+overall.qual.map <- 
+  data.frame(OverallQual = X[order(X$avg.price), "OverallQual"],
+             overall.qual.class = c(2, 2, 3, 4, 5, 6, 7, 8 ,9 ,10))
+rm(X)
+X <- merge(training.data, overall.qual.map)[, c("overall.qual.class", "SalePrice")]
+X$overall.qual.class <- as.factor(X$overall.qual.class)
+bwplot(SalePrice ~ overall.qual.class, X)
+rm(X, overall.qual.map)
+```
+
+This looks quite good.
+
+## Roof style
+A distribution of average sale price is
+```{r}
+X <- aggregate(cbind(avg.price = SalePrice) ~ RoofStyle,
+          data = training.data,
+          mean)
+X[order(X$avg.price), ]
+```
+
+Are 'Gable' and 'Mansard' similar?
+```{r}
+oneway.test(SalePrice ~ RoofStyle,
+            data = training.data,
+            subset = RoofStyle %in% c("Gable", "Mansard"))
+```
+
+They are. Let us combine them.
+```{r}
+roofstyle.map <- data.frame(
+  RoofStyle = X[order(X$avg.price), "RoofStyle"],
+  RoofStyle.class = as.factor(c(1, 2, 2, 3, 4, 5))
+)
+rm(X)
+X <- merge(training.data, roofstyle.map)[, c("RoofStyle.class", "SalePrice")]
+oneway.test(SalePrice ~ RoofStyle.class, data = X)
+bwplot(SalePrice ~ RoofStyle.class, X)
+rm(X, roofstyle.map)
+```
+
+Although there the means are all different, there is a significant overlap 
+between the categories. For instance, all of '1' lies within the limits of '2'.
+The class '3' overlaps entirely with classes '2' and '4'. The class '5' overlaps
+with '2', '3' and '4'. Perhaps, RoofStyle is not going to be useful in our first
+model.
+
+## External quality and condition
+We will follow the procedure we used to examine overall quality and condition.
+First, a contingency table of the two variables is
+```{r}
+with(training.data,
+     table(ExterQual, ExterCond))
+```
+
+Given that 'TA' stands for 'typical/average', 'Gd' for good and 'Fa' for fair
+there is a good chance the three terms are used interchangeably. We will explore
+if we can club them together. But before we do that, we want to see which one of
+these variables resolves sale price better than the other.
+```{r}
+X <- with(training.data, 
+          tapply(SalePrice, list(ExterQual,ExterCond), mean))
+X
+```
+
+The row-wise and column-wise ranges are
+```{r}
+Xr <- apply(X, 1, function(x) range(x, na.rm = TRUE))
+Xc <- apply(X, 2, function(x) range(x, na.rm = TRUE))
+print("Row wise ranges are:")
+Xr[2, ] - Xr[1, ]
+print("Column wise ranges are:")
+Xc[2, ] - Xc[1, ]
+```
+
+Column wise ranges are narrower. Therefore, we choose External Quality instead
+of External Condition. The group means are
+```{r}
+aggregate(cbind(avg.price = SalePrice) ~ ExterQual, training.data, mean)
+```
+
+They are sufficiently far apart from each other. Nevertheless, we also look at
+the box plots.
+```{r}
+bwplot(SalePrice ~ ExterQual, training.data)
+rm(X, Xc, Xr)
+```
+
+How is external quality correlated with overall quality?
+```{r}
+with(training.data,
+     table(ExterQual, OverallQual))
+```
+
+A contingency table of the means is
+```{r}
+X <- with(training.data,
+          tapply(SalePrice, list(ExterQual, OverallQual), mean))
+X
+```
+
+The row-wise and column-wise ranges are
+```{r}
+Xr <- apply(X, 1, function(x) range(x, na.rm = TRUE))
+Xc <- apply(X, 2, function(x) range(x, na.rm = TRUE))
+paste("Row-wise range is:")
+Xr[2, ] - Xr[1, ]
+paste("Column-wise range is:")
+Xc[2, ] - Xc[1, ]
+rm(X, Xc, Xr)
+```
+
+Among the two, we will retain OverallQual.
+
+## Foundation
+The group means are
+```{r}
+X <- aggregate(cbind(avg.price = SalePrice) ~ Foundation, training.data, mean)
+X[order(X$avg.price), ]
+```
+
+We will check if six levels can be collapsed into four.
+```{r}
+oneway.test(SalePrice ~ Foundation,
+            data = training.data,
+            subset = Foundation %in% c("BrkTil", "CBlock"))
+```
+
+These two levels cannot be combined together.
+```{r}
+oneway.test(SalePrice ~ Foundation,
+            data = training.data,
+            subset = Foundation %in% c("Stone", "CBlock"))
+```
+
+We can combine them together. Can we add 'Wood' to the group?
+```{r}
+oneway.test(SalePrice ~ Foundation,
+            data = training.data,
+            subset = Foundation %in% c("Stone", "CBlock", "Wood"))
+```
+We can. Thus, we can create the map
+```{r}
+foundation.map <-
+  data.frame(Foundation = X[order(X$avg.price), "Foundation"],
+             Foundation.class = as.factor(c(1, 2, rep(3, 3), 4)))
+rm(X)
+X <- merge(training.data, foundation.map)[, c("Foundation.class", "SalePrice")]
+oneway.test(SalePrice ~ Foundation.class, X)
+bwplot(SalePrice ~ Foundation.class, X)
+rm(X, foundation.map)
+```
+
+We will retain this variable.
+
+## Basement quality, condition, exposure and surface area
+Te first three are categorical. We consider them separately. The unique levels 
+of these variables are
+```{r}
+unique(training.data$BsmtCond)
+unique(training.data$BsmtExposure)
+unique(training.data$BsmtQual)
+```
+
+Some houses lack basement. How many?
+```{r}
+nrow(training.data[is.na(training.data$BsmtCond), ])
+nrow(training.data[is.na(training.data$BsmtExposure), ])
+nrow(training.data[is.na(training.data$BsmtQual), ])
+```
+
+The aggregate sale prices are
+```{r}
+X.c <- aggregate(cbind(avg.price = SalePrice) ~ BsmtCond, training.data, mean)
+X.e <- aggregate(cbind(avg.price = SalePrice) ~ BsmtExposure, training.data, mean)
+X.q <- aggregate(cbind(avg.price = SalePrice) ~ BsmtQual, training.data, mean)
+
+X.c[order(X.c$avg.price), ]
+X.e[order(X.e$avg.price), ]
+X.q[order(X.q$avg.price), ]
+rm(X.c, X.e, X.q)
+```
+
+All resolve sale price equally well. Are they correlated?
+```{r}
+with(training.data, table(BsmtCond, BsmtQual))
+with(training.data, table(BsmtCond, BsmtExposure))
+with(training.data, table(BsmtExposure, BsmtQual))
+```
+
+Basement condition and quality are related to each other. Basement exposure is
+fundamentally a different variable. Let us now find out if we can select one of
+basement condition and quality.
+```{r}
+X <- with(training.data,
+          tapply(SalePrice, list(BsmtCond, BsmtQual), mean))
+Xr <- apply(X, 1, function(r) range(r, na.rm = TRUE))
+Xc <- apply(X, 2, function(c) range(c, na.rm = TRUE))
+print("Row ranges are:")
+Xr[2, ] - Xr[1, ]
+print("Column ranges are:")
+Xc[2, ] - Xc[1, ]
+rm(X, Xr, Xc)
+```
+
+The column ranges are narrower and hence we chose BsmtQual. Is basement quality
+related to overall quality?
+```{r}
+with(training.data, table(OverallQual, BsmtQual))
+```
+
+Excellent basements are mostly in best houses, good basements belong to those of
+better than average overall quality and typical/average basements are in middle
+quality houses. Thus the correlation between the two seems to be fairly strong. 
+Therefore, we choose overall quality over basement quality.
+A scatter plot of basement area with sale price is
+```{r}
+xyplot(SalePrice ~ TotalBsmtSF, data = training.data[-which(training.data$TotalBsmtSF == 0)])
+```
+
+Let us remove the cases where the basement area is zero.
+```{r}
+X <- training.data[training.data$TotalBsmtSF != 0, c("TotalBsmtSF", "SalePrice")]
+xyplot(SalePrice ~ TotalBsmtSF, X)
+```
+
+There is a strong correlation between the two, at least visually. The correlation
+coefficient is
+```{r}
+paste("cor = ", round(with(X, cor(SalePrice, TotalBsmtSF)), 4))
+rm(X)
+```
+
+We will retain this variable. However, we must remove the zeros to get a good 
+fit.
+
+## Heating quality
+How is heating quality correlated with overall quality?
+```{r}
+with(training.data,
+     table(OverallQual, HeatingQC))
+```
+
+The good and typical/average heating quality seem to have similar behavior. Can
+they be combined?
+```{r}
+oneway.test(SalePrice ~ HeatingQC,
+            data = training.data,
+            subset = HeatingQC %in% c("Fa", "Gd"))
+```
+
+How about good and TA? Or Fa and TA
+```{r}
+oneway.test(SalePrice ~ HeatingQC,
+            data = training.data,
+            subset = HeatingQC %in% c("TA", "Gd"))
+oneway.test(SalePrice ~ HeatingQC,
+            data = training.data,
+            subset = HeatingQC %in% c("TA", "Fa"))
+```
+
+The sale prices in all cases are statistically different. Let's see a 
+contingency table with mean sale price.
+```{r}
+X <- with(training.data,
+          tapply(SalePrice, list(OverallQual, HeatingQC), mean))
+```
+
+The two variables may be individually useful to predict sale price. A 
+distribution of sale prices across heating quality is
+```{r}
+bwplot(SalePrice ~ HeatingQC, training.data)
+```
+
+We will retain Heating quality.
+
+## Central air conditioning
+This is a binary variable. How are sale prices distributed across it?
+```{r}
+bwplot(SalePrice ~ CentralAir, training.data)
+```
+
+It is quite clear that houses with central airconditioning fetch a higher price.
+
+## Electrical
+The average sale price across the level is
+```{r}
+X <- aggregate(cbind(avg.price = SalePrice) ~ Electrical, training.data, mean)
+X[order(X$avg.price), ]
+```
+
+How similar are fuses P and F?
+```{r}
+oneway.test(SalePrice ~ Electrical,
+            data = training.data,
+            subset = Electrical %in% c("FuseP", "FuseF"))
+```
+
+They can be clubbed together. Can we also include fuse A?
+```{r}
+oneway.test(SalePrice ~ Electrical,
+            data = training.data,
+            subset = Electrical %in% c("FuseP", "FuseF", "FuseA"))
+```
+
+Thus, we can map the existing levels to Mix, Fuse and SBrkr.
+```{r}
+elec.map <- 
+  data.frame(Electrical = X[order(X$avg.price), "Electrical"],
+             Elec.class = as.factor(c(1, rep(2, 3), 3)))
+rm(X)
+X <- merge(training.data, elec.map)[, c("Elec.class", "SalePrice")]
+aggregate(SalePrice ~ Elec.class, X, mean)
+aggregate(SalePrice ~ Elec.class, X, length)
+```
+
+There is only one case with level '1'. Therefore our oneway test should be
+```{r}
+oneway.test(SalePrice ~ Elec.class,
+            data = X,
+            subset = Elec.class != 1)
+```
+
+Before leaving this variable, we check the distribution of sale price across
+levels.
+```{r}
+bwplot(SalePrice ~ Elec.class, X)
+rm(X, elec.map)
+```
+
+We will retain this variable after combining all fuse types to a single category.
+
+## GrLivArea - above grade living area
+This is a numerical variable. Its summary is
+```{r}
+summary(training.data$GrLivArea)
+```
+
+A scatter plot of sale price versus GrLivArea is
+```{r}
+xyplot(SalePrice ~ GrLivArea, training.data)
+```
+
+The correlation coefficient is
+```{r}
+paste("cor = ", with(training.data, cor(GrLivArea, SalePrice)))
+```
+
+Is is correlated with the other numerical variable we have seen so far?
+```{r}
+xyplot(GrLivArea ~ TotalBsmtSF, training.data)
+```
+
+Even without removing the cases with zero total basement area the correlation is
+```{r}
+paste("cor = ", with(training.data, cor(GrLivArea, TotalBsmtSF)))
+```
+
+If we remove the cases with zero total basement area,
+```{r}
+X <- training.data[training.data$TotalBsmtSF != 0, c("GrLivArea", "TotalBsmtSF")]
+paste("cor =", with(X, cor(GrLivArea, TotalBsmtSF)))
+rm(X)
+```
+
+We shall retain this variable.
+
+## BsmtFullBath and FullBath
+A contingency table of these variables with mean sale price is
+```{r}
+with(training.data, table(BsmtFullBath, FullBath))
+```
+
+A distribution of sale prices across their levels is
+```{r}
+bwplot(SalePrice ~ as.factor(BsmtFullBath), training.data, main = "BsmtFullBath")
+bwplot(SalePrice ~ as.factor(FullBath), training.data, main = "FullBath")
+```
+
+Let us examine the group means of BsmtFullBath in greater details.
+```{r}
+X <- aggregate(cbind(avg.price = SalePrice) ~ BsmtFullBath, training.data, mean)
+X[order(X$avg.price), ]
+```
+
+How close are levels 1 and 2?
+```{r}
+oneway.test(SalePrice ~ BsmtFullBath,
+            data = training.data,
+            subset = BsmtFullBath %in% c(1, 2))
+```
+
+They can be combined together.
+```{r}
+bsmt.map <- data.frame(
+  BsmtFullBath = X[order(X$avg.price), "BsmtFullBath"],
+  Bsmt.class = as.factor(c(rep(0, 2), rep(1, 2)))
+)
+X.b <- merge(training.data, bsmt.map)[, c("Bsmt.class", "FullBath", "SalePrice")]
+oneway.test(SalePrice ~ Bsmt.class, X.b)
+bwplot(SalePrice ~ Bsmt.class, X.b)
+```
+
+Let us see how the new levels of BsmtFullBath compare against FullBath.
+```{r}
+with(X.b, table(Bsmt.class, FullBath))
+rm(X, X.b, bsmt.map)
+```
+
+We will have to retain both.
+
+## KitchenQual
+How is it related to OverallQual?
+```{r}
+with(training.data, table(KitchenQual, OverallQual))
+```
+
+The table suggests that the two might be closely related. We will choose to keep
+OverallQual.
+
+## TotRmsAbvGrd
+Let us first examine the group means.
+```{r}
+X <- aggregate(cbind(avg.price = SalePrice) ~ TotRmsAbvGrd, training.data, mean)
+X[order(X$avg.price), ]
+rm(X)
+```
+
+We will retain this variable.
+
+## Functional
+The group means are
+```{r}
+X <- aggregate(cbind(avg.price = SalePrice) ~ Functional,
+               training.data,
+               mean)
+X[order(X$avg.price), ]
+```
+
+Can Min2, Min1, Maj1 and Mod be clubbed together?
+```{r}
+oneway.test(SalePrice ~ Functional,
+            data = training.data,
+            subset = Functional %in% c("Min2", "Min1", "Maj1", "Mod"))
+```
+
+Looks like they can be. We can also combine the lone "Sev" case with "Maj2". Let 
+us do that.
+```{r}
+func.map <- 
+  data.frame(Functional = X[order(X$avg.price), "Functional"],
+             Func.class = as.factor(c(1, 1, rep(2, 4), 3)))
+rm(X)
+X <- merge(training.data, func.map)[, c("Func.class", "SalePrice")]
+bwplot(SalePrice ~ Func.class, X)
+rm(X, func.map)
+```
+
+## FireplaceQu
+The group means are
+```{r}
+X <- aggregate(cbind(avg.price = SalePrice) ~ FireplaceQu,
+               training.data, mean)
+X[order(X$avg.price), ]
+rm(X)
+```
+
+The group means are well separated. Is FireplaceQu correlated with OverallQual?
+```{r}
+with(training.data,
+     table(FireplaceQu, OverallQual))
+```
+
+It looks harder to guess one from another. Do all houses have a fire place?
+```{r}
+nrow(training.data[is.na(training.data$FireplaceQu), ])
+```
+
+Close to half the houses do not have a fireplace. Let us therefore drop it.
+
+## GarageFinish and GarageCond
+A contingency table of the two is
+```{r}
+with(training.data,
+     table(GarageFinish, GarageCond))
+```
+
+They are definitely uncorrelated. We will therefore retain both of them. Is
+GarageCond correlated to OverallQual?
+```{r}
+with(training.data,
+     table(GarageCond, OverallQual))
+```
+
+I think we should drop GarageCond because it is heavily concentrated in a single
+level TA. Which is also the reason why there are such a large number of outliers
+in its boxplot. Moreover, a GarageCond of Ex, which stands for excellent, does
+not fetch a great sale price.
+
+How many houses do not have a garage?
+```{r}
+nrow(training.data[is.na(training.data$GarageFinish), ])
+```
+
+A few houses do not have a garage. Let us drop this variable in the first 
+iteration of the model.
+
+## Sale type and condition
+The group means of sale type are
+```{r}
+X <- aggregate(cbind(avg.price = SalePrice) ~ SaleType,
+               data = training.data,
+               mean)
+X[order(X$avg.price), ]
+```
+
+Let us explore a few opportunities to combine the levels.
+```{r}
+oneway.test(SalePrice ~ SaleType,
+            data = training.data,
+            subset = SaleType %in% c("ConLI", "CWD"))
+```
+
+They can be grouped together.
+
+```{r}
+oneway.test(SalePrice ~ SaleType,
+            data = training.data,
+            subset = SaleType %in% c("ConLD", "ConLW", "COD"))
+```
+
+These too can be clubbed together.
+```{r}
+oneway.test(SalePrice ~ SaleType,
+            data = training.data,
+            subset = SaleType %in% c("Con", "New"))
+```
+
+We can group them together as well.
+
+Let us map the levels to new ones.
+```{r}
+saletype.map <-
+  data.frame(SaleType = X[order(X$avg.price), "SaleType"],
+             st.class = as.factor(c(1, rep(2, 3), 3, rep(4, 2), rep(5, 2))))
+rm(X)
+X <- merge(training.data, saletype.map)[, c("st.class", "SalePrice")]
+bwplot(SalePrice ~ st.class, X)
+aggregate(cbind(avg.price = SalePrice) ~ st.class, X, mean)
+rm(X, saletype.map)
+```
+
+We now look at sale condition. From preliminary analysis we know that the 
+sale type WD is distributed across sale conditions. Therefore, we cannot 
+treat the two as correlated with each other. Let us check if we can collapse
+the levels of SaleCondition.
+```{r}
+X <- aggregate(cbind(avg.price = SalePrice) ~ SaleCondition, 
+               training.data, mean)
+X[order(X$avg.price), ]
+```
+
+Are 'Abnorml' and 'Family' similar?
+```{r}
+oneway.test(SalePrice ~ SaleCondition,
+            data = training.data,
+            subset = SaleCondition %in% c("Abnorml", "Family"))
+```
+
+They can be grouped together.
+
+Are 'Alloca' and 'Normal' similar?
+```{r}
+oneway.test(SalePrice ~ SaleCondition,
+            data = training.data,
+            subset = SaleCondition %in% c("Alloca", "Normal"))
+```
+
+They too can be clubbed together.
+
+Let us check the new levels.
+```{r}
+sc.map <-
+  data.frame(SaleCondition = X[order(X$avg.price), "SaleCondition"],
+             sc.class = as.factor(c(1, 2, 2, 3, 3, 4)))
+rm(X)
+X <- merge(training.data, sc.map)[, c("sc.class", "SalePrice")]
+bwplot(SalePrice ~ sc.class, X)
+rm(sc.map, X)
+```            
