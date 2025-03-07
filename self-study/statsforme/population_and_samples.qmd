@@ -21,7 +21,7 @@ n.sims <- 100
 sample.size <- 10
 S <- matrix(rbinom(n=n.sims * sample.size, size=1, prob=0.5), 
             nrow=sample.size)
-sample.means <- colMeans(S)
+sample.means <- apply(S, MARGIN=2, FUN=mean)
 hist(sample.means, xlab='Sample mean', main='Histogram of sample means')
 ```
 We see that there is a wide variation in the sample means although a majority
@@ -34,7 +34,7 @@ We can carry out this procedure for an infinite population of standard normal
 variates.
 ```{r}
 S <- matrix(rnorm(n=n.sims * sample.size), nrow=sample.size)
-sample.means <- colMeans(S)
+sample.means <- apply(S, MARGIN=2, FUN=mean)
 X <- seq(from=-3, to=3, length.out=100)
 hist(sample.means,
      xlab="Sample mean",
@@ -239,51 +239,123 @@ k\sigma/\sqrt{n})$ is `1 - 2 * pnorm(-k)` for an positive integer $k$.
 
 
 ## Confidence intervals in practice {#sec1-s5}
+### The effect of the sample size
 The confidence interval derived in the previous section depends on the 
 distribution of the sample means. The central limit theorem guarantees that it
 will be gaussian in the limit of the sample size going to infinity. In practice,
 it means that when the sample sizes are large enough, the sampling distribution
 of means looks like a gaussian. But the sample size at which it starts happening
 depends on the distribution and its parameters from which the data are sampled. 
-We will illustrate this point with the example of a binomial distribution.
+We will illustrate this point with the example of a Bernoulli distribution with
+two different sample sizes.
+
+#### Sample size $50$
 ```{r, fig.width=6, fig.height=12}
 p1 <- 0.5
 p2 <- 0.9
-sample.size <- 20
+sample.size <- 50
 n.samples <- 100
-means.1 <- colMeans(matrix(rbinom(n=sample.size*n.samples, size=1, p=p1), 
-                           nrow=sample.size))
-means.2 <- colMeans(matrix(rbinom(n=sample.size*n.samples, size=1, p=p2), 
-                           nrow=sample.size))
-mean.means.1 <- p1
-mean.means.2 <- p2
-sd.means.1 <- sqrt(means.1 * (1 - means.1)/sample.size)
-sd.means.2 <- sqrt(means.2 * (1 - means.2)/sample.size)
+sample.1 <- matrix(data=rbinom(n=sample.size * n.samples, size=1, p=p1), 
+                   nrow=sample.size)
+sample.2 <- matrix(data=rbinom(n=sample.size * n.samples, size=1, p=p2), 
+                   nrow=sample.size)
+means.1 <- apply(sample.1, MARGIN=2, FUN=mean) 
+means.2 <- apply(sample.2, MARGIN=2, FUN=mean) 
+
+mean.means.1 <- mean(means.1)
+mean.means.2 <- mean(means.2)
+
+# We assume that the population variance is known. Therefore,
+sigma.1 <- sqrt(p1 * (1 - p1))
+sigma.2 <- sqrt(p2 * (1 - p2))
 X1 <- seq(from=mean.means.1 - 0.5, to=mean.means.1 + 0.5, length.out=100)
 X2 <- seq(from=mean.means.2 - 0.5, to=mean.means.2 + 0.5, length.out=100)
-N1 <- dnorm(X1, mean=mean.means.1, 
-            sd=sqrt(mean.means.1 * (1 - mean.means.1)/sample.size))
-N2 <- dnorm(X2, mean=mean.means.2, 
-            sd=sqrt(mean.means.2 * (1 - mean.means.2)/sample.size))
+N1 <- dnorm(X1, mean=mean.means.1, sd=sigma.1/sqrt(sample.size))
+N2 <- dnorm(X2, mean=mean.means.2, sd=sigma.2/sqrt(sample.size))
 oldpar <- par(mfrow=c(2, 1))
-plot(X1, N1, lty=2, main=paste("p =", p1), type="l")
+plot(X1, N1, lty=2, main=paste("p =", p1, ", n =", sample.size), type="l")
 lines(density(means.1))
 legend("topright",
        legend=c("Density", "Gaussian"),
        lty = c(1, 2),
        bty = "n")
-plot(density(means.2), main=paste("p =", p2), type="l")
-lines(X2, N2, lty=2)
+plot(X2, N2, lty=2, main=paste("p =", p2, ", n =", sample.size), type="l")
+lines(density(means.2))
 legend("topright",
        legend=c("Density", "Gaussian"),
        lty = c(1, 2),
        bty = "n")
 ```
 
-Clearly, the density is much closer to being an gaussian when $p = 0.5$ than
-when $p = 0.8$. Therefore, building a confidence interval assuming that the
-sampling distribution of means is gaussian is grossly wrong in the latter case.
-In the former case, the parameters of the sampling distribution can be taken as 
+In both situations, the sampling distribution of means closely resembles a
+gaussian distribution with appropriate parameters.
+
+#### Sample size $10$
+```{r, fig.width=6, fig.height=12}
+p1 <- 0.5
+p2 <- 0.9
+sample.size <- 10
+n.samples <- 100
+sample.1 <- matrix(data=rbinom(n=sample.size * n.samples, size=1, p=p1), 
+                   nrow=sample.size)
+sample.2 <- matrix(data=rbinom(n=sample.size * n.samples, size=1, p=p2), 
+                   nrow=sample.size)
+means.1 <- apply(sample.1, MARGIN=2, FUN=mean) 
+means.2 <- apply(sample.2, MARGIN=2, FUN=mean) 
+
+mean.means.1 <- mean(means.1)
+mean.means.2 <- mean(means.2)
+
+# We assume that the population variance is known. Therefore,
+sigma.1 <- sqrt(p1 * (1 - p1))
+sigma.2 <- sqrt(p2 * (1 - p2))
+X1 <- seq(from=mean.means.1 - 0.5, to=mean.means.1 + 0.5, length.out=100)
+X2 <- seq(from=mean.means.2 - 0.5, to=mean.means.2 + 0.5, length.out=100)
+N1 <- dnorm(X1, mean=mean.means.1, sd=sigma.1/sqrt(sample.size))
+N2 <- dnorm(X2, mean=mean.means.2, sd=sigma.2/sqrt(sample.size))
+oldpar <- par(mfrow=c(2, 1))
+plot(X1, N1, lty=2, main=paste("p =", p1, ", n =", sample.size), type="l")
+lines(density(means.1))
+legend("topright",
+       legend=c("Density", "Gaussian"),
+       lty = c(1, 2),
+       bty = "n")
+plot(density(means.2), main=paste("p =", p2, ", n =", sample.size), type="l")
+lines(X2, N2, lty=2)
+legend("topleft",
+       legend=c("Density", "Gaussian"),
+       lty = c(1, 2),
+       bty = "n")
+```
+Clearly, the density is much closer to being an gaussian when $p = 0.5$ and it
+anything but gaussian when $p = 0.9$. Therefore, building a confidence interval 
+assuming that the sampling distribution of means is gaussian is grossly wrong 
+in the latter case.
+
+### Population variance is seldom known
+The central limit theorem assures that in the limit of infinite sample size,
+$$
+z = \frac{\bar{X}_n - \mu}{\sigma}\sqrt{n}
+$$
+has a standard normal distribution. However, in most realistic situations, we
+neither know $\mu$ nor do we know $\sigma$. When the sample size is "reasonably
+large", we can approximate $\sigma$ be $s$, the sample standard deviation, and
+use the $z$ statistic to derive a confidence interval around $\bar{X}_n$. In the
+general case, the statistic
+$$
+t = \frac{\bar{X}_n - \mu}{s}\sqrt{n}
+$$
+follows a $t$-distribution of $n - 1$ degrees of freedom. A $t$-distribution
+approximates a standard normal distribution for large enough degrees of freedom.
+However, for small $n$, one must use the $t$ statistic to construct the 
+confidence intervals.
+
+We will illustrate this point by comparing the confidence intervals for a sample
+size of $20$ drawn from a Bernoulli distribution with parameters $p=0.5$ and
+$p=0.9$.
+
+As we do not know the parameters of the population distribution, we estimate
+the parameters of the sampling distribution can be taken as 
 $\mu = \hat{p} = \bar{X}_n$ and $\sigma^2 = \hat{p}(1 - \hat{p})$. An interval
 calculated using these parameters is called the _Wald interval_. For the second
 sample, the Wald interval is not appropriate as we show in the simulation below
@@ -291,7 +363,7 @@ for the case $p = 0.9$.
 ```{r}
 samples <- matrix(data=rbinom(n=sample.size*n.samples, size=1, p=p2),
                   nrow=sample.size)
-sample.means <- colMeans(samples)
+sample.means <- apply(samples, MARGIN=2, FUN=mean)
 sample.sd <- sqrt(sample.means * (1 - sample.means)/sample.size)
 # We are looking for a 95% interval, so the limits are +/- 2 standard
 # deviations from the mean.
@@ -320,7 +392,7 @@ ac.samples <- rbind(samples,
                     rep(1, n.samples),
                     rep(0, n.samples),
                     rep(0, n.samples))
-ac.sample.means <- colMeans(ac.samples)
+ac.sample.means <- apply(ac.samples, MARGIN=2, FUN=mean)
 ac.sd <- sqrt(ac.sample.means * (1 - ac.sample.means)/sqrt(sample.size))
 ac.lower.lim <- ac.sample.means - k * ac.sd
 ac.upper.lim <- ac.sample.means + k * ac.sd
