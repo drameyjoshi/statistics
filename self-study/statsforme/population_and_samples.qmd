@@ -354,7 +354,9 @@ $$
 \left[\bar{X}_n + t_{\nu, 1-\alpha/2}\frac{s}{\sqrt{n}}, 
  \bar{X}_n + t_{\nu, \alpha/2}\frac{s}{\sqrt{n}}\right],
 $$
-where $\nu = n - 1$ is the number of degrees of freedom of the t-distribution.
+where $\nu = n - 1$ is the number of degrees of freedom of the t-distribution
+and $t_{\nu, x}$ denotes the quantile of a $t$ distribution with $\nu$ degrees 
+of freedom at a probability value of $x$.
 We will illustrate these ideas with a few plots. We draw several samples from
 a standard normal distribution and start with a plot of their means. We overlay
 the sampling distribution with a gaussian with parameters $\mu=0, \sigma^2=1/
