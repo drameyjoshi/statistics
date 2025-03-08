@@ -348,8 +348,72 @@ $$
 follows a $t$-distribution of $n - 1$ degrees of freedom. A $t$-distribution
 approximates a standard normal distribution for large enough degrees of freedom.
 However, for small $n$, one must use the $t$ statistic to construct the 
-confidence intervals.
+confidence intervals. Thus, if we want to construct a $95\%$ confidence interval
+for $\mu$ then with $\alpha = 0.95$, $\mu$ lies in 
+$$
+\left[\bar{X}_n + t_{\nu, 1-\alpha/2}\frac{s}{\sqrt{n}}, 
+ \bar{X}_n + t_{\nu, \alpha/2}\frac{s}{\sqrt{n}}\right],
+$$
+where $\nu = n - 1$ is the number of degrees of freedom of the t-distribution.
+We will illustrate these ideas with a few plots. We draw several samples from
+a standard normal distribution and start with a plot of their means. We overlay
+the sampling distribution with a gaussian with parameters $\mu=0, \sigma^2=1/
+\sqrt{n}$, $n$ being the sample size. 
+```{r}
+sample.size <- 6
+n.samples <- 100
+sample.data <- matrix(data=rnorm(n=sample.size * n.samples), nrow=sample.size)
+sample.means <- apply(sample.data, MARGIN=2, FUN=mean)
+X <- seq(from=-1.5, to=1.5, length.out=100)
+plot(X, dnorm(X, mean=0, sd=1/sqrt(sample.size)), type="l", lty=2, 
+     xlab="X", ylab=expression(f[X]), main="Sampling distribution of mean")
+lines(density(sample.means))
+legend("topright",
+       legend=c("Density of sample means", expression(N(0, 1/sqrt(n)))),
+       lty=c(1, 2),
+       cex=0.7,
+       bty="n")
+```
 
+Sometimes I forget that the sampling distribution of means is **not** $t$-
+distributed. To remind myself of it, the next plot shows that the two are
+drastically different.
+```{r}
+plot(density(sample.means), xlab="X", ylab=expression(f[X]), type="l", lty=3,
+     main="Sampling distribution compared with t-distribution")
+lines(X, dt(X, df=sample.size-1), lty=3)
+legend("topright",
+       legend=c("Density of sample means", expression(t[n-1])),
+       lty=c(1, 3),
+       cex=0.7,
+       bty="n")
+```
+
+Next we look at the distribution of
+$$
+t = \frac{\bar{X}_n - \mu}{s}\sqrt{n}
+$$
+and compare it with a) the standard normal distribution and b) a $t$-distribution
+with $n - 1$ degrees of freedom.
+```{r}
+sample.sd <- apply(sample.data, MARGIN=2, FUN=sd)
+t <- (sample.means - 0)/sample.sd * sqrt(sample.size)
+X <- seq(from=-4, to=4, length.out=100)
+plot(X, dnorm(X), xlab=expression(bar(X)[n]), ylab=expression(f[bar(X)[n]]), 
+     main="Comparison of t-values with t and standard normal", type="l", lty=3)
+lines(X, dt(X, df=sample.size-1), lty=2)
+lines(density(t))
+legend("topright",
+       legend=c("t-stat", expression(t[n-1]), expression(N(0, 1))),
+       lty=c(1, 2, 3),
+       cex=0.7,
+       bty="n")
+```
+Especially at the extreme values, the $t$ values are better represented by the
+$t$-distribution. Even at the centre, the shorter and flatter $t$-distribution
+is closer to the data.
+
+### An example of confidence interval calculation
 We will illustrate this point by comparing the confidence intervals for a sample
 size of $20$ drawn from a Bernoulli distribution with parameters $p=0.5$ and
 $p=0.9$.
