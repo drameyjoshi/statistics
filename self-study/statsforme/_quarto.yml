@@ -8,7 +8,7 @@ book:
   chapters:
     - index.qmd
     - population_and_samples.qmd
-    - summary.qmd
+    - t_test.qmd
     - references.qmd
 
 bibliography: references.bib

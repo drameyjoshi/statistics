@@ -1,0 +1,76 @@
+{{< include macros.qmd >}}
+# The $t$-test
+
+We will consider one of the simplest statistical test and examine important
+topics related to hypothesis testing. We will illustrate the concepts using the
+'sleep' dataset.
+
+## The data set
+The 'sleep' dataset has observations of the extra sleep induced by two drugs on
+ten subjects. The attribute `extra` records the additional sleep. It may be
+negative. The distributuion of `extra` among the subjects when they were
+administered a drug looks like
+```{r fig.width=8, fig.height=6}
+par(mfrow=c(1, 2))
+hist(sleep[sleep$group == 1, "extra"], 
+     xlab="extra", ylab="Frequency", main="Drug 1")
+hist(sleep[sleep$group == 2, "extra"], 
+     xlab="extra", ylab="Frequency", main="Drug 2")
+```
+The action of the two drugs on the subjects is clearly not identical. In the 
+first case, the range of `extra` is from $-2$ to $4$ while in the second case it
+is from $-1$ to $6$. The second drug is likely to be more effective. However, we
+do not know if this variation is significant or just out of randomness. Before
+further analysis, we will look at the summary of the two groups.
+```{r}
+summary(sleep[sleep$group == 1, "extra"])
+summary(sleep[sleep$group == 2, "extra"])
+```
+The values of mean and median of `extra` in the two groups seem to be quite
+different. We are emboldened to suspect that the two drugs indeed have a 
+differing effectiveness.
+
+## The pooled variance
+To test if the two means are same, we have to compute the pooled variance of
+the groups. It is a method of estimating the variance of the population by
+assuming the two groups have same variance. In our case, the two variances are
+```{r}
+v1 <- var(sleep[sleep$group==1, "extra"])
+v2 <- var(sleep[sleep$group==2, "extra"])
+cat(paste("Variance of group 1:", v1, "\n"))
+cat(paste("Variance of group 2:", v2, "\n"))
+cat(paste("The ratio of variances is: ", v1/v2, "\n"))
+```
+
+### Are the two variances equal?
+If $X_1$ and $X_2$ are $\chi^2$-random variables with degrees of freedom $d_1$
+and $d_2$ then the variable $X_1/X_2$ is said to be F-distributed with 
+parameters $d_1$ and $d_2$. It is not possible to tell if these sample variances 
+are a manifestation of sampling from the same population. However, we can check
+the probability of getting a value of $0.7983$ under an F distribution with 
+parameters $9, 9$ using the code
+```{r}
+dfs <- tapply(sleep$extra, sleep$group, length)
+# Multiplication by 2 is necessary for a 2-way test. We are checking for the
+# ratio greater than 1 and less than 1.
+p.ratio <- pf(v1/v2, df1 = dfs[1], df2=dfs[2]) * 2
+cat(paste("The probability of getting the ratio", round(v1/v2, 4), "is", 
+          round(p.ratio, 4), "\n"))
+```
+Recall that a $\chi^2$ random variable of $k$ degrees of freedom is the sum of
+squares of $k$ independent standard normal random variables. It represents the
+variance of a sample $k + 1$ standard normal random variables. The $F$ 
+distribution thus assumes that numerator and denominator are variances of two
+samples drawn from the same population. 
+
+In the case of our data, we conclude that if the two samples came from the same
+population then a ratio as extreme as we got is possible with a probability of
+$0.7286$, which is quite high. Therefore, we fail to reject the null hypothesis
+that the two variances are the same.
+
+We can carry out this analysis in using a built-in R function
+```{r}
+var.test(sleep[sleep$group == 1, "extra"], sleep[sleep$group == 2, "extra"])
+```
+and come to the same conclusion.
+
