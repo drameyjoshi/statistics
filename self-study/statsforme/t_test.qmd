@@ -4,7 +4,7 @@ We will consider one of the simplest statistical test and examine important
 topics related to hypothesis testing. We will illustrate the concepts using the
 'sleep' dataset.
 
-## The data set
+## The data set {#sec-c2s1}
 The 'sleep' dataset has observations of the extra sleep induced by two drugs on
 ten subjects. The attribute `extra` records the additional sleep. It may be
 negative. The distributuion of `extra` among the subjects when they were
@@ -29,7 +29,7 @@ The values of mean and median of `extra` in the two groups seem to be quite
 different. We are emboldened to suspect that the two drugs indeed have a 
 differing effectiveness.
 
-## The pooled variance
+## The pooled variance {#sec-c2s2}
 To test if the two means are same, we have to compute the pooled variance of
 the groups. It is a method of estimating the variance of the population by
 assuming the two groups have same variance. In our case, the two variances are
@@ -49,7 +49,7 @@ something about the ratio of two variances, we first need to find a probability
 distribution that describes its variation.
 
 ### The F-distribution
-Recall the discussion in section @sec1-s2 that the variance $s^2$ of a sample
+Recall the discussion in section @sec-c1s2 that the variance $s^2$ of a sample
 of size $k$ drawn from a population with variance $\sigma^2$ has
 $$
 \frac{s^2}{\sigma^2} \sim \frac{\chi^2_{k-1}}{m},
@@ -93,7 +93,8 @@ consulting this plot
 ```{r}
 k <- seq(from=3, to=50)
 ratio <- (k - 3)/(k - 1)
-plot(k, ratio, type="l", ylim=c(0, 1.1), xlab="k", ylab=expression((k-3)/(k-1)))
+plot(k, ratio, type="l", ylim=c(0, 1.1), 
+     xlab="k", ylab=expression((k-3)/(k-1)))
 abline(h=1, lty=2)
 ```
 
@@ -138,3 +139,80 @@ var.test(sleep[sleep$group == 1, "extra"], sleep[sleep$group == 2, "extra"])
 ```
 and come to the same conclusion.
 
+This discussion also brings out the limitations of statistical tests like 
+`var.test` that depend on the properties of the underlying probability 
+distribution.
+
+- The data we are studying may not fit the underlying probability model.
+- The distribution may not be approximated by a gaussian distribution.
+- The parameters of the distribution may not be known.
+
+Statistical tests that depends on the properties of underlying distribution form
+what is called as \emph{parametric statistics}. In the recent years, there has
+been a shift towards \emph{nonparametric statistics}. The machine learning 
+algorithms fall in this category.
+
+And yet, there is great value in parametric methods. One must only be careful in
+examining whether the assumptions of the tests are valis before running them and
+interpreting their results.
+
+We applied hypothesis testing to the problem of testing whether two sample
+variances are equal. We will repeat the exercise to test whether the two drugs
+in `sleep` data induce the same amount of extra sleep in the ten subjects on
+which it was tested.
+
+### The formula for the pooled variance
+We have now convinced ourselves that there is a good chance that the two
+samples are drawn from the same population. Yet, the magnitudes of their variances
+are different. Can we use them to estimate the variance of the population? We
+need it to calculate the $t$-statistic. 
+
+A pooled variance is an estimator for the population variance when we use the
+variance from several samples each one with a different sample mean. If $s_1^2,
+\ldots, s_n^2$ are variances of samples of size $k_1, \ldots, k_n$ then the
+pooled variance is
+$$
+s_p^2 = \frac{(k_1 - 1)s_1^2 + \cdots + (k_n - 1)s_n^2}{k_1 - 1 + \cdots k_n - 1}
+$$
+In our case, since the two samples have the same size, the pooled variance is
+just the arithmetic mean of the two sample variances.
+
+When we had just one sample of size $n$, we constructed the $t$ statistic as 
+$$
+t = \frac{\bar{X}_n - \mu}{s}\sqrt{n}.
+$$
+Now that we have multiple samples (right now, two) we need a way to generalise 
+this. The correct generalisation is
+$$
+t = \frac{\bar{X}_n - \mu}{s_p}\sqrt{n_p},
+$$
+where
+$$
+\frac{1}{n_p} = \frac{1}{k_1} + \cdots + \frac{1}{k_n}.
+$$
+Thus, the pooled sample size is the harmonic mean of the individual sample sizes
+of the pool.
+
+### Combined variance
+There is a related statistic called \emph{combined variance}. It is the variance
+of multiple samples around the mean of all sample means. In our case, we have
+$$
+\begin{eqnarray}
+\bar{X}_n &=& \frac{X_1 + \cdots + X_n}{n} \\
+\bar{X}_n &=& \frac{X_{n+1} + \cdots + X_{n+m}}{m} \\
+\bar{X} &=& \frac{X_1 + \cdots + X_{n+m}}{n + m}
+\end{eqnarray}
+$$
+so that
+$$
+\bar{X} = \frac{n\bar{X}_n + m\bar{X}_m}{n + m}.
+$$
+The combined variance is
+$$
+s_c^2 = \frac{1}{n+m-1}\sum_{i=1}^{n+m}(X_i - \bar{X})^2.
+$$
+We can manipulate the sum so that
+$$
+s_c^2 = \frac{n-1}{n+m-1}s_n^2 + \frac{m-1}{n+m-1}s_m^2 + 
+\frac{mn}{(m+n)(m+n-1)}(\bar{X}_n - \bar{X}_m)^2.
+$$
