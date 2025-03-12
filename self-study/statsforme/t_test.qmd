@@ -1,4 +1,3 @@
-{{< include macros.qmd >}}
 # The $t$-test
 
 We will consider one of the simplest statistical test and examine important
@@ -41,32 +40,97 @@ cat(paste("Variance of group 1:", v1, "\n"))
 cat(paste("Variance of group 2:", v2, "\n"))
 cat(paste("The ratio of variances is: ", v1/v2, "\n"))
 ```
+It is not possible to tell if these sample variances are a manifestation of 
+sampling from the same population by merely reading their values and their 
+ratio. However, we can carry out a statistical test that tells us the probability
+of getting a ratio of this magnitude if the two variances are equal. That brings
+us to the first example of hypothesis testing. Since it involves deciding 
+something about the ratio of two variances, we first need to find a probability 
+distribution that describes its variation.
 
-### Are the two variances equal?
+### The F-distribution
+Recall the discussion in section @sec1-s2 that the variance $s^2$ of a sample
+of size $k$ drawn from a population with variance $\sigma^2$ has
+$$
+\frac{s^2}{\sigma^2} \sim \frac{\chi^2_{k-1}}{m},
+$$
+where $m = k - 1$ if the population was normally distributed. Otherwise, it is
+a function of $k$ and $\kappa$, the kurtosis of the population. Now suppose that
+there are two such samples drawn of size $k_1$ and $k_2$. Then
+$$
+\frac{s_i^2}{\sigma^2} \sim \frac{\chi^2_{k_i - 1}}{m(k_i, \kappa)}, i = 1, 2.
+$$
+Note that the two samples are drawn from the same population. As a result, the
+kurtosis used to get $m$ is the same. The ratio of the variances is
+$$
+\frac{s_1^2}{s_2^2} \sim 
+\frac{\chi^2_{k_1 - 1}}{\chi^2_{k_2 - 1}}\frac{m(k_2, \kappa)}{m(k_1, \kappa)}
+$$
+(The algebra of random variables is drastically different from that of numbers.
+It is a rather involved topic a glimpse of which can be had by reading the 
+article [Ratio distribution](https://en.wikipedia.org/wiki/Ratio_distribution).
+We will see a example of its subtlety in the cases considered below.)
+
+We consider a few special cases of this distribution.
+
+- If the samples are drawn from a normal population then
+$$
+\frac{s_1^2}{s_2^2} \sim 
+\frac{\chi^2_{k_1 - 1}}{\chi^2_{k_2 - 1}}\frac{k_2 - 1}{k_1 - 1}.
+$$
+
+- If the sample sizes are equal,
+$$
+\frac{s_1^2}{s_2^2} \sim \frac{\chi^2_{k_1 - 1}}{\chi^2_{k_1 - 1}}.
+$$
+Note that the rhs is not equal to the constant $1$. The two samples are not
+identical and they will, in general, have unequal variances.
+
+- If the samples are large enough then $m$ will approximately be the same for
+them and we can approximate the distribution of the ratio of variances by
+the expression in the previous point. How large is enough can be determined by
+consulting this plot
+```{r}
+k <- seq(from=3, to=50)
+ratio <- (k - 3)/(k - 1)
+plot(k, ratio, type="l", ylim=c(0, 1.1), xlab="k", ylab=expression((k-3)/(k-1)))
+abline(h=1, lty=2)
+```
+
+For our immediate purpose, we need the second of the cases discussed above. 
+Since our main goal right now is to understand hypothesis testing, we will not
+halt to discuss the most general form of the distribution of ratio of sample
+variances.
+
 If $X_1$ and $X_2$ are $\chi^2$-random variables with degrees of freedom $d_1$
 and $d_2$ then the variable $X_1/X_2$ is said to be F-distributed with 
-parameters $d_1$ and $d_2$. It is not possible to tell if these sample variances 
-are a manifestation of sampling from the same population. However, we can check
-the probability of getting a value of $0.7983$ under an F distribution with 
-parameters $9, 9$ using the code
-```{r}
-dfs <- tapply(sleep$extra, sleep$group, length)
-# Multiplication by 2 is necessary for a 2-way test. We are checking for the
-# ratio greater than 1 and less than 1.
-p.ratio <- pf(v1/v2, df1 = dfs[1], df2=dfs[2]) * 2
-cat(paste("The probability of getting the ratio", round(v1/v2, 4), "is", 
-          round(p.ratio, 4), "\n"))
-```
+parameters $d_1$ and $d_2$. Thus, the ratio of sample variances is F-distributed.
+
 Recall that a $\chi^2$ random variable of $k$ degrees of freedom is the sum of
 squares of $k$ independent standard normal random variables. It represents the
 variance of a sample $k + 1$ standard normal random variables. The $F$ 
 distribution thus assumes that numerator and denominator are variances of two
 samples drawn from the same population. 
 
+### Are the two variances equal?
+Coming back to the `sleep` data, we calculated the ratio of variances of the
+two groups to be $0.7983$. This ratio is our test statistic $t$. Our null
+hypothesis is that the two samples are drawn from the same population and 
+therefore have the same variance. Under the null hypothesis, we can find the
+probability that we can get a value of the test statistic as extreme as we got.
+```{r}
+dfs <- tapply(sleep$extra, sleep$group, length)
+# Multiplication by 2 is necessary for a 2-way test. We are checking for the
+# ratio greater than 1 and less than 1.
+t <- pf(v1/v2, df1 = dfs[1], df2=dfs[2]) * 2
+cat(paste("The probability of getting the ratio", round(v1/v2, 4), "is", 
+          round(t, 4), "\n"))
+```
 In the case of our data, we conclude that if the two samples came from the same
 population then a ratio as extreme as we got is possible with a probability of
-$0.7286$, which is quite high. Therefore, we fail to reject the null hypothesis
-that the two variances are the same.
+$0.7286$, which is quite high. In other words, if we reject the null hypothesis
+then there is a $72.86\%$ chance that we could be wrong. Therefore, we choose
+not to reject the null hypothesis.
 
 We can carry out this analysis in using a built-in R function
 ```{r}
