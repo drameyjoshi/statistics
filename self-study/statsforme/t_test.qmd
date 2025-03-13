@@ -323,3 +323,96 @@ number obtained in any one of the cases.
 
 In a paired test, such a symmetry does not arise and we do not have to double
 the probability.
+
+## $t$-test when variances are not equal
+The generalisation of the $t$-test for equality of sample means when the sample
+variances and sizes are not equal was developed by Welch [@welch1947]. The
+theory behind the formulae is quite involved and explained in Welch's paper. We
+merely quote the formulae here. The $t$-statistic is calculated as
+$$
+t = \frac{\bar{X}_1 - \bar{X}_2}{\sqrt{s_a^2 + s_b^2}},
+$$
+where
+\begin{eqnarray*}
+s_a &=& \frac{s_1}{n_1} \\
+s_b &=& \frac{s_2}{n_2}
+\end{eqnarray*}
+Here $s_{1, 2}$ are sample variances and $n_{1,2}$ are sample sizes. The number
+of degrees of freedom of the $t$ statistic are
+$$
+\nu = \frac{(s_a^2 + s_b^2)^2}{s_a^4/(n_1 - 1) + s_b^4/(n_2 - 1)}.
+$$
+Unlike the previous cases, we will not demonstrate the calculations but use the
+R function instead. We will use the `ChickWeight` data and find out if the 
+weight gained by the chicks on Diet 1 is the same as that gained by chicks on 
+Diet 2. Before we can analyse the data, we must transform it in a form where 
+we can easily calculate the weight gain.
+```{r}
+start.time <- tapply(ChickWeight$Time, ChickWeight$Chick, min)
+start.time.df <- data.frame(Chick = names(start.time), start.time = start.time)
+
+end.time <- tapply(ChickWeight$Time, ChickWeight$Chick, max)
+end.time.df <- data.frame(Chick = names(end.time), end.time = end.time)
+
+A <- merge(
+  x = ChickWeight,
+  y = start.time.df,
+  by.x = c("Chick", "Time"),
+  by.y = c("row.names", "start.time")
+)
+B <- merge(
+  x = ChickWeight,
+  y = end.time.df,
+  by.x = c("Chick", "Time"),
+  by.y = c("row.names", "end.time")
+)
+C <- merge(x = A[, c("Chick", "weight", "Diet")],
+           y = B[, c("Chick", "weight", "Diet")],
+           by = c("Chick", "Diet"))
+C$weight.gain <- C$weight.y - C$weight.x
+wgdata <- C[, c("Chick", "Diet", "weight.gain")]
+head(wgdata)
+```
+
+We check the mean weight gain with Diets 1 and 2 and also calculate the sample
+variances.
+```{r}
+tapply(wgdata$weight.gain, wgdata$Diet, mean)
+tapply(wgdata$weight.gain, wgdata$Diet, var)
+```
+
+Interestingly, the F-test on variances indicates that the variances are all
+equal.
+```{r}
+for (i in 1:3) {
+  for (j in (i + 1):4) {
+    X <- wgdata[wgdata$Diet == i, "weight.gain"]
+    Y <- wgdata[wgdata$Diet == j, "weight.gain"]
+    p <- round(var.test(X, Y)$p.value, 4)
+    cat(paste("Diet", i, " and Diet", j, ": p-value =", p, "\n"))
+  }
+}
+```
+
+We, therefore, carry out the $t$-test once assuming equal variances and then
+assuming that they are different.
+```{r}
+t.test(x=wgdata[wgdata$Diet == 1, "weight.gain"],
+       y=wgdata[wgdata$Diet == 2, "weight.gain"],
+       paired=FALSE,
+       var.equal=TRUE)
+```
+When the variances are assumed equal, the confidence interval is entirely on
+the left hand side of zero and we can conclude that the weight gain due Diet 1
+is less than that due to Diet 2.
+
+```{r}
+t.test(x=wgdata[wgdata$Diet == 1, "weight.gain"],
+       y=wgdata[wgdata$Diet == 2, "weight.gain"],
+       paired=FALSE,
+       var.equal=FALSE)
+```
+On the other hand, the $p$-value and the confidence interval suggest that we 
+cannot be so sure if we assume that the variances are unequal. Also notice that
+in this case Welch's test was carried out instead of the standard $t$-test.
+
