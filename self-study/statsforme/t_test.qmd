@@ -216,3 +216,48 @@ $$
 s_c^2 = \frac{n-1}{n+m-1}s_n^2 + \frac{m-1}{n+m-1}s_m^2 + 
 \frac{mn}{(m+n)(m+n-1)}(\bar{X}_n - \bar{X}_m)^2.
 $$
+
+## $t$-test {#sec-c2s2}
+We will now show how a $t$ test works. We want to investigate whether the
+extra sleep induced by the two drugs is same. We construct the $t$-statistic
+as
+$$
+t = \frac{\bar{X} - \bar{Y}}{s_p}\sqrt(n_p),
+$$
+where $\bar{X}$ is the sample mean of `extra` in the first group, $\bar{Y}$
+is the sample mean of `extra` in the second group, $s_p$ is the pooled variance
+and $n_p$ is the pooled degrees of freedom. We calculate each of these as
+```{r}
+group.means <- tapply(sleep$extra, sleep$group, mean)
+X.bar <- group.means[1]
+Y.bar <- group.means[2]
+
+group.vars <- tapply(sleep$extra, sleep$group, var)
+v1 <- group.vars[1]
+v2 <- group.vars[2]
+
+group.size <- tapply(sleep$extra, sleep$group, length)
+df1 <- group.size[1] - 1
+df2 <- group.size[2] - 1
+
+vp <- (df1 * v1 + df2 * v2)/(df1 + df2)
+np <- prod(group.size)/sum(group.size)
+
+t.stat <- (X.bar - Y.bar)/sqrt(vp) * sqrt(np)
+# We are testing if the means are different. Therefore, we need a 2-way test.
+p.val <- pt(t.stat, df = df1 + df2) * 2
+cat(paste("t-stat =", t.stat, "p =", p.val, "df =", df1 + df2))
+```
+
+A $p$-value of close to $8\%$ indicates that under the null distribution 
+there is an $8\%$ chance that the $t$-value will be as extreme as this one. If
+our significance level is $5\%$, we may want to not reject the null hypothesis.
+
+We can, of course, do all of this using a single function.
+```{r}
+t.test(sleep[sleep$group == 1, "extra"],
+       sleep[sleep$group == 2, "extra"],
+       paired=FALSE,
+       var.equal=TRUE)
+```
+
