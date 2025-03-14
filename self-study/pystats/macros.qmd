@@ -1,0 +1,8 @@
+---
+format: html
+---
+
+::: {.hidden}
+\newcommand{\var}{\text{Var}}
+\newcommand{\dNorm}{\mathcal{N}}
+:::

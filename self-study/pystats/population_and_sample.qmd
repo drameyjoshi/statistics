@@ -1,0 +1,515 @@
+{{< include macros.qmd >}}
+# Population and Samples
+
+A population is characterised by a cumulative probability distribution. A sample
+is a subset of the population that we observe and measure. Measurements of the
+sample are used to infer the parameters of the population. We will illustreate
+this idea with the simplest of measurements - the mean.
+
+## Sample mean {#sec-c1s1}
+Consider a population with an infinite number of tosses of a fair coin. We draw
+a random sample of ten such and find its mean.
+```{python}
+import numpy as np
+
+rng = np.random.default_rng(12111842)
+n_samples = 5
+
+_ = [print(
+        f"Sample mean = {np.mean(rng.binomial(n=1, p=0.5, size=10)).item()}"
+     ) for i in range(n_samples)]
+```
+
+Although we tossed a fair coin, the mean value of a sample is not always $0.5$.i
+We next repeat the procedure a large number of times and plot a histogram of the
+sample means.
+```{python}
+import matplotlib.pyplot as plt
+
+n_samples = 1000
+sample_means = [np.mean(rng.binomial(n=1, p=0.5, size=10)) 
+                for i in range(n_samples)]
+_ = plt.hist(sample_means)
+plt.xlabel("Sample mean")
+plt.ylabel("Frequency")
+_ = plt.title("Sampling distribution of means")
+```
+We see that there is a wide variation in the sample means although a majority
+of the times we do get the value $0.5$ appropriate for the tosses of a fair coin.
+
+The sample mean is also a random variable and it has a distribution. It is
+called the _sampling distribution of mean_.
+
+We can carry out this procedure for an infinite population of standard normal
+variates.
+```{python}
+from scipy import stats
+
+sample_size = 10
+data = rng.normal(loc=0, scale=1, size=n_samples * sample_size)
+samples = np.reshape(data, (sample_size, n_samples))
+sample_means = np.apply_along_axis(np.mean, 0, samples)
+
+kde = stats.gaussian_kde(sample_means)
+X = np.linspace(-1, 1, 100)
+fig, ax = plt.subplots()
+ax.hist(sample_means, density=True, bins=30)
+ax.plot(X, kde(X), label="Kernel density")
+ax.plot(X, stats.norm.pdf(X), label="Population density", color="black")
+plt.xlabel("Sample mean")
+plt.ylabel("Density")
+plt.legend(loc="upper left")
+_ = plt.title("Sampling distribution of means")
+```
+We observe that the sampling distribution of mean has a much lesser spread
+compared to the distribution of the population. This is to be expected as each
+sample mean tries to come closer to the true centre of the population. We can
+easily show that
+
+::: {#prp-c1p1}
+If a population has mean $\mu$ and variance $\sigma^2$ then the sampling
+distribution of mean has mean $\mu$ and variance $\sigma^2/n$, where $n$ is the
+sample size.
+:::
+
+::: {.proof}
+The sample mean is
+$$
+\bar{x} = \frac{1}{n}\sum_{i=1}^n x_i,
+$$
+so that
+$$
+E(\bar{x}) = \frac{1}{n}\sum_{i=1}^n E(x_i) = \frac{1}{n}\sum_{i=1}^n \mu = \mu,
+$$
+and
+$$
+\var(\bar{x}) = \frac{1}{n^2}\var\left(\sum_{i=1}^n x_i\right).
+$$
+Here we used the fact that $\\var(aX) = a^2\var(X)$. Since
+$\var(X_1 + \cdots + X_n) = n\var{X}$, we have
+$$
+\var(\bar{x}) = \frac{1}{n^2} n\sigma^2 = \frac{\sigma^2}{n}.
+$$
+:::
+
+The standard deviation of the sampling distribution is called its _standard
+error_.
+
+The histograms of the means of samples drawn from Bernoulli and standard normal
+distibutions seem to be peaked around the population mean and tapering away from
+it. The central limit theorem (see @wasserman2013all) guarantees that if $X_1,
+\ldots, X_n$ are random variables drawn independently from a population with
+mean $\mu$ and variance $\sigma^2 < \infty$ then
+$$
+Z_n = \frac{\bar{X} - \mu}{\sigma/\sqrt{n}}
+$$
+is a standard normal random variable as $n \rightarrow \infty$. In other words,
+the random variable $\bar{X}$ has a normal distribution of mean $\mu$ and
+variance $\sigma^2/n$.
+
+## Sample variance {#sec-c1s2}
+If $X_1, \ldots, X_n$ are a sample drawn from a population, its sample variance
+is
+$$
+s^2 = \frac{1}{n-1}\sum_{i=1}^n(X_i - \bar{X})^2.
+$$
+Being a quantity computed from the sample, $s^2$ is also a random variable.
+There are two results known about the distribution of sample variance:
+
+- If $X_1, \ldots, X_n$ are such that $X_i \sim \dNorm(\mu, \sigma^2)$ then
+$$
+(n - 1)\frac{s^2}{\sigma^2} \sim \chi^2(n - 1).
+$$
+A proof of this statement can be found in [The Book of Statistical Proofs](
+https://statproofbook.github.io/P/norm-chi2). Another proof is available in
+an [Eberly College of Science](https://online.stat.psu.edu/stat414/lesson/26/26.3)
+course.
+
+- If $X_1, \ldots, X_n$ are drawn from a distibution with variance $\sigma^2$
+and kurtosis $\kappa$ then
+$$
+\frac{s^2}{\sigma^2} \sim \frac{\chi^2(m)}{m},
+$$
+where
+$$
+m = \frac{2n}{\kappa - (n - 3)/(n - 1)}.
+$$
+This fact is mentioned in an answer to a question on [Stack Exchange](https://stats.stackexchange.com/questions/316714/sampling-distribution-of-sample-variance-of-non-normal-iid-r-v-s)
+in which the paper @ONeill02102014 is referred.
+
+We will now show that
+
+::: {#prp-c1p2}
+$E(s^2) = \sigma^2$.
+:::
+
+::: {.proof}
+Consider, $(n-1)S_n^2 = \sum_{i=1}^n(X_i - \bar{X}_n)^2$ so that
+\begin{equation}\label{e2}
+(n-1)E(S_n^2) = \sum_{i=1}^n\left(E(X_i^2) - 2E(X_i\bar{X}_n) + E(\bar{X}_n^2)\right)
+\end{equation}
+We first consider the term $E(X_i\bar{X}_n)$. It is
+\begin{eqnarray*}
+E(X_i\bar{X}_n) &=& E\left(X_i \sum_{j=1}^n\frac{X_j}{n}\right) \\
+nE(X_i\bar{X}_n) &=& \sum_{j=1, j\ne i}^n E(X_iX_j) + E(X_i^2) \\
+nE(X_i\bar{X}_n) &=& (n-1)\mu^2 + \mu^2 + \sigma^2 \\
+E(X_i\bar{X}_n) &=& \mu^2 + \frac{\sigma^2}{n},
+\end{eqnarray*}
+as $X_i$ are iid.
+
+From @prp-c1p1,
+$$
+E(\bar{X}_n^2) = \var{\bar{X}_n} - (E(\bar{X}_n))^2 = \frac{\sigma^2}{n} - \mu^2
+$$
+so that we have
+$$
+(n-1)E(S_n^2) = \sum_{i=1}^n\left(E(X_i^2) - 2\mu^2 - \frac{2\sigma^2}{n}
++ \frac{\sigma^2}{n} + \mu^2\right).
+$$
+The result follows from the fact that $E(X_i^2) = \mu^2 + \sigma^2$.
+:::
+
+## Convergence of mean {#sec-c1s3}
+If we toss a fair coin a large number of times we expect that eventually the
+number of heads will be almost the same as the number of tails. However, the
+way this equality emerges is quite unlike the way a mathematical series
+converges. In the experiment with coins, let us calculate the empirical
+probability of getting a head as the number of tosses increases. It is
+interesting to observe that different experiments will converge to the expected
+value of $0.5$ in different ways. If $X_n$ denotes the outcome of the $n$th toss
+and if we let $X_n = 1$ if the coin lands on head and $X_n = 0$ if it lands on
+tail then the probability of the number of times we get a head is also equal to
+the sample mean $\bar{X}_n$. We treat this experiment as a way to determine the
+sample mean.
+```{python}
+D = np.arange(1, n_samples + 1)
+
+S1 = np.cumsum(rng.binomial(n=1, p=0.5, size=n_samples))/D
+S2 = np.cumsum(rng.binomial(n=1, p=0.5, size=n_samples))/D
+S3 = np.cumsum(rng.binomial(n=1, p=0.5, size=n_samples))/D
+
+plt.plot(D, S1, label="Expt 1")
+plt.plot(D, S2, label="Expt 2")
+plt.plot(D, S3, label="Expt 3")
+plt.hlines(y=0.5, linestyles="dashed", 
+           xmin=0, xmax=n_samples+1, color="black")
+plt.xlabel("# tosses")
+plt.ylabel(r"$\bar{X}_n$")
+plt.legend(loc="upper right")
+_ = plt.title("Convergence of means")
+```
+Eventually, the sample means calculated in all experiments tends to be close to
+$0.5$ but each one approaches it differently. This type of convergence is called
+'convergence in probability'. The law of large number assures us that $\bar{X}_n$
+converges to $\mu$ in probability.
+
+## Confidence intervals of means {#sec-c1s4}
+We saw in section @sec-c1s1 that the sample mean is itself a random variable
+and has a distribution. Therefore, it is not usually helpful to quote just the
+sample mean. We need some way to indicate how far the population mean is from
+the sample mean.
+
+The sampling distribution of means is a gaussian distribution with parameters
+$\mu, \sigma^2/n$, where $n$ is the size of the sample. Therefore, the
+probability of getting a sample mean in the range $(\mu - \sigma/\sqrt{n}, \mu
++ \sigma/\sqrt{n})$ is close to $68\%$. Similarly, the probability of getting
+an $\bar{X}_n$ in the range $(\mu - 2\sigma/\sqrt{n}, \mu + 2\sigma/\sqrt{n})$
+is close to $95\%$ or the probability of $\bar{X}_n \le \mu - 2\sigma/\sqrt{n}$
+or $\bar{X}_n \ge \mu + 2\sigma/\sqrt{n}$ is $5\%$. Now the event
+$$
+\mu - 2\frac{\sigma}{\sqrt{n}} \le \bar{X}_n \le \mu + 2\frac{\sigma}{\sqrt{n}}
+$$
+is equivalent to
+$$
+-2\frac{\sigma}{\sqrt{n}} \le \bar{X}_n - \mu \le 2\frac{\sigma}{\sqrt{n}}
+$$
+which is same as
+$$
+-2\frac{\sigma}{\sqrt{n}} \le -\bar{X}_n + \mu \le 2\frac{\sigma}{\sqrt{n}}
+$$
+or
+$$
+\bar{X}_n -2\frac{\sigma}{\sqrt{n}} \le \mu \le
+\bar{X}_n + 2\frac{\sigma}{\sqrt{n}}.
+$$
+Thus, the probability of $\bar{X}_n$ lying in an interval around $\mu$ is the
+same as the probability of $\mu$ lying in the interval of same size around
+$\bar{X}_n$. A statement about the complement of this event is that the
+probability of $\bar{X}_n$ lying outside an interval around $\mu$ is the same
+as the probability of $\mu$ lying outside the interval of the same size around
+$\bar{X}_n$.
+
+Note that this equivalence is as a result of the symmetry of the gaussian
+distribution and it should not be applied to other distributions without
+considerations of its shape.
+
+We can summarise this section by stating that for a data set $X_1, \ldots, X_n$,
+the probability of $\mu \in (\bar{X}_n - k\sigma/\sqrt{n}, \bar{X}_n +
+k\sigma/\sqrt{n})$ is $1 - 2\Phi(-k)$ for an positive integer $k$, where $\Phi$
+denotes the standard normal distribution function.
+## Confidence intervals in practice {#sec-c1s5}
+### The effect of the sample size
+The confidence interval derived in the previous section depends on the
+distribution of the sample means. The central limit theorem guarantees that it
+will be gaussian in the limit of the sample size going to infinity. In practice,
+it means that when the sample sizes are large enough, the sampling distribution
+of means looks like a gaussian. But the sample size at which it starts happening
+depends on the distribution and its parameters from which the data are sampled.
+We will illustrate this point with the example of a Bernoulli distribution with
+two different sample sizes.
+
+#### Sample size $50$
+```{python, fig.width=6, fig.height=12}
+p1, p2 = 0.5, 0.9
+sample_size = 50
+n_samples = 100
+
+sample_1 = np.reshape(rng.binomial(n=1, p=p1, size=sample_size * n_samples),
+                      (sample_size, n_samples))
+sample_2 = np.reshape(rng.binomial(n=1, p=p2, size=sample_size * n_samples),
+                      (sample_size, n_samples))
+sample_means_1 = np.apply_along_axis(np.mean, 0, sample_1)
+sample_means_2 = np.apply_along_axis(np.mean, 0, sample_2)
+
+mean_means_1 = np.mean(sample_means_1)
+mean_means_2 = np.mean(sample_means_2)
+
+# We assume that the population variance is known.
+sigma_1 = np.sqrt(p1 * (1 - p1))
+sigma_2 = np.sqrt(p2 * (1 - p2))
+
+X1 = np.linspace(start=mean_means_1 - 0.3,
+                 stop=mean_means_1 + 0.3,
+                 num=100)
+X2 = np.linspace(start=mean_means_2 - 0.3,
+                 stop=mean_means_2 + 0.3,
+                 num=100)
+
+kde_1 = stats.gaussian_kde(sample_means_1)
+kde_2 = stats.gaussian_kde(sample_means_2)
+
+N1 = stats.norm.pdf(X1, loc=mean_means_1, scale=sigma_1/np.sqrt(sample_size))
+N2 = stats.norm.pdf(X2, loc=mean_means_2, scale=sigma_2/np.sqrt(sample_size))
+fig, ax = plt.subplots(1, 2, figsize=(10, 4))
+ax[0].plot(X1, N1, label="Gaussian")
+ax[0].plot(X1, kde_1(X1), label="Density")
+ax[0].legend(loc="upper left")
+_ = ax[0].set_title(f"p = {p1}, n = {sample_size}")
+ax[1].plot(X2, N2, label="Gaussian")
+ax[1].plot(X2, kde_2(X2), label="Density")
+ax[1].legend(loc="upper left")
+_ = ax[1].set_title(f"p = {p2}, n = {sample_size}")
+```
+
+In both situations, the sampling distribution of means closely resembles a
+gaussian distribution with appropriate parameters.
+
+#### Sample size $10$
+```{python, fig.width=6, fig.height=12}
+p1, p2 = 0.5, 0.9
+sample_size = 10
+n_samples = 100
+
+sample_1 = np.reshape(rng.binomial(n=1, p=p1, size=sample_size * n_samples),
+                      (sample_size, n_samples))
+sample_2 = np.reshape(rng.binomial(n=1, p=p2, size=sample_size * n_samples),
+                      (sample_size, n_samples))
+sample_means_1 = np.apply_along_axis(np.mean, 0, sample_1)
+sample_means_2 = np.apply_along_axis(np.mean, 0, sample_2)
+
+mean_means_1 = np.mean(sample_means_1)
+mean_means_2 = np.mean(sample_means_2)
+
+# We assume that the population variance is known.
+sigma_1 = np.sqrt(p1 * (1 - p1))
+sigma_2 = np.sqrt(p2 * (1 - p2))
+
+X1 = np.linspace(start=mean_means_1 - 0.3,
+                 stop=mean_means_1 + 0.3,
+                 num=100)
+X2 = np.linspace(start=mean_means_2 - 0.3,
+                 stop=mean_means_2 + 0.3,
+                 num=100)
+
+kde_1 = stats.gaussian_kde(sample_means_1)
+kde_2 = stats.gaussian_kde(sample_means_2)
+
+N1 = stats.norm.pdf(X1, loc=mean_means_1, scale=sigma_1/np.sqrt(sample_size))
+N2 = stats.norm.pdf(X2, loc=mean_means_2, scale=sigma_2/np.sqrt(sample_size))
+fig, ax = plt.subplots(1, 2, figsize=(10, 4))
+ax[0].plot(X1, N1, label="Gaussian")
+ax[0].plot(X1, kde_1(X1), label="Density")
+ax[0].legend(loc="upper left")
+_ = ax[0].set_title(f"p = {p1}, n = {sample_size}")
+ax[1].plot(X2, N2, label="Gaussian")
+ax[1].plot(X2, kde_2(X2), label="Density")
+ax[1].legend(loc="upper left")
+_ = ax[1].set_title(f"p = {p2}, n = {sample_size}")
+```
+
+Clearly, the density is much closer to being an gaussian when $p = 0.5$ and it
+anything but gaussian when $p = 0.9$. Therefore, building a confidence interval
+assuming that the sampling distribution of means is gaussian is grossly wrong
+in the latter case.
+
+### Population variance is seldom known
+The central limit theorem assures that in the limit of infinite sample size,
+$$
+z = \frac{\bar{X}_n - \mu}{\sigma}\sqrt{n}
+$$
+has a standard normal distribution. However, in most realistic situations, we
+neither know $\mu$ nor do we know $\sigma$. When the sample size is "reasonably
+large", we can approximate $\sigma$ be $s$, the sample standard deviation, and
+use the $z$ statistic to derive a confidence interval around $\bar{X}_n$. In the
+general case, the statistic
+$$
+t = \frac{\bar{X}_n - \mu}{s}\sqrt{n}
+$$
+follows a $t$-distribution of $n - 1$ degrees of freedom. A $t$-distribution
+approximates a standard normal distribution for large enough degrees of freedom.
+However, for small $n$, one must use the $t$ statistic to construct the
+confidence intervals. Thus, if we want to construct a $95\%$ confidence interval
+for $\mu$ then with $\alpha = 0.95$, $\mu$ lies in
+$$
+\left[\bar{X}_n + t_{\nu, 1-\alpha/2}\frac{s}{\sqrt{n}},
+ \bar{X}_n + t_{\nu, \alpha/2}\frac{s}{\sqrt{n}}\right],
+$$
+where $\nu = n - 1$ is the number of degrees of freedom of the t-distribution
+and $t_{\nu, x}$ denotes the quantile of a $t$ distribution with $\nu$ degrees
+of freedom at a probability value of $x$.
+We will illustrate these ideas with a few plots. We draw several samples from
+a standard normal distribution and start with a plot of their means. We overlay
+the sampling distribution with a gaussian with parameters $\mu=0, \sigma^2=1/
+\sqrt{n}$, $n$ being the sample size.
+
+We will illustrate these ideas with a few plots. We draw several samples from
+a standard normal distribution and start with a plot of their means. We overlay
+the sampling distribution with a gaussian with parameters $\mu=0, \sigma^2=1/
+\sqrt{n}$, $n$ being the sample size.
+```{python}
+sample_size = 6
+n_samples = 100
+samples = np.reshape(rng.normal(size=sample_size * n_samples), 
+                     (sample_size, n_samples))
+sample_means = np.apply_along_axis(np.mean, 0, samples)
+X = np.linspace(start=-1.5, stop=1.5, num=100)
+plt.plot(X, stats.norm.pdf(X, loc=0, scale=1/np.sqrt(sample_size)),
+         label=r"$\varphi(x)$")
+kde = stats.gaussian_kde(sample_means)
+plt.plot(X, kde(X), label="Density of sample means")
+plt.legend(loc="upper left")
+_ = plt.title(f"Sample size = {sample_size}")
+```
+
+Sometimes I forget that the sampling distribution of means is **not** $t$-
+distributed. To remind myself of it, the next plot shows that the two are
+drastically different.
+
+```{python}
+plt.plot(X, kde(X), label="Density of sample means")
+plt.plot(X, stats.t.pdf(X, df=sample_size - 1), label="t-distribution")
+plt.legend(loc="upper left")
+_ = plt.title(r"Sample and $t$-distributions")
+```
+
+Next we look at the distribution of
+$$
+t = \frac{\bar{X}_n - \mu}{s}\sqrt{n}
+$$
+and compare it with a) the standard normal distribution and b) a $t$-distribution
+with $n - 1$ degrees of freedom.
+
+```{python}
+sample_sd = np.apply_along_axis(np.std, 0, samples)
+ts = (sample_means - 0)/sample_sd * np.sqrt(sample_size)
+X = np.linspace(start=-4, stop=4, num=100)
+plt.plot(X, stats.norm.pdf(X), label="Standard normal")
+plt.plot(X, stats.t.pdf(X, df=sample_size-1), label="Student's t")
+kde = stats.gaussian_kde(ts)
+plt.plot(X, kde(X), label="Density of t-stats")
+plt.legend(loc="upper left")
+_ = plt.title("Comparison of t-stats with standard normal and Student's t")
+```
+Especially at the extreme values, the $t$ values are better represented by the
+$t$-distribution. Even at the centre, the shorter and flatter $t$-distribution
+is closer to the data.
+
+### An example of confidence interval calculation
+We will illustrate this point by comparing the confidence intervals for a sample
+size of $20$ drawn from a Bernoulli distribution with parameters $p=0.5$ and
+$p=0.9$.
+
+As we do not know the parameters of the population distribution, we estimate
+the parameters of the sampling distribution can be taken as
+$\mu = \hat{p} = \bar{X}_n$ and $\sigma^2 = \hat{p}(1 - \hat{p})$. An interval
+calculated using these parameters is called the _Wald interval_. For the second
+sample, the Wald interval is not appropriate as we show in the simulation below
+for the case $p = 0.9$.
+```{python}
+p = 0.9
+samples = np.reshape(rng.binomial(n=1, p=p, size=sample_size * n_samples),
+                     (sample_size, n_samples))
+sample_means = np.apply_along_axis(np.mean, 0, samples)
+sample_sd = np.apply_along_axis(np.std, 0, samples)
+# We are looking for a 95% interval, so the limits are +/- 2 standard
+# deviations from the mean.
+k = 2
+lower = sample_means - k * sample_sd
+upper = sample_means + k * sample_sd
+
+mu = p
+result = (lower <= mu) & (mu <= upper)
+pct = np.round(100 * np.sum(result)/n_samples, 2)
+print(f"The confidence intervals captured parametric mean {pct}% times.")
+print("It was expected to capture 95% times.")
+```
+
+This is not a pathological example of the failure of Wald interval. Often times
+we want to sample to estimate the parametric probability of a rare event.
+Clearly, in this case, the Wald interval misses to capture the parametric
+probability far too many times. A simple trick due to Agresti and Coull seems to
+work wonders. It consists of augumenting every sample with two successes and two
+failures.
+
+```{python}
+# Quantities related to Agreti-Coull interval will be prefixed with 'ac_'
+ac_samples = np.concatenate((samples, 
+                             np.reshape(np.ones(n_samples), (1, n_samples)),
+                             np.reshape(np.ones(n_samples), (1, n_samples)),
+                             np.reshape(np.zeros(n_samples), (1, n_samples)),
+                             np.reshape(np.zeros(n_samples), (1, n_samples))),
+                            axis=0)
+ac_sample_means = np.apply_along_axis(np.mean, 0, ac_samples)
+ac_sample_sd = np.apply_along_axis(np.std, 0, ac_samples)
+
+k = 2
+ac_lower = ac_sample_means - k * ac_sample_sd
+ac_upper = ac_sample_means + k * ac_sample_sd
+
+mu = p
+ac_result = (ac_lower <= mu) & (mu <= ac_upper)
+ac_pct = np.round(100 * np.sum(ac_result)/n_samples, 2)
+
+print(f"The confidence intervals captured parametric mean {ac_pct}% times.")
+print("It was expected to capture 95% times.")
+```
+However, this adjustment comes at a cost. Let us compare the sample means with
+and without the Agresti-Coull adjustment.
+```{python}
+print(f"Mean of means of original samples = {np.mean(sample_means)}")
+print(f"Mean of means of Agresti-Coull samples = {np.mean(ac_sample_means):0.3}")
+```
+
+The sample means of the Agresit-Coull augmented data are shifted lower than the
+observed sample means. However, one must note that the Agresti-Coull adjustment
+is done only to find good confidence intervals. The reported sample mean should
+be the one calculated prior to augmentation of two successes and two failures.
+
+There are other methods of computing the confidence intervals for a binomial
+distribution. An early method by Clopper and Pearson [@ClopperPearson1934] is called
+and _exact_ method because it does not use the central limit theorem to
+approximate the sampling distribution of means. Rather, it derives them from the
+properties of binomial distribution alone. The 
+[Wikipedia page](https://en.wikipedia.org/wiki/Binomial_proportion_confidence_interval#)
+on binomial proportions describes a few more ways to compute the confidence
+intervals.

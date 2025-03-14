@@ -1,0 +1,23 @@
+project:
+  type: book
+
+book:
+  title: "Statistics for Me in Python"
+  author: "Amey Joshi"
+  date: "3/14/2025"
+  chapters:
+    - index.qmd
+    - population_and_sample.qmd
+    - summary.qmd
+    - references.qmd
+
+bibliography: references.bib
+
+format:
+  html:
+    theme: cosmo
+  pdf:
+    documentclass: scrreprt
+
+
+
