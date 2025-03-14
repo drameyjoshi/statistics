@@ -397,22 +397,66 @@ for (i in 1:3) {
 We, therefore, carry out the $t$-test once assuming equal variances and then
 assuming that they are different.
 ```{r}
-t.test(x=wgdata[wgdata$Diet == 1, "weight.gain"],
-       y=wgdata[wgdata$Diet == 2, "weight.gain"],
-       paired=FALSE,
-       var.equal=TRUE)
+X <- wgdata[wgdata$Diet == 1, "weight.gain"]
+Y <- wgdata[wgdata$Diet == 2, "weight.gain"]
+t.test(x=X, y=Y, paired=FALSE, var.equal=TRUE)
 ```
 When the variances are assumed equal, the confidence interval is entirely on
 the left hand side of zero and we can conclude that the weight gain due Diet 1
 is less than that due to Diet 2.
 
 ```{r}
-t.test(x=wgdata[wgdata$Diet == 1, "weight.gain"],
-       y=wgdata[wgdata$Diet == 2, "weight.gain"],
-       paired=FALSE,
-       var.equal=FALSE)
+t.test(x=X, y=Y, paired=FALSE, var.equal=FALSE)
 ```
 On the other hand, the $p$-value and the confidence interval suggest that we 
 cannot be so sure if we assume that the variances are unequal. Also notice that
 in this case Welch's test was carried out instead of the standard $t$-test.
+
+
+### An investigation into the variances of weight gain
+It was a tad surprising that the F-test for comparing variances declared that
+the all variances are likely to be same. Let us compare the density of the
+data after centering all of them on the origin.
+```{r}
+cwg.1 = wgdata[wgdata$Diet == 1, "weight.gain"] - 
+        mean(wgdata[wgdata$Diet == 1, "weight.gain"])
+cwg.2 = wgdata[wgdata$Diet == 2, "weight.gain"] - 
+        mean(wgdata[wgdata$Diet == 2, "weight.gain"])
+cwg.3 = wgdata[wgdata$Diet == 3, "weight.gain"] - 
+        mean(wgdata[wgdata$Diet == 3, "weight.gain"])
+cwg.4 = wgdata[wgdata$Diet == 4, "weight.gain"] -
+        mean(wgdata[wgdata$Diet == 4, "weight.gain"])
+
+density.1 <- density(cwg.1)
+density.2 <- density(cwg.2)
+density.3 <- density(cwg.3)
+density.4 <- density(cwg.4)
+
+ymax <- max(density.1$y, density.2$y, density.3$y, density.4$y)
+plot(
+  density.1,
+  ylim = c(0, ymax),
+  col = "black",
+  xlab = "Centred weight gain",
+  main = "Density of weight gain"
+)
+lines(density.2, col = "blue")
+lines(density.3, col = "green")
+lines(density.4, col = "red")
+legend(
+  "topright",
+  legend = c("Diet 1", "Diet 2", "Diet 3", "Diet 4"),
+  col = c("black", "blue", "green", "red"),
+  lty = rep(1, 4),
+  cex = 0.7,
+  bty = "n"
+)
+
+```
+
+The plot indeed shows that the "width" of the densities are not drastically 
+different from each other.
+
+However, it probably makes sense to always use the Welch test to compare means
+for its less stringent requirements.
 
