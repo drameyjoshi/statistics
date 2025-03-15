@@ -1,0 +1,151 @@
+# The $t$-test
+
+We will consider one of the simplest statistical test and examine important
+topics related to hypothesis testing. We will illustrate the concepts using the
+'sleep' dataset.
+
+## The data set {#sec-c2s1}
+The 'sleep' dataset has observations of the extra sleep induced by two drugs on
+ten subjects. The attribute `extra` records the additional sleep. It may be
+negative. The distributuion of `extra` among the subjects when they were
+administered a drug looks like
+```{python fig.width=8, fig.height=6}
+import rdatasets as rds
+import matplotlib.pyplot as plt
+
+sleep = rds.data("sleep")
+axes = sleep[["group", "extra"]].hist("extra", by="group", sharey=True)
+
+g = 1
+for ax in axes.flatten():
+    ax.set_xlabel("extra")
+    ax.set_ylabel("frequency")
+    ax.set_title(f"Group {g}")
+    g += 1
+
+_ = plt.suptitle("Extra sleep induced by two drugs")
+```
+The action of the two drugs on the subjects is clearly not identical. In the 
+first case, the range of `extra` is from $-2$ to $4$ while in the second case it
+is from $-1$ to $6$. The second drug is likely to be more effective. However, we
+do not know if this variation is significant or just out of randomness. Before
+further analysis, we will look at the summary of the two groups.
+
+```{python}
+sleep[sleep["group"] == 1]["extra"].describe()
+```
+```{python}
+sleep[sleep["group"] == 2]["extra"].describe()
+```
+The values of mean and median of `extra` in the two groups seem to be quite
+different. We are emboldened to suspect that the two drugs indeed have a
+differing effectiveness.
+
+## The pooled variance {#sec-c2s2}
+To test if the two means are same, we have to compute the pooled variance of
+the groups. It is a method of estimating the variance of the population by
+assuming the two groups have same variance. In our case, the two variances are
+```{python}
+vs = [sleep[sleep["group"] == i]["extra"].var().item() for i in [1, 2]]
+vr = vs[0]/vs[1]
+_ = [print(f"Variance of group {i+1} = {vs[i]:0.4}") for i in [0, 1]]
+_ = print(f"Ratio of variances is {vr:0.3}")
+
+```
+
+It is not possible to tell if these sample variances are a manifestation of
+sampling from the same population by merely reading their values and their
+ratio. However, we can carry out a statistical test that tells us the probability
+of getting a ratio of this magnitude if the two variances are equal. That brings
+us to the first example of hypothesis testing. Since it involves deciding
+something about the ratio of two variances, we first need to find a probability
+distribution that describes its variation.
+
+### The F-distribution
+Recall the discussion in section @sec-c1s2 that the variance $s^2$ of a sample
+of size $k$ drawn from a population with variance $\sigma^2$ has
+$$
+\frac{s^2}{\sigma^2} \sim \frac{\chi^2_{k-1}}{m},
+$$
+where $m = k - 1$ if the population was normally distributed. Otherwise, it is
+a function of $k$ and $\kappa$, the kurtosis of the population. Now suppose that
+there are two such samples drawn of size $k_1$ and $k_2$. Then
+$$
+\frac{s_i^2}{\sigma^2} \sim \frac{\chi^2_{k_i - 1}}{m(k_i, \kappa)}, i = 1, 2.
+$$
+Note that the two samples are drawn from the same population. As a result, the
+kurtosis used to get $m$ is the same. The ratio of the variances is
+$$
+\frac{s_1^2}{s_2^2} \sim
+\frac{\chi^2_{k_1 - 1}}{\chi^2_{k_2 - 1}}\frac{m(k_2, \kappa)}{m(k_1, \kappa)}
+$$
+(The algebra of random variables is drastically different from that of numbers.
+It is a rather involved topic a glimpse of which can be had by reading the
+article [Ratio distribution](https://en.wikipedia.org/wiki/Ratio_distribution).
+We will see a example of its subtlety in the cases considered below.)
+
+We consider a few special cases of this distribution.
+
+- If the samples are drawn from a normal population then
+$$
+\frac{s_1^2}{s_2^2} \sim
+\frac{\chi^2_{k_1 - 1}}{\chi^2_{k_2 - 1}}\frac{k_2 - 1}{k_1 - 1}.
+$$
+
+- If the sample sizes are equal,
+$$
+\frac{s_1^2}{s_2^2} \sim \frac{\chi^2_{k_1 - 1}}{\chi^2_{k_1 - 1}}.
+$$
+Note that the rhs is not equal to the constant $1$. The two samples are not
+identical and they will, in general, have unequal variances.
+
+- If the samples are large enough then $m$ will approximately be the same for
+them and we can approximate the distribution of the ratio of variances by
+the expression in the previous point. How large is enough can be determined by
+consulting this plot
+```{python}
+ratios = [(k - 3)/(k - 1) for k in range(3, 51)]
+plt.plot([k for k in range(3, 51)], ratios)
+plt.xlabel("k")
+plt.ylabel(r"$(k-3)/(k-1)$")
+plt.hlines(y=1, xmin=3, xmax=50, linestyle="dashed", color="black")
+```
+For our immediate purpose, we need the second of the cases discussed above.
+Since our main goal right now is to understand hypothesis testing, we will not
+halt to discuss the most general form of the distribution of ratio of sample
+variances.
+
+If $X_1$ and $X_2$ are $\chi^2$-random variables with degrees of freedom $d_1$
+and $d_2$ then the variable $X_1/X_2$ is said to be F-distributed with
+parameters $d_1$ and $d_2$. Thus, the ratio of sample variances is F-distributed.
+
+Recall that a $\chi^2$ random variable of $k$ degrees of freedom is the sum of
+squares of $k$ independent standard normal random variables. It represents the
+variance of a sample $k + 1$ standard normal random variables. The $F$
+distribution thus assumes that numerator and denominator are variances of two
+samples drawn from the same population.
+
+### Are the two variances equal?
+Coming back to the `sleep` data, we calculated the ratio of variances of the
+two groups to be $0.7983$. This ratio is our test statistic $t$. Our null
+hypothesis is that the two samples are drawn from the same population and
+therefore have the same variance. Under the null hypothesis, we can find the
+probability that we can get a value of the test statistic as extreme as we got.
+
+```{python}
+from scipy import stats
+
+dfs = sleep[["group", "extra"]].groupby("group").count().to_numpy().flatten()
+# Multiplication by 2 is necessary for a 2-way test. We are checking for the
+# ratio greater than 1 and less than 1.
+t = stats.f.pdf(vr, dfn=dfs[0], dfd=dfs[1])
+print(f"The probability of getting a ratio {vr:0.4} of variances is {t:0.4}")
+```
+In the case of our data, we conclude that if the two samples came from the same
+population then a ratio as extreme as we got is possible with a probability of
+$0.7286$, which is quite high. In other words, if we reject the null hypothesis
+then there is a $72.86\%$ chance that we could be wrong. Therefore, we choose
+not to reject the null hypothesis.
+
+Unfortunately, Python does not have an equivalent of `var.test` in R.
+
