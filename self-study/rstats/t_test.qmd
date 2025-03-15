@@ -11,10 +11,10 @@ negative. The distributuion of `extra` among the subjects when they were
 administered a drug looks like
 ```{r fig.width=8, fig.height=6}
 par(mfrow=c(1, 2))
-hist(sleep[sleep$group == 1, "extra"], 
-     xlab="extra", ylab="Frequency", main="Drug 1")
-hist(sleep[sleep$group == 2, "extra"], 
-     xlab="extra", ylab="Frequency", main="Drug 2")
+sleep.1 <- sleep[sleep$group == 1, "extra"]
+sleep.2 <- sleep[sleep$group == 2, "extra"]
+hist(sleep.1, xlab="extra", ylab="Frequency", main="Drug 1")
+hist(sleep.2, xlab="extra", ylab="Frequency", main="Drug 2")
 ```
 The action of the two drugs on the subjects is clearly not identical. In the 
 first case, the range of `extra` is from $-2$ to $4$ while in the second case it
@@ -22,8 +22,8 @@ is from $-1$ to $6$. The second drug is likely to be more effective. However, we
 do not know if this variation is significant or just out of randomness. Before
 further analysis, we will look at the summary of the two groups.
 ```{r}
-summary(sleep[sleep$group == 1, "extra"])
-summary(sleep[sleep$group == 2, "extra"])
+summary(sleep.1)
+summary(sleep.2)
 ```
 The values of mean and median of `extra` in the two groups seem to be quite
 different. We are emboldened to suspect that the two drugs indeed have a 
@@ -135,7 +135,7 @@ not to reject the null hypothesis.
 
 We can carry out this analysis in using a built-in R function
 ```{r}
-var.test(sleep[sleep$group == 1, "extra"], sleep[sleep$group == 2, "extra"])
+var.test(sleep.1, sleep.2)
 ```
 and come to the same conclusion.
 
@@ -254,10 +254,7 @@ our significance level is $5\%$, we may want to not reject the null hypothesis.
 
 We can, of course, do all of this using a single function.
 ```{r}
-t.test(sleep[sleep$group == 1, "extra"],
-       sleep[sleep$group == 2, "extra"],
-       paired=FALSE,
-       var.equal=TRUE)
+t.test(sleep.1, sleep.2, paired=FALSE, var.equal=TRUE)
 ```
 
 ## The paired $t$-test {#sec-c2s4}
@@ -295,10 +292,7 @@ as extreme as this one can be found. We can therefore reject the null hypothesis
 
 This analysis can be done using a single function in R.
 ```{r}
-t.test(sleep[sleep$group == 1, "extra"],
-       sleep[sleep$group == 2, "extra"],
-       paired=FALSE,
-       var.equal=TRUE)
+t.test(sleep.1, sleep.2, paired=FALSE, var.equal=TRUE)
 ```
 
 ### Calculation of $p$-value

@@ -101,14 +101,14 @@ If $X_1, \ldots, X_n$ are a sample drawn from a population, its sample variance
 is
 $$
 s^2 = \frac{1}{n-1}\sum_{i=1}^n(X_i - \bar{X})^2.
-$$
+$$ {#eq-c1e1}
 Being a quantity computed from the sample, $s^2$ is also a random variable. 
 There are two results known about the distribution of sample variance:
 
 - If $X_1, \ldots, X_n$ are such that $X_i \sim \dNorm(\mu, \sigma^2)$ then
 $$
 (n - 1)\frac{s^2}{\sigma^2} \sim \chi^2(n - 1).
-$$
+$$ {#eq-c1e2}
 A proof of this statement can be found in [The Book of Statistical Proofs](
 https://statproofbook.github.io/P/norm-chi2). Another proof is available in
 an [Eberly College of Science](https://online.stat.psu.edu/stat414/lesson/26/26.3)
@@ -118,11 +118,11 @@ course.
 and kurtosis $\kappa$ then 
 $$
 \frac{s^2}{\sigma^2} \sim \frac{\chi^2(m)}{m},
-$$
+$$ {#eq-c1e3}
 where
 $$
 m = \frac{2n}{\kappa - (n - 3)/(n - 1)}.
-$$
+$$ {#eq-c1e4}
 This fact is mentioned in an answer to a question on [Stack Exchange](https://stats.stackexchange.com/questions/316714/sampling-distribution-of-sample-variance-of-non-normal-iid-r-v-s)
 in which the paper @ONeill02102014 is referred.
 
@@ -208,20 +208,20 @@ is close to $95\%$ or the probability of $\bar{X}_n \le \mu - 2\sigma/\sqrt{n}$
 or $\bar{X}_n \ge \mu + 2\sigma/\sqrt{n}$ is $5\%$. Now the event
 $$
 \mu - 2\frac{\sigma}{\sqrt{n}} \le \bar{X}_n \le \mu + 2\frac{\sigma}{\sqrt{n}}
-$$
+$$ {#eq-c1e5}
 is equivalent to
 $$
 -2\frac{\sigma}{\sqrt{n}} \le \bar{X}_n - \mu \le 2\frac{\sigma}{\sqrt{n}}
-$$
+$$ {#eq-c1e6}
 which is same as
 $$
 -2\frac{\sigma}{\sqrt{n}} \le -\bar{X}_n + \mu \le 2\frac{\sigma}{\sqrt{n}}
-$$
+$$ {#eq-c1e7}
 or
 $$
 \bar{X}_n -2\frac{\sigma}{\sqrt{n}} \le \mu \le 
 \bar{X}_n + 2\frac{\sigma}{\sqrt{n}}.
-$$
+$$ {#eq-c1e8}
 Thus, the probability of $\bar{X}_n$ lying in an interval around $\mu$ is the
 same as the probability of $\mu$ lying in the interval of same size around
 $\bar{X}_n$. A statement about the complement of this event is that the
@@ -336,7 +336,7 @@ in the latter case.
 The central limit theorem assures that in the limit of infinite sample size,
 $$
 z = \frac{\bar{X}_n - \mu}{\sigma}\sqrt{n}
-$$
+$$ {#eq-c1e9}
 has a standard normal distribution. However, in most realistic situations, we
 neither know $\mu$ nor do we know $\sigma$. When the sample size is "reasonably
 large", we can approximate $\sigma$ be $s$, the sample standard deviation, and
@@ -344,7 +344,7 @@ use the $z$ statistic to derive a confidence interval around $\bar{X}_n$. In the
 general case, the statistic
 $$
 t = \frac{\bar{X}_n - \mu}{s}\sqrt{n}
-$$
+$$ {#eq-c1e10}
 follows a $t$-distribution of $n - 1$ degrees of freedom. A $t$-distribution
 approximates a standard normal distribution for large enough degrees of freedom.
 However, for small $n$, one must use the $t$ statistic to construct the 
@@ -353,7 +353,7 @@ for $\mu$ then with $\alpha = 0.95$, $\mu$ lies in
 $$
 \left[\bar{X}_n + t_{\nu, 1-\alpha/2}\frac{s}{\sqrt{n}}, 
  \bar{X}_n + t_{\nu, \alpha/2}\frac{s}{\sqrt{n}}\right],
-$$
+$$ {#eq-c1e11}
 where $\nu = n - 1$ is the number of degrees of freedom of the t-distribution
 and $t_{\nu, x}$ denotes the quantile of a $t$ distribution with $\nu$ degrees 
 of freedom at a probability value of $x$.
@@ -381,7 +381,7 @@ Sometimes I forget that the sampling distribution of means is **not** $t$-
 distributed. To remind myself of it, the next plot shows that the two are
 drastically different.
 ```{r}
-plot(density(sample.means), xlab="X", ylab=expression(f[X]), type="l", lty=3,
+plot(density(sample.means), xlab="X", ylab=expression(f[X]), type="l", lty=1,
      main="Sampling distribution compared with t-distribution")
 lines(X, dt(X, df=sample.size-1), lty=3)
 legend("topright",
@@ -485,6 +485,8 @@ There are other methods of computing the confidence intervals for a binomial
 distribution. An early method by Clopper and Pearson [@ClopperPearson1934] is called
 and _exact_ method because it does not use the central limit theorem to 
 approximate the sampling distribution of means. Rather, it derives them from the
-properties of binomial distribution alone. The [Wikipedia page](https://en.wikipedia.org/wiki/Binomial_proportion_confidence_interval#)
+properties of binomial distribution alone. The 
+[Wikipedia page](https://en.wikipedia.org/wiki/Binomial_proportion_confidence_interval#)
 on binomial proportions describes a few more ways to compute the confidence
 intervals.
+
