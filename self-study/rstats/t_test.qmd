@@ -285,7 +285,7 @@ p.val <- pt(t.stat, df=df) * 2
 cat(paste("t-stat =", round(t.stat, 4), 
           "p =", round(p.val, 6), "df =", df))
 ```
-Under the null hypothesis, there is only a $0.21\%$ chance that a $t$-statistic
+Under the null hypothesis, there is only a $0.28\%$ chance that a $t$-statistic
 as extreme as this one can be found. We can therefore reject the null hypothesis.
 
 This analysis can be done using a single function in R.
