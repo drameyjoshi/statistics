@@ -303,3 +303,160 @@ This analysis can be done using a single function in Python
 res = stats.ttest_rel(combined.extra_1, combined.extra_2)
 print(f"t-stat = {res.statistic:0.4}, p = {res.pvalue:0.6}, df={res.df:0}")
 ```
+
+## $t$-test when variances are not equal
+The generalisation of the $t$-test for equality of sample means when the sample
+variances and sizes are not equal was developed by Welch [@welch1947]. The
+theory behind the formulae is quite involved and explained in Welch's paper. We
+merely quote the formulae here. The $t$-statistic is calculated as
+$$
+t = \frac{\bar{X}_1 - \bar{X}_2}{\sqrt{s_a^2 + s_b^2}},
+$$
+where
+\begin{eqnarray*}
+s_a &=& \frac{s_1}{n_1} \\
+s_b &=& \frac{s_2}{n_2}
+\end{eqnarray*}
+Here $s_{1, 2}$ are sample variances and $n_{1,2}$ are sample sizes. The number
+of degrees of freedom of the $t$ statistic are
+$$
+\nu = \frac{(s_a^2 + s_b^2)^2}{s_a^4/(n_1 - 1) + s_b^4/(n_2 - 1)}.
+$$
+Unlike the previous cases, we will not demonstrate the calculations but use the
+R function instead. We will use the `ChickWeight` data and find out if the
+weight gained by the chicks on Diet 1 is the same as that gained by chicks on
+Diet 2. Before we can analyse the data, we must transform it in a form where
+we can easily calculate the weight gain.
+```{python}
+import pandas as pd
+
+chick = rds.data("ChickWeight")
+start_time = chick[["Chick", "Time"]].groupby("Chick").min()
+end_time = chick[["Chick", "Time"]].groupby("Chick").max()
+
+start = pd.merge(left=chick,
+                 right=start_time,
+                 how="inner",
+                 left_on=["Chick", "Time"],
+                 right_on=["Chick", "Time"])
+end = pd.merge(left=chick,
+               right=end_time,
+               how="inner",
+               left_on=["Chick", "Time"],
+               right_on=["Chick", "Time"])
+combined = pd.merge(left=start[["Chick", "Diet", "weight"]], 
+                    right=end[["Chick", "Diet", "weight"]], 
+                    left_on=["Chick", "Diet"],
+                    right_on=["Chick", "Diet"], 
+                    how="inner")
+combined["wtgain"] = combined["weight_y"] - combined["weight_x"]
+wgdata = combined[["Chick", "Diet", "wtgain"]]
+wgdata.head()
+```
+We check the mean weight gain with Diets 1 and 2 and also calculate the sample
+variances.
+```{python}
+wgdata[["Diet", "wtgain"]].groupby("Diet").mean().head()
+```
+```{python}
+wgdata[["Diet", "wtgain"]].groupby("Diet").var(ddof=1) # Sample variances
+```
+Interestingly, the F-test on variances indicates that the variances are all
+equal.
+```{python}
+diets = wgdata["Diet"].unique()
+for i in range(1, len(diets)):
+    for j in range(i + 1, len(diets) + 1):
+        X = wgdata[wgdata["Diet"] == i]["wtgain"]
+        Y = wgdata[wgdata["Diet"] == j]["wtgain"]
+        vr = X.var(ddof=1)/Y.var(ddof=1)
+        pv = stats.f.cdf(vr, dfn=len(X), dfd=len(Y))
+        print(f"Diet {i} and Diet {j}, p-value of F test is {pv:0.4}")
+```
+
+We, therefore, carry out the $t$-test once assuming equal variances and then
+assuming that they are different.
+```{python}
+res = stats.ttest_ind(wgdata[wgdata["Diet"] == 1]["wtgain"],
+                      wgdata[wgdata["Diet"] == 2]["wtgain"],
+                      equal_var=True)
+print(f"t-statistic = {res.statistic:0.4}, p-value={res.pvalue:0.6}, df={res.df}")
+```
+
+Unlike the `t.test` function, we do not get the confidence intervals in the 
+result of the function. We will calculate it instead.
+```{python}
+X = wgdata[wgdata["Diet"] == 1]["wtgain"]
+Y = wgdata[wgdata["Diet"] == 2]["wtgain"]
+
+n1 = len(X)
+n2 = len(Y)
+n_p = n1 * n2/(n1 + n2)
+df = n1 + n2 - 2
+
+s1_sq = X.var(ddof=1)
+s2_sq = Y.var(ddof=1)
+sp_sq = ((n1 - 1)*s1_sq + (n2 - 1)*s2_sq)/(n1 + n2 - 2)
+
+alpha = 0.05
+lims = (X.mean() - Y.mean() - 
+        np.array([1, -1]) * stats.t.ppf(alpha/2, df) * np.sqrt(sp_sq/n_p))
+print(f"The 95% confidence interval is {lims}")
+```
+When the variances are assumed equal, the confidence interval is entirely on
+the left hand side of zero and we can conclude that the weight gain due Diet 1
+is less than that due to Diet 2.
+
+```{python}
+res = stats.ttest_ind(wgdata[wgdata["Diet"] == 1]["wtgain"],
+                      wgdata[wgdata["Diet"] == 2]["wtgain"],
+                      equal_var=False)
+print(f"t-statistic = {res.statistic:0.4}, p-value={res.pvalue:0.6}, df={res.df}")
+```
+
+Once again, we calculate the confidence interval on our own.
+```{python}
+n1 = len(X)
+sa = X.var(ddof=1)/n1
+n2 = len(Y)
+sb = Y.var(ddof=1)/n2
+df = (sa + sb)**2/(sa**2/(n1 - 1) + sb**2/(n2 - 1))
+
+alpha = 0.05
+lim = (X.mean() - Y.mean() + 
+       np.array([1, -1]) * stats.t.ppf(alpha/2, df) * np.sqrt(sa + sb))
+
+print(f"The 95% confidence interval is {lim}")
+```
+On the other hand, the $p$-value and the confidence interval suggest that we
+cannot be so sure if we assume that the variances are unequal. Also notice that
+in this case Welch's test was carried out instead of the standard $t$-test.
+
+### An investigation into the variances of weight gain
+It was a tad surprising that the F-test for comparing variances declared that
+the all variances are likely to be same. Let us compare the density of the
+data after centering all of them on the origin.
+```{python}
+X1 = (wgdata[wgdata["Diet"] == 1]["wtgain"] - 
+      wgdata[wgdata["Diet"] == 1]["wtgain"].mean())
+X2 = (wgdata[wgdata["Diet"] == 2]["wtgain"] - 
+      wgdata[wgdata["Diet"] == 2]["wtgain"].mean())
+X3 = (wgdata[wgdata["Diet"] == 3]["wtgain"] - 
+      wgdata[wgdata["Diet"] == 3]["wtgain"].mean())
+X4 = (wgdata[wgdata["Diet"] == 4]["wtgain"] - 
+      wgdata[wgdata["Diet"] == 4]["wtgain"].mean())
+
+kde1 = stats.gaussian_kde(X1)
+kde2 = stats.gaussian_kde(X2)
+kde3 = stats.gaussian_kde(X3)
+kde4 = stats.gaussian_kde(X4)
+X = np.linspace(start=-250, stop=250, num=100)
+
+plt.plot(X, kde1(X), label="Diet 1")
+plt.plot(X, kde2(X), label="Diet 2")
+plt.plot(X, kde3(X), label="Diet 3")
+plt.plot(X, kde4(X), label="Diet 4")
+plt.legend(loc="upper left")
+_ = plt.title("Centred distributions of weight gain")
+```
+

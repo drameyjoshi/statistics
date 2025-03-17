@@ -293,29 +293,6 @@ This analysis can be done using a single function in R.
 t.test(sleep.1, sleep.2, paired=TRUE, var.equal=TRUE)
 ```
 
-### Calculation of $p$-value
-When we calculated the $p$-value in the unpaired $t$-test, we multiplied the
-result of the call to the function `dt` by $2$. We did not do so in the paired
-$t$-test. 
-
-In the unpaired test, we were checking if $\bar{X}$ and $\bar{Y}$ were different.
-The $t$ statistic of the form
-$$
-t = \frac{\bar{X} - \bar{Y}}{s_p}\sqrt{n_p},
-$$
-treats $\bar{Y}$ like a parametric mean and tests if $\bar{X}$ is a sample from
-that population. We should also consider the symmetric situation with
-$$
-t = \frac{\bar{Y} - \bar{X}}{s_p}\sqrt{n_p},
-$$
-in which $\bar{X}$ plays the role of the parametric mean. The two values differ
-only in sign. Since the $t$-distribution is symmetric about zero, the sum of
-the probabilities of getting values as extreme or more as these is twice the
-number obtained in any one of the cases.
-
-In a paired test, such a symmetry does not arise and we do not have to double
-the probability.
-
 ## $t$-test when variances are not equal
 The generalisation of the $t$-test for equality of sample means when the sample
 variances and sizes are not equal was developed by Welch [@welch1947]. The
