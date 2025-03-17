@@ -281,9 +281,7 @@ hypothesis? To find it out, we need to calculate the relevant $t$-statistic.
 s <- sd(combined$diff.extra)
 df <- nrow(combined) - 1
 t.stat <- (mean.diff - 0)/s * sqrt(nrow(combined))
-# Note that we are not multiplying by 2 as we did before. The reason for this
-# choice will be discussed later.
-p.val <- dt(t.stat, df=df)
+p.val <- pt(t.stat, df=df) * 2
 cat(paste("t-stat =", round(t.stat, 4), 
           "p =", round(p.val, 6), "df =", df))
 ```
@@ -292,7 +290,7 @@ as extreme as this one can be found. We can therefore reject the null hypothesis
 
 This analysis can be done using a single function in R.
 ```{r}
-t.test(sleep.1, sleep.2, paired=FALSE, var.equal=TRUE)
+t.test(sleep.1, sleep.2, paired=TRUE, var.equal=TRUE)
 ```
 
 ### Calculation of $p$-value

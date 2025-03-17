@@ -10,8 +10,10 @@ ten subjects. The attribute `extra` records the additional sleep. It may be
 negative. The distributuion of `extra` among the subjects when they were
 administered a drug looks like
 ```{python fig.width=8, fig.height=6}
+import numpy as np
 import rdatasets as rds
 import matplotlib.pyplot as plt
+from scipy import stats
 
 sleep = rds.data("sleep")
 axes = sleep[["group", "extra"]].hist("extra", by="group", sharey=True)
@@ -133,8 +135,6 @@ therefore have the same variance. Under the null hypothesis, we can find the
 probability that we can get a value of the test statistic as extreme as we got.
 
 ```{python}
-from scipy import stats
-
 dfs = sleep[["group", "extra"]].groupby("group").count().to_numpy().flatten()
 # Multiplication by 2 is necessary for a 2-way test. We are checking for the
 # ratio greater than 1 and less than 1.
@@ -148,4 +148,158 @@ then there is a $72.86\%$ chance that we could be wrong. Therefore, we choose
 not to reject the null hypothesis.
 
 Unfortunately, Python does not have an equivalent of `var.test` in R.
+This discussion also brings out the limitations of statistical tests like
+`var.test`, or the F-test as we used it here, that depend on the properties of 
+the underlying probability distribution.
 
+- The data we are studying may not fit the underlying probability model.
+- The distribution may not be approximated by a gaussian distribution.
+- The parameters of the distribution may not be known.
+
+Statistical tests that depends on the properties of underlying distribution form
+what is called as \emph{parametric statistics}. In the recent years, there has
+been a shift towards \emph{nonparametric statistics}. The machine learning
+algorithms fall in this category.
+
+And yet, there is great value in parametric methods. One must only be careful in
+examining whether the assumptions of the tests are valis before running them and
+interpreting their results.
+
+We applied hypothesis testing to the problem of testing whether two sample
+variances are equal. We will repeat the exercise to test whether the two drugs
+in `sleep` data induce the same amount of extra sleep in the ten subjects on
+which it was tested.
+
+### The formula for the pooled variance
+We have now convinced ourselves that there is a good chance that the two
+samples are drawn from the same population. Yet, the magnitudes of their variances
+are different. Can we use them to estimate the variance of the population? We
+need it to calculate the $t$-statistic.
+
+A pooled variance is an estimator for the population variance when we use the
+variance from several samples each one with a different sample mean. If $s_1^2,
+\ldots, s_n^2$ are variances of samples of size $k_1, \ldots, k_n$ then the
+pooled variance is
+$$
+s_p^2 = \frac{(k_1 - 1)s_1^2 + \cdots + (k_n - 1)s_n^2}{k_1 - 1 + \cdots k_n - 1}
+$$
+In our case, since the two samples have the same size, the pooled variance is
+just the arithmetic mean of the two sample variances.
+
+When we had just one sample of size $n$, we constructed the $t$ statistic as
+$$
+t = \frac{\bar{X}_n - \mu}{s}\sqrt{n}.
+$$
+Now that we have multiple samples (right now, two) we need a way to generalise
+this. The correct generalisation is
+$$
+t = \frac{\bar{X}_n - \mu}{s_p}\sqrt{n_p},
+$$
+where
+$$
+\frac{1}{n_p} = \frac{1}{k_1} + \cdots + \frac{1}{k_n}.
+$$
+Thus, the pooled sample size is the harmonic mean of the individual sample sizes
+of the pool.
+
+### Combined variance
+There is a related statistic called \emph{combined variance}. It is the variance
+of multiple samples around the mean of all sample means. In our case, we have
+\begin{eqnarray}
+\bar{X}_n &=& \frac{X_1 + \cdots + X_n}{n} \\
+\bar{X}_n &=& \frac{X_{n+1} + \cdots + X_{n+m}}{m} \\
+\bar{X} &=& \frac{X_1 + \cdots + X_{n+m}}{n + m}
+\end{eqnarray}
+so that
+$$
+\bar{X} = \frac{n\bar{X}_n + m\bar{X}_m}{n + m}.
+$$
+The combined variance is
+$$
+s_c^2 = \frac{1}{n+m-1}\sum_{i=1}^{n+m}(X_i - \bar{X})^2.
+$$
+We can manipulate the sum so that
+$$
+s_c^2 = \frac{n-1}{n+m-1}s_n^2 + \frac{m-1}{n+m-1}s_m^2 +
+\frac{mn}{(m+n)(m+n-1)}(\bar{X}_n - \bar{X}_m)^2.
+$$
+
+## $t$-test {#sec-c2s3}
+We will now show how a $t$ test works. We want to investigate whether the
+extra sleep induced by the two drugs is same. We construct the $t$-statistic
+as
+$$
+t = \frac{\bar{X} - \bar{Y}}{s_p}\sqrt(n_p),
+$$
+where $\bar{X}$ is the sample mean of `extra` in the first group, $\bar{Y}$
+is the sample mean of `extra` in the second group, $s_p$ is the pooled variance
+and $n_p$ is the pooled degrees of freedom. We calculate each of these as
+```{python}
+# Group means
+grpmns = sleep[["group", "extra"]].groupby("group").mean().to_numpy().flatten()
+X_bar = grpmns[0]
+Y_bar = grpmns[1]
+
+grpvars = sleep[["group", "extra"]].groupby("group").var().to_numpy().flatten()
+v1 = grpvars[0]
+v2 = grpvars[1]
+
+grpsize = sleep[["group", "extra"]].groupby("group").count().to_numpy().flatten()
+df1 = grpsize[0] - 1
+df2 = grpsize[1] - 1
+
+# Pooled variance
+v_p = (df1 * v1 + df2 * v2)/(df1 + df2)
+n_p = np.prod(grpsize)/np.sum(grpsize)
+
+t_stat = (X_bar - Y_bar)/np.sqrt(v_p) * np.sqrt(n_p)
+# We are testing if the means are different. Therefore, we need a 2-way test.
+p_val = stats.t.cdf(t_stat, df = df1 + df2) * 2
+print(f"t-stat = {t_stat:0.4}, p = {p_val:0.6}, df = {df1 + df2}")
+```
+
+A $p$-value of close to $8\%$ indicates that under the null distribution
+there is an $8\%$ chance that the $t$-value will be as extreme as this one. If
+our significance level is $5\%$, we may want to not reject the null hypothesis.
+
+We can, of course, do all of this using a single function.
+```{python}
+res = stats.ttest_ind(sleep[sleep["group"] == 1]["extra"],
+                      sleep[sleep["group"] == 2]["extra"])
+print(f"t-stat = {res.statistic:0.4}, p = {res.pvalue:0.6}, df={res.df:0}")
+```
+
+## The paired $t$-test {#sec-c2s4}
+We will now use the same data and ask a different question. Supposing the two
+groups consisted of the same individuals and the test involved giving them the
+two drugs in succession and recording the extra sleep they got, can we tell if
+one drug was better than the other?
+
+To answer this question, we set the null hypothesis that there was no difference
+in the effect of the two drugs. Therefore, if we take a difference of the extra
+sleep induced by the two drugs for each person then its average will be zero.
+Let us see how the data looks like
+```{python}
+drug1 = sleep[sleep["group"] == 1][["ID", "extra"]]
+drug2 = sleep[sleep["group"] == 2][["ID", "extra"]]
+combined = drug1.join(drug2.set_index("ID"), on="ID", lsuffix="_1", rsuffix="_2")
+extra_mean = np.mean(combined.extra_1 - combined.extra_2)
+print(f"The mean of the differences in extra is {extra_mean:0.4}")
+```
+What is the chance that we can see a mean as extreme as this one under the null
+hypothesis? To find it out, we need to calculate the relevant $t$-statistic.
+```{python}
+s = np.std(combined.extra_1 - combined.extra_2, ddof=1)
+df = len(combined) - 1
+t_stat = (extra_mean - 0)/s * np.sqrt(len(combined))
+p_val = stats.t.cdf(t_stat, df=df) * 2
+print(f"t-stat = {t_stat:0.4}, p = {p_val:0.6}, df = {df}")
+```
+Under the null hypothesis, there is only a $0.28\%$ chance that a $t$-statistic
+as extreme as this one can be found. We can therefore reject the null hypothesis.
+
+This analysis can be done using a single function in Python
+```{python}
+res = stats.ttest_rel(combined.extra_1, combined.extra_2)
+print(f"t-stat = {res.statistic:0.4}, p = {res.pvalue:0.6}, df={res.df:0}")
+```
