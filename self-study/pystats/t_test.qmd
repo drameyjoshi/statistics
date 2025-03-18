@@ -135,7 +135,11 @@ therefore have the same variance. Under the null hypothesis, we can find the
 probability that we can get a value of the test statistic as extreme as we got.
 
 ```{python}
-dfs = sleep[["group", "extra"]].groupby("group").count().to_numpy().flatten()
+dfs = (sleep[["group", "extra"]].
+        groupby("group").
+        count().
+        to_numpy().
+        flatten())
 # Multiplication by 2 is necessary for a 2-way test. We are checking for the
 # ratio greater than 1 and less than 1.
 t = stats.f.pdf(vr, dfn=dfs[0], dfd=dfs[1])
@@ -236,15 +240,27 @@ is the sample mean of `extra` in the second group, $s_p$ is the pooled variance
 and $n_p$ is the pooled degrees of freedom. We calculate each of these as
 ```{python}
 # Group means
-grpmns = sleep[["group", "extra"]].groupby("group").mean().to_numpy().flatten()
+grpmns = (sleep[["group", "extra"]].
+            groupby("group").
+            mean().
+            to_numpy().
+            flatten())
 X_bar = grpmns[0]
 Y_bar = grpmns[1]
 
-grpvars = sleep[["group", "extra"]].groupby("group").var().to_numpy().flatten()
+grpvars = (sleep[["group", "extra"]].
+            groupby("group").
+            var().
+            to_numpy().
+            flatten())
 v1 = grpvars[0]
 v2 = grpvars[1]
 
-grpsize = sleep[["group", "extra"]].groupby("group").count().to_numpy().flatten()
+grpsize = (sleep[["group", "extra"]].
+            groupby("group").
+            count().
+            to_numpy().
+            flatten())
 df1 = grpsize[0] - 1
 df2 = grpsize[1] - 1
 
@@ -282,7 +298,8 @@ Let us see how the data looks like
 ```{python}
 drug1 = sleep[sleep["group"] == 1][["ID", "extra"]]
 drug2 = sleep[sleep["group"] == 2][["ID", "extra"]]
-combined = drug1.join(drug2.set_index("ID"), on="ID", lsuffix="_1", rsuffix="_2")
+combined = drug1.join(drug2.set_index("ID"), on="ID", 
+                      lsuffix="_1", rsuffix="_2")
 extra_mean = np.mean(combined.extra_1 - combined.extra_2)
 print(f"The mean of the differences in extra is {extra_mean:0.4}")
 ```
@@ -380,7 +397,7 @@ assuming that they are different.
 res = stats.ttest_ind(wgdata[wgdata["Diet"] == 1]["wtgain"],
                       wgdata[wgdata["Diet"] == 2]["wtgain"],
                       equal_var=True)
-print(f"t-statistic = {res.statistic:0.4}, p-value={res.pvalue:0.6}, df={res.df}")
+print(f"t-stat= {res.statistic:0.4}, p-value={res.pvalue:0.6}, df={res.df}")
 ```
 
 Unlike the `t.test` function, we do not get the confidence intervals in the 
@@ -411,7 +428,7 @@ is less than that due to Diet 2.
 res = stats.ttest_ind(wgdata[wgdata["Diet"] == 1]["wtgain"],
                       wgdata[wgdata["Diet"] == 2]["wtgain"],
                       equal_var=False)
-print(f"t-statistic = {res.statistic:0.4}, p-value={res.pvalue:0.6}, df={res.df}")
+print(f"t-stat= {res.statistic:0.4}, p-value={res.pvalue:0.6}, df={res.df}")
 ```
 
 Once again, we calculate the confidence interval on our own.
