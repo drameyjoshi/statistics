@@ -112,14 +112,14 @@ If $X_1, \ldots, X_n$ are a sample drawn from a population, its sample variance
 is
 $$
 s^2 = \frac{1}{n-1}\sum_{i=1}^n(X_i - \bar{X})^2.
-$$
+$${#eq-c1e1}
 Being a quantity computed from the sample, $s^2$ is also a random variable.
 There are two results known about the distribution of sample variance:
 
 - If $X_1, \ldots, X_n$ are such that $X_i \sim \dNorm(\mu, \sigma^2)$ then
 $$
 (n - 1)\frac{s^2}{\sigma^2} \sim \chi^2(n - 1).
-$$
+$${#eq-c1e2}
 A proof of this statement can be found in [The Book of Statistical Proofs](
 https://statproofbook.github.io/P/norm-chi2). Another proof is available in
 an [Eberly College of Science](https://online.stat.psu.edu/stat414/lesson/26/26.3)
@@ -129,11 +129,11 @@ course.
 and kurtosis $\kappa$ then
 $$
 \frac{s^2}{\sigma^2} \sim \frac{\chi^2(m)}{m},
-$$
+$${#eq-c1e3}
 where
 $$
 m = \frac{2n}{\kappa - (n - 3)/(n - 1)}.
-$$
+$${#eq-c1e4}
 This fact is mentioned in an answer to a question on [Stack Exchange](https://stats.stackexchange.com/questions/316714/sampling-distribution-of-sample-variance-of-non-normal-iid-r-v-s)
 in which the paper @ONeill02102014 is referred.
 
@@ -145,9 +145,9 @@ $E(s^2) = \sigma^2$.
 
 ::: {.proof}
 Consider, $(n-1)S_n^2 = \sum_{i=1}^n(X_i - \bar{X}_n)^2$ so that
-\begin{equation}\label{e2}
+$$
 (n-1)E(S_n^2) = \sum_{i=1}^n\left(E(X_i^2) - 2E(X_i\bar{X}_n) + E(\bar{X}_n^2)\right)
-\end{equation}
+$${#eq-c1s5}
 We first consider the term $E(X_i\bar{X}_n)$. It is
 \begin{eqnarray*}
 E(X_i\bar{X}_n) &=& E\left(X_i \sum_{j=1}^n\frac{X_j}{n}\right) \\
@@ -218,20 +218,20 @@ is close to $95\%$ or the probability of $\bar{X}_n \le \mu - 2\sigma/\sqrt{n}$
 or $\bar{X}_n \ge \mu + 2\sigma/\sqrt{n}$ is $5\%$. Now the event
 $$
 \mu - 2\frac{\sigma}{\sqrt{n}} \le \bar{X}_n \le \mu + 2\frac{\sigma}{\sqrt{n}}
-$$
+$${#eq-c1e6}
 is equivalent to
 $$
 -2\frac{\sigma}{\sqrt{n}} \le \bar{X}_n - \mu \le 2\frac{\sigma}{\sqrt{n}}
-$$
+$${#eq-c1e7}
 which is same as
 $$
 -2\frac{\sigma}{\sqrt{n}} \le -\bar{X}_n + \mu \le 2\frac{\sigma}{\sqrt{n}}
-$$
+$${#eq-c1e8}
 or
 $$
 \bar{X}_n -2\frac{\sigma}{\sqrt{n}} \le \mu \le
 \bar{X}_n + 2\frac{\sigma}{\sqrt{n}}.
-$$
+$${#eq-c1e9}
 Thus, the probability of $\bar{X}_n$ lying in an interval around $\mu$ is the
 same as the probability of $\mu$ lying in the interval of same size around
 $\bar{X}_n$. A statement about the complement of this event is that the
@@ -356,7 +356,7 @@ in the latter case.
 The central limit theorem assures that in the limit of infinite sample size,
 $$
 z = \frac{\bar{X}_n - \mu}{\sigma}\sqrt{n}
-$$
+$${#eq-c1e10}
 has a standard normal distribution. However, in most realistic situations, we
 neither know $\mu$ nor do we know $\sigma$. When the sample size is "reasonably
 large", we can approximate $\sigma$ be $s$, the sample standard deviation, and
@@ -364,7 +364,7 @@ use the $z$ statistic to derive a confidence interval around $\bar{X}_n$. In the
 general case, the statistic
 $$
 t = \frac{\bar{X}_n - \mu}{s}\sqrt{n}
-$$
+$${#eq-c1e11}
 follows a $t$-distribution of $n - 1$ degrees of freedom. A $t$-distribution
 approximates a standard normal distribution for large enough degrees of freedom.
 However, for small $n$, one must use the $t$ statistic to construct the
@@ -373,7 +373,7 @@ for $\mu$ then with $\alpha = 0.95$, $\mu$ lies in
 $$
 \left[\bar{X}_n + t_{\nu, 1-\alpha/2}\frac{s}{\sqrt{n}},
  \bar{X}_n + t_{\nu, \alpha/2}\frac{s}{\sqrt{n}}\right],
-$$
+$${#eq-c1e12}
 where $\nu = n - 1$ is the number of degrees of freedom of the t-distribution
 and $t_{\nu, x}$ denotes the quantile of a $t$ distribution with $\nu$ degrees
 of freedom at a probability value of $x$.

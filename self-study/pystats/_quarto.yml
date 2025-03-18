@@ -9,6 +9,7 @@ book:
     - index.qmd
     - population_and_sample.qmd
     - t_test.qmd
+    - hypotheses.qmd
     - references.qmd
 
 bibliography: references.bib

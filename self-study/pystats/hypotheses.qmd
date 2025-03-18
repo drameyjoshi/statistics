@@ -1,0 +1,51 @@
+# Hypothesis Testing in Practice
+
+The fundamental idea underlying hypothesis testing is checking if we have 
+enough statistical evidence to reject a null hypothesis. However, in practice
+one needs many other metrics other than a verdict of the test. In this chapter,
+we will consider some of them.
+
+## Confidence intervals {#sec-c3s1}
+While testing hypotheses we often compute a 'test statistic', usually denoted by
+$T$, and find out the probability of getting a value as extreme or more than
+what we got, under the null hypothesis. If the probability of so happening is
+extremely low we conclude that an event like this can happen only rarely under
+the null hypothesis and therefore reject it hypothesis. The choice of the 
+threshold for calling a probability 'low' is a matter of personal choice. In 
+order to minimise the impact of the researcher's bias, one needs more 
+information about the situation than the two probabilities. 
+
+Consider the situation when we are testing whether a sample of a large size $n$
+is drawn from a population of mean $\mu$ and suppose that we know the population
+variance $\sigma^2$. If the null hypothesis is that the sample is drawn from
+the population then the appropriate test statistic is
+$$
+T = \frac{\bar{X}_n - \mu}{\sigma}\sqrt{n}.
+$$ {#eq-c3e1}
+Under the null hypothesis, the statistic $T$ follows a standard normal 
+distribution. This is our 'null distribution'. If $\alpha$ is the maximum 
+probability of committing a type I error then we decide the hypothesis after 
+comparing the probability of getting a value of $T$ as extreme or more than we 
+got in @{eq-c3e1} with $\alpha$. 
+
+$\bar{X}_n$ can differ from $\mu$ either because $\bar{X}_n < \mu$ or $\bar{X}_n
+> \mu$. Since the null distribution is symmetric, both events happen with equal
+probability. If $\alpha$ is our threshold for rejecting the null hypothesis then
+we distribute it evenly among the two possibilities. That is, we reject the
+null hypothesis if:
+
+- $F_T(T) \le \alpha/2$ or
+- $F_T(T) \ge 1 - \alpha/2$.
+
+The first of these events covers the possibiity of $\bar{X}_n$ being much lower
+than $\mu$ and the second one cover the possibility of $\bar{X}_n$ being much
+larger than $\mu$. The function $F_T$ is the null distribution function, here
+a standard normal.
+
+The two possibilities above can be expressed in an equivalent manner as:
+
+- $T \le F_T^{-1}(\alpha/2)$ or
+- $T \ge F_T^{-1}(1 - \alpha/2)$.
+
+In this case, the statistic $T$ follows the standard normal distribution. 
+Therefore $F_T = \Phi$.
