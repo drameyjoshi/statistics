@@ -142,7 +142,11 @@ dfs = (sleep[["group", "extra"]].
         flatten())
 # Multiplication by 2 is necessary for a 2-way test. We are checking for the
 # ratio greater than 1 and less than 1.
-t = stats.f.pdf(vr, dfn=dfs[0], dfd=dfs[1])
+if vr > 1:
+    t = (1 - stats.f.cdf(vr, dfn=dfs[0], dfd=dfs[1])) * 2
+else:
+    t = stats.f.cdf(vr, dfn=dfs[0], dfd=dfs[1]) * 2
+
 print(f"The probability of getting a ratio {vr:0.4} of variances is {t:0.4}")
 ```
 In the case of our data, we conclude that if the two samples came from the same
