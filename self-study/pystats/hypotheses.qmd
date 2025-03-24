@@ -284,7 +284,9 @@ $${#eq-c3e13}
                         b=mtcars[mtcars["cyl"] == 6]["mpg"],
                         equal_var=False,
                         alternative="greater")
-  print(f"t-stat={res.statistic:0.4}, p-value={res.pvalue:0.4}, df={res.df:0.4}")
+  print(f"t-stat={res.statistic:0.4}")
+  print(f"p-value={res.pvalue:0.4}")
+  print(f"df={res.df:0.4}")
   ```
   Given the $p$-value, we can reject the null hypothesis. We carried out a 
   one-sided test. Therefore, we restate our null hypothesis as "Mileage of 
