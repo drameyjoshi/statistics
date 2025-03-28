@@ -1,0 +1,339 @@
+# Hypothesis Testing in Practice
+
+The fundamental idea underlying hypothesis testing is checking if we have 
+enough statistical evidence to reject a null hypothesis. However, in practice
+one needs many other metrics other than a verdict of the test. In this chapter,
+we will consider some of them.
+
+## Confidence intervals {#sec-c3s1}
+While testing hypotheses we often compute a 'test statistic', usually denoted by
+$T$, and find out the probability of getting a value as extreme or more than
+what we got, under the null hypothesis. If the probability of so happening is
+extremely low we conclude that an event like this can happen only rarely under
+the null hypothesis and therefore reject it hypothesis. The choice of the 
+threshold for calling a probability 'low' is a matter of personal choice. In 
+order to minimise the impact of the researcher's bias, one needs more 
+information about the situation than the two probabilities. 
+
+Consider the situation when we are testing whether a sample of a large size $n$
+is drawn from a population of mean $\mu$ and suppose that we know the population
+variance $\sigma^2$. We want to check if the sample mean is different from the
+population mean. Therefore, the null hypothesis is that the sample is drawn from
+a population of mean $\mu$. Under this hypothesis, the appropriate test 
+statistic is
+$$
+T = \frac{\bar{X}_n - \mu}{\sigma}\sqrt{n}.
+$$ {#eq-c3e1}
+Under the null hypothesis, the statistic $T$ follows a standard normal 
+distribution. This is our 'null distribution'. If $\alpha$ is the maximum 
+probability of committing a type I error then we decide the hypothesis after 
+comparing the probability of getting a value of $T$ as extreme or more than we 
+got in @{eq-c3e1} with $\alpha$. 
+
+$\bar{X}_n$ can differ from $\mu$ either because $\bar{X}_n < \mu$ or $\bar{X}_n
+> \mu$. Since the null distribution is symmetric, both events happen with equal
+probability. If $\alpha$ is our threshold for rejecting the null hypothesis then
+we distribute it evenly among the two possibilities. That is, we reject the
+null hypothesis if:
+
+- $F_T(T) \le \alpha/2$ or
+- $F_T(T) \ge 1 - \alpha/2$.
+
+The first of these events covers the possibiity of $\bar{X}_n$ being much lower
+than $\mu$ and the second one cover the possibility of $\bar{X}_n$ being much
+larger than $\mu$. The function $F_T$ is the null distribution function, here
+a standard normal.
+
+The two possibilities above can be expressed in an equivalent manner as:
+
+- $T \le F_T^{-1}(\alpha/2)$ or
+- $T \ge F_T^{-1}(1 - \alpha/2)$.
+
+The inequalities are preserved because of the non-decreasing nature of $F$.
+In this case, the statistic $T$ follows the standard normal distribution. 
+Therefore $F_T = \Phi$.
+
+If we were merely checking if $\bar{X}_n \le \mu$ then our null hypothesis would
+be $\bar{X}_n \ge \mu$ and we would reject it if $F(T) \ge 1 - \alpha$, or
+equivalently $T \le F_T^{-1}(1 - \alpha)$. 
+
+If we were merely checking if $\bar{X}_n \ge \mu$ then our null hypothesis would
+be $\bar{X}_n \le \mu$ and we would reject it if $F(T) \le \alpha$, or
+equivalently $T \le F_T^{-1}(\alpha)$. 
+
+We often do not need just the verdict of the hypothesis testing but also an 
+idea of how far the population mean is from the sample mean. The $T$ statistic
+will lie in the interval $[T_{1 - \alpha/2}, T_{\alpha/2}]$ with a probability
+$\alpha$. That is,
+$$
+T_{1 - \alpha/2} \le T \le T_{\alpha/2},
+$${#eq-c3e2} with probability $\alpha$. Substituting @eq-c3e1 in this equation,
+we get
+$$
+T_{1 - \alpha/2} \le \frac{\bar{X}_n - \mu}{\sigma}\sqrt{n}.\le T_{\alpha/2},
+$$
+or
+$$
+\mu \in \left[\bar{X}_n - T_{\alpha/2}\frac{\sigma}{\sqrt{n}}, \bar{X}_n - 
+T_{1 - \alpha/2}\frac{\sigma} {\sqrt{n}}\right]
+$${#eq-c3e3}
+with probability $\alpha$. This is the $(1 - \alpha)\%$ confidence interval for
+$\mu$.
+
+We will now consider the case of a sample that is not too large and the test
+statistic is
+$$
+T = \frac{\bar{X}_n - \mu}{s}\sqrt{n},
+$${#eq-c3e4}
+where $s$ is the sample variance. We reject the null hypothesis that the sample
+is drawn from the population with mean $\mu$ if $T \le F_T(\alpha/2, n - 1)$
+or $T \ge F_T(1 - \alpha/2, n - 1)$. The one-sided tests are decided similar to
+the previously considered case of the $z$-statistic. The $(1 - \alpha)\%$
+confidence interval for $\mu$ is
+$$
+\mu \in \left[\bar{X}_n - T_{\alpha/2, n - 1}\frac{s}{\sqrt{n}}, \bar{X}_n - 
+T_{1 - \alpha/2, n - 1}\frac{s} {\sqrt{n}}\right]
+$${#eq-c3e5}
+
+While checking if two samples come from the same population, we use the 
+statistic
+$$
+T = \frac{\bar{X}_n - \bar{Y}_n}{s_\ast}\sqrt{n_\ast},
+$${#eq-c3e6}
+where $s_\ast$ and $n_\ast$ are either pooled variance and sample size or
+Welch variance and sample size. At a significance level $\alpha$, we
+consider them to be drawn from the same population if $T \le T_{1 - \alpha/2, 
+\nu_\ast}$ or $T \ge T_{\alpha/2, \nu_\ast}$, where $\nu_\ast$ is the 
+appropriate number of degrees of freedom. It is easier to understand the 
+construction of the confidence interval if we consider the null hypothesis that
+$\bar{X}_n - \bar{Y}_n = d$, where $d$ is a constant. Then the test statistic
+will be
+$$
+T = \frac{\bar{X}_n - \bar{Y}_n - d}{s_\ast}\sqrt{n_\ast}.
+$${#eq-c3e7}
+Then $T \in [T_{\alpha/2, \nu_\ast}, T_{1-\alpha/2, \nu_ast}]$ with probability
+$1 - \alpha$ or
+$$
+d \in \left[\bar{X}_n - \bar{Y}_n - T_{\alpha/2, \nu_ast}, \bar{X}_n - \bar{Y}_n
+- T_{1 - \alpha/2, \nu_\ast}\right]
+$${#eq-c3e8}
+with probability $1 - \alpha$. We fail to reject the null hypothesis if $d$
+indeed lies in this interval. To test the equality of means we put $d = 0$.
+
+## The $p$-value {#sec-c3s2}
+The $p$-value is defined as the probability of observing a test statistic as
+or more extreme than the one calculated from the data assuming that then null
+hypothesis is true. Therefore, an interpretation of the $p$ value as the 
+probability that the null hypothesis is false is not correct. (The equivalent
+interpretation that the null hypothesis is true with probability $1 - p$ is also
+wrong.)
+
+$p$ values are encountered not only in formal hypothesis tests. We will 
+illustrate them in other situations as well. For example:
+
+- We come across a family in which there are seven girls and a boy. We suspect
+  that the probability of a child's gender to be female is greater than being 
+  a male. The null hypothesis is that girls and boys are born with equal 
+  probability. Under the null hypothesis, that a family of eight children will
+  have seven or more girl children is
+  ```{r}
+  p = 1 - pbinom(q=6, size=8, p=0.5)
+  cat(paste("p-value is", round(p, 6), "\n"))
+  ```
+  The probability of having seven or more girls in a family of eight children
+  is extremely low. Yet, we have seen only one family. And we may not want to
+  dismiss the null hypothesis but rather admit this as a rare occurrence.
+
+- Let us consider a variation of the above problem. Suppose that we want to 
+  consider the chance of have seven of more children of the same gender in a
+  family of eight children. There are two possibilities in this case. A family
+  with $7$ or more girls among $8$ children and a family of $7$ or more boys
+  among $8$ children. This is a two-tailed version of the previous case. The
+  probability of an even as extreme as the one found is now twice the 
+  probability found in the previous case. We may not want to reject the null
+  hypothesis in this test.
+
+
+## Type I and II errors
+Rejecting the null hypothesis when it is true is called a type I or a false
+positive error. Accepting the null hypothesis when it is false is called a type
+II or a false negative error. The probability of these errors happening is
+denoted by $\alpha$ and $\beta$ respectively.
+
+The idea of type I and II errors is also applicable in non-parametric methods of
+machine learning. However, one cannot calculate $\alpha$ and $\beta$ because
+one does not know the null distribution, there is none such in non-parametric
+methods.
+
+### Power of a test
+Consider a situation in which we are testing a null hypothesis that the sample
+is drawn from a population $\dNorm(\mu_1, \sigma)$ versus an alternative hypothesis
+that is is drawn from $\dNorm(\mu_1, \sigma)$. The null and alternative 
+distributions are as shown in the diagram below.
+
+Suppose further that we will reject the null hypothesis if the probability of
+type I error is $\alpha$.
+
+```{r}
+mu.1 <- 20
+mu.2 <- 27
+sigma <- 3
+X1 <- seq(from=mu.1 - 2*sigma, to=mu.1 + 2*sigma, length.out=100)
+X2 <- seq(from=mu.2 - 2*sigma, to=mu.2 + 2*sigma, length.out=100)
+Y1 <- dnorm(X1, mean=mu.1, sd=sigma)
+Y2 <- dnorm(X2, mean=mu.2, sd=sigma)
+
+alpha <- 0.05
+x.critical <- qnorm(p=1 - alpha, mean=mu.1, sd=sigma)
+y.critical <- dnorm(x=x.critical, mean=mu.1, sd=sigma)
+
+xlim <- c(X1[1], X2[100])
+plot(X1, Y1, xlim=xlim, type="l", col="blue")
+lines(X2, Y2, col="red")
+segments(x0=mu.1, y0=0, x1=mu.1, y1=max(Y1), lty=2, col="black")
+segments(x0=mu.2, y0=0, x1=mu.2, y1=max(Y2), lty=2, col="black")
+segments(x0=x.critical, y0=0, x1=x.critical, y1=y.critical, lty=2, col="red")
+legend(x="topleft",
+       legend=c(expression(H[0]), expression(H[1])),
+       col=c("blue", "red"),
+       lty=c(1, 1),
+       cex=0.7,
+       bty="n")
+```
+
+If the alternative hypothesis is indeed true then by failing to reject the null
+for all values of sample mean less than $25$, we are committing a type II error.
+The power of the test is the area under the alternative hypothesis rightward of
+the red dashed line. 
+
+Suppose that we calculate the sample mean to be $\bar{X}$. We will fail to 
+reject the null hypothesis if
+$$
+\frac{\bar{X} - \mu_0}{\sigma}\sqrt{n} \le z_{1 - \alpha}.
+$${#eq-c3e9}
+If we need the power to be $P = 1 - \beta$ then under the alternate hypothesis,
+$$
+\frac{\mu_a - \bar{X}}{\sigma}\sqrt{n} \le z_{1 - \beta}.
+$${#eq-c3e10}
+Adding these equations,
+$$
+\frac{\mu_a - \mu_0}{\sigma}\sqrt{n} \le z_{1 - \alpha} + z_{1 - \beta}.
+$${#eq-c3e11}
+The unit-less quantity
+$$
+d = \frac{\mu_a - \mu_0}{\sigma}
+$${#eq-c3e12}
+is called the _effect size_. Given $\alpha, \beta$ and $d$, the sample size
+must obey the inequality
+$$
+n \le \left(\frac{z_{1 - \alpha} + z_{1 - \beta}}{d}\right)^2.
+$${#eq-c3e13}
+
+## Illustrative examples
+
+- Consider the R dataset `mtcars`. Test the hypothesis that the mileage of $6$
+  cylinder cars is better than $4$ cylinder cars.[@caffo2016statistical]
+
+  The null hypothesis is that the mileage is independent of the number of 
+  cylinders.
+
+  We will start with visualising the data.
+  ```{r, fig.height=8}
+  old.par <- par(mfrow=c(2, 1))
+  hist(mtcars[mtcars$cyl==4, ]$mpg, xlab="mpg", main="4 cylinders")
+  hist(mtcars[mtcars$cyl==6, ]$mpg, xlab="mpg", main="6 cylinders")
+  ```
+
+  The histograms suggest that the $6$ cylinder cars are more fuel efficient.
+  Let us test this hypothesis using an independent sample $t$-test. Before 
+  using it, let us check if the two data have same variance.
+  ```{r}
+  var.test(mtcars[mtcars$cyl==4, c("mpg")], mtcars[mtcars$cyl==6, c("mpg")])
+  ```
+
+  Under the null hypothesis of equal variance, the probability of getting a 
+  ratio of variances as extreme or more than we got in our data is $0.01182$.
+  Therefore, we carry out the $t$-test assuming that the variances are not 
+  equal.
+
+  ```{r}
+  t.test(mtcars[mtcars$cyl==4, c("mpg")], 
+         mtcars[mtcars$cyl==6, c("mpg")], 
+         paired=FALSE, 
+         var.equal=FALSE, 
+         alternative="greater")
+  ```
+  Given the $p$-value, we can reject the null hypothesis. We carried out a 
+  one-sided test. Therefore, we restate our null hypothesis as "Mileage of 
+  4 cylinder cars is not greater than that of 6 cylinder cars".
+
+- Is a coin which gave $55$ heads in $100$ tosses fair? [@caffo2016statistical]
+  The null hypothesis is that it is. We then calculate the probability of 
+  getting an outcome as or more extreme as this using
+  ```{r}
+  p <- 1 - pbinom(q=55, size=100, p=0.5)
+  cat(paste("p-value is", round(p, 6), "\n"))
+  ```
+  There is a $13.56%$ probability that a fair coin will show $55$ or more heads
+  in $100$ tosses. We may not want to suspect the fairness of our coin.
+
+- A website was known to have $520$ hits per day on an average for a year. 
+  After it was redesigned, it had $15800$ visits in the next $30$ days. Was
+  the new design more attractive? The null hypothesis is that the new design
+  made no change to the daily hit rate. Now, $15800$ hits in $30$ days 
+  translates to $526.67$ hits per day. We calculate the probability of 
+  having $567.67$ or more assuming the null hypothesis. [@caffo2016statistical]
+
+  ```{r}
+  p <-   1 - ppois(15800, lambda=520*30)
+  cat(paste("p-value is", round(p, 6), "\n"))
+  ```
+  There is a $5.44\%$ chance that the old design would have given us the $15800$
+  hits in a month. Therefore, we fail to reject the null hypothesis.
+
+- In an AB test, one scheme led to an average of $10$ purchases per day with 
+  a sample of $100$ days while the other led to $11$ purchaces per day with the
+  same sample size. Assume that the common standard deviation of both data is
+  known to be $4$ purchases per day. Is one scheme better than the other?
+  [@caffo2016statistical]
+
+  We are given the sizes of the two samples and their mean. Thus,
+  ```{r}
+  mu.1 <- 10
+  mu.2 <- 11
+  n1 <- 100
+  n2 <- 100
+  ```
+  The null hypothesis is that the two samples are drawn from the same population
+  and that the two schemes have not stratified it. Furthermore, the variance of
+  the population is known. We just need to calculate the appropriate degrees of
+  freedom
+  ```{r}
+  sigma <- 4 # Standard deviation of the population.
+  n_p <- n1 * n2/(n1 + n2)
+
+  t <- (mu.1 - mu.2)/sigma * sqrt(n_p)
+  ```
+  As the population standard deviation is a known parameter, the test statistic
+  follows the standard normal distribution and the $p$-value is calculated as
+  ```{r}
+  p.val <- 2 * pnorm(-(abs(t)))
+  cat(paste("p-value is", round(p.val, 6), "\n"))
+  ```
+
+- The goal is to design a study to detect the four year mean brain volume loss
+  of $0.01$ mm$^3$ when the standard deviation of the volume measurements in the
+  population is $0.04$ mm$^3$. If we want a one-sided test of means with $\alpha
+  = 0.05$ and a power of $80\%$ what should be our minimum sample size.
+  
+  The effect size is the ratio of the change in mean with the standard deviation.
+  Thus,
+  ```{r}
+  vol_change <- 0.01
+  sigma <- 0.04
+  d <- vol_change/sigma # effect size
+  alpha <- 0.05
+  P <- 0.8 # Same as 1 - beta
+  rhs <- ((qnorm(1 - alpha) + qnorm(P))/d)^2
+  cat(paste("Minimum sample size =", ceiling(rhs), "\n"))
+  ```
