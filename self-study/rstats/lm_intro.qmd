@@ -1,0 +1,137 @@
+# Anatomy of Linear Regression
+There is a lot more to linear regression beyond getting the slope and intercepts
+of the "best-fitting" line. The linear regression problem has an exact solution.
+Yet, there are plenty of diagnostic tests that one must look at before accepting
+the model. We will start with a quick overview of the mathematics underlying the
+model.
+
+## The problem of linear estimation {#sec-c4s1}
+Suppose that we have $n$ response variables $y_1, \ldots, y_n$ each of which is
+thought to depend on $p$ explanatory variables. That is, we believe that
+$$
+y_i = f(x_{1i}, \ldots, x_{pi}), \text{ for } i = 1, 2, \ldots, n.
+$$ {#eq-c4e1}
+We do not know the form of the function $f$ but we think that we can approximate
+it, at least for the limited range of our observations, by a linear function.
+That is, we can find an approximate value $\hat{y}_i$ for the observed value
+$y_i$ using the linear relation
+$$
+\hat{y}_i = \beta_0 + \beta_1 X_{1i} + \cdots + \beta_p X_{pi},
+\text{ for } i = 1, 2, \ldots, n.
+$$ {#eq-c4e2}
+We can express it in a vector-matrix form as 
+$$
+\hat{y} = X\beta,
+$$ {#eq-c4e3}
+where $\hat{y} = (y_1, \ldots, y_n)^T$, $\beta = (\beta_0, \beta_1, \ldots, 
+\beta_p)^T \in \mathbb{R}^{p + 1}$ and $X$ is a $n \times (p + 1)$ matrix of 
+the form
+$$
+X = \begin{bmatrix}
+1 & x_{11} & x_{12} & \cdots & x_{1p} \\
+\vdots \\
+1 & x_{n1} & x_{n2} & \cdots & x_{np} \\
+\end{bmatrix}
+$$ {#eq-c4e4}
+The goal of the regression model is to find $\beta$ for the data $y, X$ such 
+that $||y - \hat{y}||^2$ is minimised. The extrema of $E = ||y - \hat{y}||^2$
+can be found by setting
+$$
+\frac{\partial E}{\partial\beta} = 0,
+$$
+that is,
+$$
+-y^TX + \beta^T X^TX = 0 \Rightarrow \beta = (X^TX)^{-1}X^T y.
+$$ {#eq-c4e5}
+A linear estimate of $y$ is,
+$$
+\hat{y} = X(X^TX)^{-1}X^T y = Py,
+$$ {#eq-c4e6}
+where $P$ is called the hat-matrix.
+
+Another way of modelling the linear regression problem is to assume that the
+true relationship between the independent variables and the response is
+$$
+\hat{y}_i = \beta_0 + \beta_1 X_{1i} + \cdots + \beta_p X_{pi} + \epsilon_i,
+$$ {#eq-c4e7}
+where $\epsilon_i$ is a random error term. The terms $\epsilon_1, \ldots, 
+\epsilon_n$ are supposed to be drawn independently from $dNorm(0, \sigma)$. The
+estimate of the error term is
+$$
+\varepsilon = y - \hat{y}.
+$$ {#eq-c4e8}
+In terms of the vector $\varepsilon$, the linear model itself is written as
+$$
+\hat{y} = X\beta + \varepsilon
+$$ {#eq-c4e9}
+and the total squared error is $E = \varepsilon^T \varepsilon$.
+
+
+## An example
+In this section, we will use the `cars` data set to build a linear regression 
+model. It is an excellent choice for the first example of regression because
+we know the exact relation between the speed of a car and the distance it goes
+before it comes to a complete halt. We know from elementary kinematics that if
+the deceleration $a$ is constant then a car at speed $v$ covers a distance $s$
+given by
+$$
+v^2 = 2as.
+$$ {#eq-c4e10}
+We begin by plotting the data.
+```{r, fig.height=8}
+par(mfrow = c(2, 1))
+plot(cars$speed, 
+     cars$dist, 
+     xlab=expression(v), 
+     ylab=expression(d), 
+     main="Distance with time")
+mtext(side=3, line=3, "Stopping distance of cars")
+plot(cars$speed, 
+     sqrt(cars$dist), 
+     xlab=expression(v), 
+     ylab=expression(sqrt(d)), 
+     main="Square root of distance with time")
+```
+It is quite evident that the square root of the distance has a linear relation
+with speed. Yet, it is also clear that not all points line on a line. There 
+could be many reasons for the fluctuation around the true relation of @eq-c4e10,
+such as:
+
+- The true relation is derived assuming a constant decelaration. It is quite
+possible that the cars had a jerk.
+- There could be an error in the measurement of the speed.
+- The distance measurements might not have been accurate.
+- The road conditions may not have been identical for all cars.
+- The wear and tear of tyres could have resulted in some degree of skidding.
+
+Thus, the true relation is just an idealisation around which the actual data
+fluctuates. We want to find out how close is the data to the true relation. If
+it is not, perhaps we should revisit our assumptions in deriving the true 
+relation.
+
+```{r}
+res <- lm(sqrt(dist) ~ speed, data=cars)
+summary(res)
+```
+
+We will replicate these calculation using the theory described in section 
+@sec-c4s1.
+```{r}
+# The design matrix.
+X <- matrix(data = c(rep(1, nrow(cars)), cars$speed), ncol=2)
+
+# The hat matrix
+P <- X %*% solve(t(X) %*% X) %*% t(X)
+
+# The beta matrix
+B <- solve(t(X) %*% X) %*% t(X) %*% sqrt(cars$dist)
+rownames(B) <- c("(Intercept)", "speed")
+colnames(B) <- c("")
+
+cat("The coefficients of the model are:\n")
+t(B)
+
+cat("They match with the coefficients computed by lm.")
+print(res$coef)
+```
+
