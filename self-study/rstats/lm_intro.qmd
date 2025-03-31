@@ -133,5 +133,24 @@ t(B)
 
 cat("They match with the coefficients computed by lm.")
 print(res$coef)
+
+# We will also compare the predictions of the `lm` command with 
+# "hand-calculations".
+y.hat <- P %*% sqrt(cars$dist)
+y.hat.diff <- round(max(abs(y.hat - res$fitted.values)), 6)
+cat(paste("The max difference between the two is", y.hat.diff, ".\n"))
 ```
+
+A summary of the results of the `lm` function gives far more information than
+just the predictions. However, we need some more understanding of the to 
+calculate the numbers in it. We do so in the next section.
+
+## Statistics of parameters
+We mentioned in section @sec-c4s1 that the linear regression model consists
+of expressing the response as a linear function of the predictors plus a noise
+term. The predictors are assumed to be deterministic. If we repeat the experiment
+for the same set of predictors $X$, we will get a different vector $y$ because
+of the noise term. Since $\beta$ depends on $y$ (refer to @eq-c4e5), the 
+parameters too become random variables. Thus, we should correctly write equation
+@eq-c4e9 as $\hat{y} = X\hat{\beta} + \varepsilon$.
 

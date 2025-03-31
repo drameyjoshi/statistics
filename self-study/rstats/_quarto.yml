@@ -10,6 +10,7 @@ book:
     - population_and_samples.qmd
     - t_test.qmd
     - hypotheses.qmd
+    - lm_intro.qmd
     - references.qmd
 
 bibliography: references.bib
