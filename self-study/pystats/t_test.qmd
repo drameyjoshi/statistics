@@ -69,7 +69,7 @@ of size $k$ drawn from a population with variance $\sigma^2$ has
 $$
 \frac{s^2}{\sigma^2} \sim \frac{\chi^2_{k-1}}{m},
 $$
-where $m = k - 1$ if the population was normally distributed. Otherwise, it is
+where $m = k - 1$ if the population was normally distributed. Otherwise, $m$ is
 a function of $k$ and $\kappa$, the kurtosis of the population. Now suppose that
 there are two such samples drawn of size $k_1$ and $k_2$. Then
 $$
@@ -84,7 +84,7 @@ $$
 (The algebra of random variables is drastically different from that of numbers.
 It is a rather involved topic a glimpse of which can be had by reading the
 article [Ratio distribution](https://en.wikipedia.org/wiki/Ratio_distribution).
-We will see a example of its subtlety in the cases considered below.)
+We will see an example of its subtlety in the cases considered below.)
 
 We consider a few special cases of this distribution.
 
@@ -96,7 +96,7 @@ $$
 
 - If the sample sizes are equal,
 $$
-\frac{s_1^2}{s_2^2} \sim \frac{\chi^2_{k_1 - 1}}{\chi^2_{k_1 - 1}}.
+\frac{s_1^2}{s_2^2} \sim \frac{\chi^2_{k_1 - 1}}{\chi^2_{k_2 - 1}}.
 $$
 Note that the rhs is not equal to the constant $1$. The two samples are not
 identical and they will, in general, have unequal variances.
@@ -165,9 +165,9 @@ the underlying probability distribution.
 - The parameters of the distribution may not be known.
 
 Statistical tests that depends on the properties of underlying distribution form
-what is called as \emph{parametric statistics}. In the recent years, there has
-been a shift towards \emph{nonparametric statistics}. The machine learning
-algorithms fall in this category.
+what is called as _parametric statistics_. In the recent years, there has
+been a shift towards _nonparametric statistics_. The machine learning
+algorithms fall in the latter category.
 
 And yet, there is great value in parametric methods. One must only be careful in
 examining whether the assumptions of the tests are valis before running them and
@@ -211,11 +211,11 @@ Thus, the pooled sample size is the harmonic mean of the individual sample sizes
 of the pool.
 
 ### Combined variance
-There is a related statistic called \emph{combined variance}. It is the variance
+There is a related statistic called _combined variance_. It is the variance
 of multiple samples around the mean of all sample means. In our case, we have
 \begin{eqnarray}
 \bar{X}_n &=& \frac{X_1 + \cdots + X_n}{n} \\
-\bar{X}_n &=& \frac{X_{n+1} + \cdots + X_{n+m}}{m} \\
+\bar{X}_m &=& \frac{X_{n+1} + \cdots + X_{n+m}}{m} \\
 \bar{X} &=& \frac{X_1 + \cdots + X_{n+m}}{n + m}
 \end{eqnarray}
 so that
@@ -237,7 +237,7 @@ We will now show how a $t$ test works. We want to investigate whether the
 extra sleep induced by the two drugs is same. We construct the $t$-statistic
 as
 $$
-t = \frac{\bar{X} - \bar{Y}}{s_p}\sqrt(n_p),
+t = \frac{\bar{X} - \bar{Y}}{s_p}\sqrt{n_p},
 $$
 where $\bar{X}$ is the sample mean of `extra` in the first group, $\bar{Y}$
 is the sample mean of `extra` in the second group, $s_p$ is the pooled variance
