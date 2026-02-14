@@ -122,7 +122,7 @@ indeed lies in this interval. To test the equality of means we put $d = 0$.
 
 ## The $p$-value {#sec-c3s2}
 The $p$-value is defined as the probability of observing a test statistic as
-or more extreme than the one calculated from the data assuming that then null
+or more extreme than the one calculated from the data assuming that the null
 hypothesis is true. Therefore, an interpretation of the $p$ value as the 
 probability that the null hypothesis is false is not correct. (The equivalent
 interpretation that the null hypothesis is true with probability $1 - p$ is also

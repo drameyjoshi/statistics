@@ -81,7 +81,7 @@ $$
 
 - If the sample sizes are equal,
 $$
-\frac{s_1^2}{s_2^2} \sim \frac{\chi^2_{k_1 - 1}}{\chi^2_{k_1 - 1}}.
+\frac{s_1^2}{s_2^2} \sim \frac{\chi^2_{k_1 - 1}}{\chi^2_{k_2 - 1}}.
 $$
 Note that the rhs is not equal to the constant $1$. The two samples are not
 identical and they will, in general, have unequal variances.
