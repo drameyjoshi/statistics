@@ -3,7 +3,7 @@
 
 A population is characterised by a cumulative probability distribution. A sample
 is a subset of the population that we observe and measure. Measurements of the
-sample are used to infer the parameters of the population. We will illustreate
+sample are used to infer the parameters of the population. We will illustrate
 this idea with the simplest of measurements - the mean.
 
 ## Sample mean {#sec-c1s1}
@@ -20,7 +20,7 @@ _ = [print(
      ) for i in range(n_samples)]
 ```
 
-Although we tossed a fair coin, the mean value of a sample is not always $0.5$.i
+Although we tossed a fair coin, the mean value of a sample is not always $0.5$.
 We next repeat the procedure a large number of times and plot a histogram of the
 sample means.
 ```{python}
@@ -85,7 +85,7 @@ and
 $$
 \var(\bar{x}) = \frac{1}{n^2}\var\left(\sum_{i=1}^n x_i\right).
 $$
-Here we used the fact that $\\var(aX) = a^2\var(X)$. Since
+Here we used the fact that $\var(aX) = a^2\var(X)$. Since
 $\var(X_1 + \cdots + X_n) = n\var{X}$, we have
 $$
 \var(\bar{x}) = \frac{1}{n^2} n\sigma^2 = \frac{\sigma^2}{n}.
@@ -144,9 +144,10 @@ $E(s^2) = \sigma^2$.
 :::
 
 ::: {.proof}
-Consider, $(n-1)S_n^2 = \sum_{i=1}^n(X_i - \bar{X}_n)^2$ so that
+Consider, $(n-1)s^2 = \sum_{i=1}^n(X_i - \bar{X}_n)^2$ so that
 $$
-(n-1)E(S_n^2) = \sum_{i=1}^n\left(E(X_i^2) - 2E(X_i\bar{X}_n) + E(\bar{X}_n^2)\right)
+(n-1)E(s^2) = \sum_{i=1}^n\left(E(X_i^2) - 2E(X_i\bar{X}_n) + 
+ E(\bar{X}_n^2)\right)
 $${#eq-c1s5}
 We first consider the term $E(X_i\bar{X}_n)$. It is
 \begin{eqnarray*}
@@ -163,7 +164,7 @@ E(\bar{X}_n^2) = \var{\bar{X}_n} - (E(\bar{X}_n))^2 = \frac{\sigma^2}{n} - \mu^2
 $$
 so that we have
 $$
-(n-1)E(S_n^2) = \sum_{i=1}^n\left(E(X_i^2) - 2\mu^2 - \frac{2\sigma^2}{n}
+(n-1)E(s^2) = \sum_{i=1}^n\left(E(X_i^2) - 2\mu^2 - \frac{2\sigma^2}{n}
 + \frac{\sigma^2}{n} + \mu^2\right).
 $$
 The result follows from the fact that $E(X_i^2) = \mu^2 + \sigma^2$.
@@ -247,6 +248,7 @@ We can summarise this section by stating that for a data set $X_1, \ldots, X_n$,
 the probability of $\mu \in (\bar{X}_n - k\sigma/\sqrt{n}, \bar{X}_n +
 k\sigma/\sqrt{n})$ is $1 - 2\Phi(-k)$ for an positive integer $k$, where $\Phi$
 denotes the standard normal distribution function.
+
 ## Confidence intervals in practice {#sec-c1s5}
 ### The effect of the sample size
 The confidence interval derived in the previous section depends on the
@@ -440,7 +442,7 @@ size of $20$ drawn from a Bernoulli distribution with parameters $p=0.5$ and
 $p=0.9$.
 
 As we do not know the parameters of the population distribution, we estimate
-the parameters of the sampling distribution can be taken as
+the parameters of the sampling distribution as
 $\mu = \hat{p} = \bar{X}_n$ and $\sigma^2 = \hat{p}(1 - \hat{p})$. An interval
 calculated using these parameters is called the _Wald interval_. For the second
 sample, the Wald interval is not appropriate as we show in the simulation below
@@ -507,7 +509,7 @@ be the one calculated prior to augmentation of two successes and two failures.
 
 There are other methods of computing the confidence intervals for a binomial
 distribution. An early method by Clopper and Pearson [@ClopperPearson1934] is called
-and _exact_ method because it does not use the central limit theorem to
+an _exact_ method because it does not use the central limit theorem to
 approximate the sampling distribution of means. Rather, it derives them from the
 properties of binomial distribution alone. The 
 [Wikipedia page](https://en.wikipedia.org/wiki/Binomial_proportion_confidence_interval#)
